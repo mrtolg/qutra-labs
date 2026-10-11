@@ -290,6 +290,13 @@
   align-items: center;
   gap: 8px;
 }
+.asst-speak {
+  margin-inline-start: 2px;
+  color: var(--muted);
+}
+.asst-speak[aria-pressed="true"] {
+  color: var(--primary);
+}
 .asst-mark {
   flex: none;
   color: var(--primary);

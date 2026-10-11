@@ -3,13 +3,14 @@ import { X } from "lucide-react";
 import { usePreferences } from "@/lib/db/database";
 import { addressName, dayPart } from "@/lib/greeting";
 import { ensureDeferredCopy, translate, useT, type Locale } from "@/lib/i18n";
+import { speakIfEnabled, stopSpeaking } from "@/lib/voice/speech";
 import "./assistantCards.css";
 
 /* Once per app launch, when the assistant is enabled, it says hello from the
    bottom-right corner: the time of day and, if the user gave one, their form
    of address ("Günaydın, Mert Bey"). The card stays about ten seconds, waits
-   while the pointer or the keyboard is on it, and closes on request. Nothing
-   is sent anywhere. */
+   while the pointer or the keyboard is on it, and closes on request. With
+   reading aloud on, the same words are spoken. Nothing is sent anywhere. */
 
 /** How long the greeting stays when nobody touches it. */
 export const GREETING_MS = 10_000;
@@ -40,7 +41,9 @@ export function AssistantGreeting() {
         const greeting = name
           ? translate(locale, "assistant.greet.withName", { greeting: hello, name })
           : hello;
-        setMessage(`${greeting}. ${translate(locale, "assistant.greet.line")}`);
+        const line = `${greeting}. ${translate(locale, "assistant.greet.line")}`;
+        setMessage(line);
+        speakIfEnabled(line, { id: "greeting", locale });
       });
   }, [enabled, locale, name]);
 
@@ -74,7 +77,10 @@ export function AssistantGreeting() {
         type="button"
         className="btn btn--icon btn--sm"
         aria-label={`${t("action.close")}: ${message}`}
-        onClick={() => setMessage(null)}
+        onClick={() => {
+          stopSpeaking();
+          setMessage(null);
+        }}
       >
         <X size={13} aria-hidden />
       </button>
