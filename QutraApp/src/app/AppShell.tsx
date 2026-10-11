@@ -11,6 +11,7 @@ import { useT } from "@/lib/i18n";
 import { useSurfaceCovered } from "./context/panelState";
 import { useAppliedAppearance } from "./useAppliedAppearance";
 import { useShortcuts } from "./useShortcuts";
+import { useEngineAutopilot } from "./useEngineAutopilot";
 
 export function SkipToMainLink() {
   const { t } = useT();
@@ -57,6 +58,8 @@ export function AppShell() {
   useAppliedAppearance();
 
   useShortcuts();
+
+  useEngineAutopilot();
 
   return (
     <div className="shell">

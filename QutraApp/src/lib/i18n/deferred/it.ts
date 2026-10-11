@@ -721,4 +721,5 @@ export const deferredIt: Record<DeferredKey, string> = {
   "assistant.greet.withName": "{greeting}, {name}",
   "assistant.greet.line": "Sono qui quando ha bisogno di me.",
   "engine.auto.failed": "Impossibile avviare l'assistente locale. Impostazioni › Provider IA ne indica il motivo.",
+  "engine.auto.working": "Preparazione dell'assistente locale…",
 };

@@ -721,4 +721,5 @@ export const deferredTr: Record<DeferredKey, string> = {
   "assistant.greet.withName": "{greeting}, {name}",
   "assistant.greet.line": "İhtiyacınız olduğunda buradayım.",
   "engine.auto.failed": "Yerel asistan başlatılamadı. Nedenini Ayarlar › Yapay zekâ sağlayıcıları bölümünde görebilirsiniz.",
+  "engine.auto.working": "Yerel asistan hazırlanıyor…",
 };

@@ -13,6 +13,7 @@ import {
   formatBytes,
   localEngine,
 } from "@/lib/localEngine/client";
+import { clearAutoEngine, useAutoEngine } from "@/lib/localEngine/autoEngine";
 import { useUi } from "@/state/ui";
 import { useLocalEngine } from "./useLocalEngine";
 import "./localEngine.css";
@@ -121,6 +122,12 @@ export function LocalEnginePanel({
     client,
   );
   const [confirmDelete, setConfirmDelete] = useState<EngineModel | null>(null);
+  // What choosing a model sets going on its own (src/lib/localEngine/autoEngine.ts).
+  const auto = useAutoEngine();
+  const autoForThis = auto.model === prefs.ollamaModel;
+  const autoBusy =
+    autoForThis &&
+    (auto.phase === "installing" || auto.phase === "preparing" || auto.phase === "starting");
 
   if (!enabled || !client.available()) return null;
   const { report, models } = view;
@@ -167,13 +174,20 @@ export function LocalEnginePanel({
     onChanged?.();
   };
   const startNow = async () => {
+    clearAutoEngine();
     await view.run((c) => c.start(prefs.ollamaModel));
     onChanged?.();
   };
   const stop = () => view.run((c) => c.stop());
   const cancel = () => view.run((c) => c.cancelTask());
-  const install = () => view.run((c) => c.install());
-  const prepare = (model: EngineModel) => view.run((c) => c.prepare(model.id));
+  const install = () => {
+    clearAutoEngine();
+    return view.run((c) => c.install());
+  };
+  const prepare = (model: EngineModel) => {
+    clearAutoEngine();
+    return view.run((c) => c.prepare(model.id));
+  };
   const deleteCopy = async (model: EngineModel) => {
     setConfirmDelete(null);
     await view.run((c) => c.deleteCopy(model.id, true));
@@ -182,9 +196,14 @@ export function LocalEnginePanel({
     onChanged?.();
   };
 
-  const step = nextStep();
+  const engineLoading = runsSelected && (status.phase === "starting" || status.phase === "loading");
+  // Between its own steps the engine offers no button to press: it is going on by itself.
+  const step = autoBusy && !task && !engineLoading ? { text: t("engine.auto.working") } : nextStep();
   const showList = !compact || modelStation === "error";
-  const failure = view.error ?? (status.phase === "failed" && runsSelected ? status.error : null);
+  const failure =
+    view.error ??
+    (autoForThis && auto.phase === "failed" ? auto.error : null) ??
+    (status.phase === "failed" && runsSelected ? status.error : null);
   const failureText = failure ? engineErrorMessage(t, failure, locale) : "";
 
   function nextStep(): { text: string; hint?: string; action?: ReactNode; progress?: ReactNode } {

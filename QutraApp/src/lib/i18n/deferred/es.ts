@@ -721,4 +721,5 @@ export const deferredEs: Record<DeferredKey, string> = {
   "assistant.greet.withName": "{greeting}, {name}",
   "assistant.greet.line": "Estoy aquí cuando me necesite.",
   "engine.auto.failed": "No se pudo iniciar el asistente local. Ajustes › Proveedores de IA explica el motivo.",
+  "engine.auto.working": "Preparando el asistente local…",
 };

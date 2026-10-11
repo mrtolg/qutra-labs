@@ -719,6 +719,7 @@ export const deferredEn = {
   "assistant.greet.withName": "{greeting}, {name}",
   "assistant.greet.line": "I'm here whenever you need me.",
   "engine.auto.failed": "The local assistant could not start. Settings › AI providers says why.",
+  "engine.auto.working": "Getting the local assistant ready…",
 } as const;
 
 export type DeferredKey = keyof typeof deferredEn;
