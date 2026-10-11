@@ -204,6 +204,7 @@ export const en = {
   "subnav.newConversation": "New conversation",
   "subnav.history": "History",
   "subnav.jarvisSettings": "Qutra settings",
+  "companion.follow": "Follow me",
   "home.askJarvis": "Ask Qutra",
   "home.running": "Running",
   "home.liveCount": "{count} live",

@@ -198,6 +198,7 @@ export const tr: Record<CatalogKey, string> = {
   "subnav.newConversation": "Yeni sohbet",
   "subnav.history": "Geçmiş",
   "subnav.jarvisSettings": "Qutra ayarları",
+  "companion.follow": "Beni takip et",
   "home.askJarvis": "Qutra'ya sor",
   "home.running": "Çalışanlar",
   "home.liveCount": "{count} canlı",

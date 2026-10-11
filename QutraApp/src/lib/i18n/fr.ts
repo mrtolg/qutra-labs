@@ -198,6 +198,7 @@ export const fr: Record<CatalogKey, string> = {
   "subnav.newConversation": "Nouvelle conversation",
   "subnav.history": "Historique",
   "subnav.jarvisSettings": "Réglages de Qutra",
+  "companion.follow": "Me suivre",
   "home.askJarvis": "Demander à Qutra",
   "home.running": "En cours",
   "home.liveCount": "{count} actifs",

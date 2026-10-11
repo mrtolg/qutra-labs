@@ -579,6 +579,13 @@ export const PreferencesSchema = z.object({
      "efendim"). Free text, kept as typed (a space inside it is the user's);
      whoever reads it trims it. Empty means a greeting without a name. */
   addressAs: z.string().max(40).catch("").default(""),
+  /* The "Beni takip et" companion: a small bubble inside the app that knows
+     the page and walks through it. Off until the user turns it on. It reads
+     nothing outside Qutra Labs, so a stored true carries no consent to
+     check. `companionHidden` lists the pages (their companion keys) where
+     it stays out of the way. */
+  companionEnabled: z.boolean().catch(false).default(false),
+  companionHidden: z.array(z.string().min(1).max(40)).max(24).catch([]).default([]),
 });
 export type Preferences = z.infer<typeof PreferencesSchema>;
 
