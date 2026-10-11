@@ -8,7 +8,9 @@
 //!   The key reaches the process through its environment, never its
 //!   command line.
 //! - **Tied to the app.** It runs inside a Windows Job Object that kills it
-//!   when the app's handle closes, so a crash cannot leave it behind.
+//!   when the app's handle closes, so a crash cannot leave it behind. A
+//!   normal exit stops it first (`Engine::shutdown`), and the job is the
+//!   backstop for an exit that never finishes.
 //! - **Settings from Rust.** Inherited `LLAMA_*` and `GGML_*` variables are
 //!   removed; the renderer never chooses a path or a flag.
 
@@ -35,6 +37,9 @@ const PROBE_TIMEOUT: Duration = Duration::from_secs(3);
 /// not restart a 4k engine.
 const MIN_CONTEXT: u32 = 8192;
 const LOG_TAIL_BYTES: u64 = 16 * 1024;
+/// How long a shutdown waits for the engine's lock once it has told a start
+/// in progress to stop (that start gives the lock up within one poll).
+const SHUTDOWN_LOCK_WAIT: Duration = Duration::from_secs(2);
 
 pub struct LaunchSpec {
     pub model_path: PathBuf,
@@ -250,6 +255,8 @@ pub struct Engine {
     idle: Mutex<Duration>,
     load_timeout: Duration,
     stop_requested: AtomicBool,
+    /// Set by `shutdown`: the app is leaving, so nothing starts again.
+    closed: AtomicBool,
     sink: Mutex<Option<StatusSink>>,
 }
 
@@ -372,6 +379,7 @@ impl Engine {
             idle: Mutex::new(idle),
             load_timeout,
             stop_requested: AtomicBool::new(false),
+            closed: AtomicBool::new(false),
             sink: Mutex::new(None),
         }
     }
@@ -460,7 +468,14 @@ impl Engine {
         context: u32,
     ) -> Result<Lease, LocalEngineError> {
         let context = context.max(MIN_CONTEXT);
+        if self.closed.load(Ordering::SeqCst) {
+            return Err(LocalEngineError::Cancelled);
+        }
         let mut run = self.run.lock().await;
+        // A start that waited for the lock while the app was closing.
+        if self.closed.load(Ordering::SeqCst) {
+            return Err(LocalEngineError::Cancelled);
+        }
         self.stop_requested.store(false, Ordering::SeqCst);
         if let Some(running) = run.as_mut() {
             if running.alive() && running.target == *target && running.context >= context {
@@ -578,7 +593,7 @@ impl Engine {
         let deadline = Instant::now() + self.load_timeout;
         let mut loading = false;
         loop {
-            if self.stop_requested.load(Ordering::SeqCst) {
+            if self.stop_requested.load(Ordering::SeqCst) || self.closed.load(Ordering::SeqCst) {
                 return Err(LocalEngineError::Cancelled);
             }
             if !running.alive() {
@@ -646,6 +661,27 @@ impl Engine {
         }
         self.stop_requested.store(false, Ordering::SeqCst);
         self.set_status(Phase::Stopped, None, None, None);
+    }
+
+    /// The app is leaving: stop the engine for good. A start in progress is
+    /// cancelled and none begins afterwards. An answer in flight gets up to
+    /// `grace` to finish (it ends the moment its lease drops), then the
+    /// process is killed, and killed processes are waited for, so the engine
+    /// and the VRAM it holds are gone before the app is. If the engine's lock
+    /// cannot be had, the job object ends the process with the app.
+    pub async fn shutdown(&self, grace: Duration) {
+        self.closed.store(true, Ordering::SeqCst);
+        self.stop_requested.store(true, Ordering::SeqCst);
+        let waited = Instant::now();
+        while self.shared.active.load(Ordering::SeqCst) > 0 && waited.elapsed() < grace {
+            tokio::time::sleep(Duration::from_millis(20)).await;
+        }
+        if let Ok(mut run) = tokio::time::timeout(SHUTDOWN_LOCK_WAIT, self.run.lock()).await {
+            if let Some(running) = run.take() {
+                running.stop();
+            }
+            self.set_status(Phase::Stopped, None, None, None);
+        }
     }
 
     /// Stop the engine when no turn holds it and it has been idle long
@@ -785,11 +821,13 @@ mod tests {
         mode: &'static str,
         starts: AtomicUsize,
         unauthorized_log: PathBuf,
+        ports: Mutex<Vec<u16>>,
     }
 
     impl Launcher for Fake {
         fn command(&self, spec: &LaunchSpec) -> Result<Command, LocalEngineError> {
             self.starts.fetch_add(1, Ordering::SeqCst);
+            self.ports.lock().unwrap().push(spec.port);
             let mut command = Command::new(std::env::current_exe().unwrap());
             command
                 .args(["--exact", FAKE_TEST, "--nocapture", "--test-threads=1"])
@@ -808,6 +846,7 @@ mod tests {
             mode,
             starts: AtomicUsize::new(0),
             unauthorized_log: dir.path().join("unauthorized.log"),
+            ports: Mutex::new(Vec::new()),
         });
         let engine = Engine::with_timeouts(
             fake.clone(),
@@ -932,6 +971,122 @@ mod tests {
         assert_ne!(status.phase, Phase::Loading);
         assert_ne!(status.phase, Phase::Starting);
         assert!(engine.run.lock().await.is_none());
+    }
+
+    /// True once nothing accepts connections on the port any more.
+    async fn port_closes(port: u16) -> bool {
+        for _ in 0..40 {
+            if tokio::net::TcpStream::connect(("127.0.0.1", port))
+                .await
+                .is_err()
+            {
+                return true;
+            }
+            tokio::time::sleep(Duration::from_millis(50)).await;
+        }
+        false
+    }
+
+    #[tokio::test]
+    async fn shutdown_stops_the_engine_and_refuses_a_new_start() {
+        let (fake, engine, _dir) = engine("healthy", DEFAULT_IDLE);
+        let lease = engine.ensure(&target("m"), 4096).await.unwrap();
+        let port: u16 = lease.origin.rsplit(':').next().unwrap().parse().unwrap();
+        drop(lease);
+
+        engine.shutdown(Duration::from_millis(200)).await;
+
+        assert!(port_closes(port).await, "the engine child is still serving");
+        assert_eq!(engine.status().phase, Phase::Stopped);
+        assert!(engine.run.lock().await.is_none());
+        let again = engine.ensure(&target("m"), 4096).await.err();
+        assert_eq!(again, Some(LocalEngineError::Cancelled));
+        assert_eq!(
+            fake.starts.load(Ordering::SeqCst),
+            1,
+            "no engine after exit"
+        );
+    }
+
+    #[tokio::test]
+    async fn shutdown_gives_a_turn_in_flight_the_grace_and_then_stops_anyway() {
+        let (_fake, engine, _dir) = engine("healthy", DEFAULT_IDLE);
+        let lease = engine.ensure(&target("m"), 4096).await.unwrap();
+        let port: u16 = lease.origin.rsplit(':').next().unwrap().parse().unwrap();
+
+        let grace = Duration::from_millis(400);
+        let began = Instant::now();
+        engine.shutdown(grace).await;
+        let took = began.elapsed();
+
+        assert!(took >= grace, "stopped under a turn after {took:?}");
+        assert!(took < Duration::from_secs(5), "took {took:?}");
+        assert!(port_closes(port).await);
+        drop(lease);
+    }
+
+    #[tokio::test]
+    async fn shutdown_does_not_wait_the_grace_when_no_turn_holds_the_engine() {
+        let (_fake, engine, _dir) = engine("healthy", DEFAULT_IDLE);
+        drop(engine.ensure(&target("m"), 4096).await.unwrap());
+        let began = Instant::now();
+        engine.shutdown(Duration::from_secs(30)).await;
+        assert!(began.elapsed() < Duration::from_secs(5));
+    }
+
+    #[tokio::test]
+    async fn shutdown_cancels_a_model_that_is_still_loading() {
+        let (fake, engine, _dir) = engine("healthy", DEFAULT_IDLE);
+        let engine = Arc::new(engine);
+        let start = tokio::spawn({
+            let engine = engine.clone();
+            async move { engine.ensure(&target("m"), 4096).await.err() }
+        });
+        // Let the child spawn and report "loading".
+        for _ in 0..40 {
+            if engine.status().phase == Phase::Loading {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(25)).await;
+        }
+        assert_eq!(engine.status().phase, Phase::Loading);
+
+        engine.shutdown(Duration::from_millis(200)).await;
+
+        assert_eq!(start.await.unwrap(), Some(LocalEngineError::Cancelled));
+        assert_eq!(engine.status().phase, Phase::Stopped);
+        let port = fake.ports.lock().unwrap()[0];
+        assert!(port_closes(port).await, "the half-loaded engine survived");
+    }
+
+    /// The child dies when the job's last handle closes, which is what the
+    /// system does for a process that crashes.
+    #[cfg(windows)]
+    #[test]
+    fn a_child_in_the_job_dies_when_the_job_handle_closes() {
+        use std::os::windows::process::CommandExt;
+        let mut child = Command::new("ping")
+            .args(["-n", "60", "127.0.0.1"])
+            .stdout(Stdio::null())
+            .creation_flags(0x0800_0000)
+            .spawn()
+            .unwrap();
+        let job = JobGuard::for_child(&child).expect("assign to a job");
+        assert!(matches!(child.try_wait(), Ok(None)), "alive while held");
+
+        drop(job);
+
+        let deadline = Instant::now() + Duration::from_secs(5);
+        let mut ended = false;
+        while Instant::now() < deadline {
+            if matches!(child.try_wait(), Ok(Some(_))) {
+                ended = true;
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(50));
+        }
+        let _ = child.kill();
+        assert!(ended, "the child outlived its job handle");
     }
 
     #[test]
