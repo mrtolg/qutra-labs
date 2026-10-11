@@ -5,6 +5,7 @@ import type {
   LaunchReceipt,
   MonitorInfo,
   NativeLocatedCandidate,
+  NativeDetectedTool,
   NativeToolInstallation,
   NativeToolRun,
   NativeToolRunEvent,
@@ -78,6 +79,9 @@ class BrowserToolSupervisor implements NativeToolSupervisor {
   async revoke(): Promise<void> {}
   async locateCandidate(): Promise<NativeLocatedCandidate | null> {
     return this.unavailable();
+  }
+  async detectInstallations(skipCatalogIds: string[]): Promise<NativeDetectedTool[]> {
+    return e2eTools()?.detect?.(skipCatalogIds) ?? [];
   }
   async register(
     _request: RegisterNativeToolRequest,

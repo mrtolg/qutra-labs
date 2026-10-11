@@ -14,6 +14,7 @@ import type {
   LaunchReceipt,
   MonitorInfo,
   NativeLocatedCandidate,
+  NativeDetectedTool,
   NativeToolInstallation,
   NativeToolRun,
   NativeToolRunEvent,
@@ -127,6 +128,10 @@ class TauriToolSupervisor implements NativeToolSupervisor {
       title,
       filterName,
     });
+  }
+
+  async detectInstallations(skipCatalogIds: string[]): Promise<NativeDetectedTool[]> {
+    return invoke<NativeDetectedTool[]>("detect_tool_installations", { skipCatalogIds });
   }
 
   async register(

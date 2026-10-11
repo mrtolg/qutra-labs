@@ -216,6 +216,9 @@ export const InstallationBindingSchema = z.object({
   catalogId: z.string().min(1),
   installationId: z.string().min(1),
   confirmedAt: ts,
+  /** How the link came about. Absent means the user made it; "detected" is
+      a link the app made for a program it found itself. */
+  source: z.enum(["detected"]).optional(),
 });
 export type InstallationBinding = z.infer<typeof InstallationBindingSchema>;
 

@@ -30,6 +30,8 @@ export type TileStatus =
   | { kind: "ready"; installation: NativeToolInstallation }
   | { kind: "changed"; installation: NativeToolInstallation }
   | { kind: "disabled"; installation: NativeToolInstallation }
+  /** Linked, but the registered file is no longer on disk. */
+  | { kind: "file_missing"; installation: NativeToolInstallation }
   | { kind: "not_registered" };
 
 export interface LauncherTile {
@@ -65,15 +67,21 @@ const STATUS_ORDER: Record<TileStatus["kind"], number> = {
   ready: 0,
   changed: 1,
   disabled: 2,
-  not_registered: 3,
+  file_missing: 3,
+  not_registered: 4,
 };
 
 function statusOf(installations: NativeToolInstallation[]): TileStatus {
-  const ready = installations.find((i) => i.enabled && !i.changedSinceVerify);
+  // A file that is gone cannot be run, so it never makes a tile ready, and
+  // another link to a file that is still there wins over it.
+  const present = installations.filter((i) => !i.fileMissing);
+  const ready = present.find((i) => i.enabled && !i.changedSinceVerify);
   if (ready) return { kind: "ready", installation: ready };
-  const changed = installations.find((i) => i.changedSinceVerify);
+  const missing = installations.find((i) => i.fileMissing);
+  if (missing && present.length === 0) return { kind: "file_missing", installation: missing };
+  const changed = present.find((i) => i.changedSinceVerify);
   if (changed) return { kind: "changed", installation: changed };
-  const disabled = installations[0];
+  const disabled = present[0];
   if (disabled) return { kind: "disabled", installation: disabled };
   return { kind: "not_registered" };
 }
@@ -107,7 +115,8 @@ export function launcherTiles(
   const byId = new Map(installations.map((i) => [i.id, i]));
   const claimed = new Set(bindings.map((b) => b.installationId));
   const suggested = new Map<string, NativeToolInstallation[]>();
-  for (const unbound of installations.filter((i) => !claimed.has(i.id))) {
+  // A file that is gone is not offered as something to link to.
+  for (const unbound of installations.filter((i) => !claimed.has(i.id) && !i.fileMissing)) {
     for (const catalogId of suggestCatalogIds(unbound)) {
       suggested.set(catalogId, [...(suggested.get(catalogId) ?? []), unbound]);
     }

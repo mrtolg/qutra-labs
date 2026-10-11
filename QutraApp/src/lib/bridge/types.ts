@@ -71,6 +71,21 @@ export interface NativeToolInstallation {
   createdAt: number;
   updatedAt: number;
   lastVerifiedAt: number;
+  /** Read when the list was made, never stored: the file is no longer where
+      it was registered. Absent on a record Rust did not just list. */
+  fileMissing?: boolean;
+}
+
+/** A program the scan of this computer found. Either Rust already holds the
+    file (`registeredId`), or it is held for review and registers by the
+    `located` token like a picked file. No path is ever sent back. */
+export interface NativeDetectedTool {
+  catalogId: string;
+  source: string;
+  fileName: string;
+  canonicalPath: string;
+  registeredId: string | null;
+  located: NativeLocatedCandidate | null;
 }
 
 /** What native Locate returns: the picked file's facts for review, the
@@ -258,6 +273,13 @@ export interface NativeToolSupervisor {
     title: string,
     filterName: string,
   ): Promise<NativeLocatedCandidate | null>;
+  /**
+   * Look for the toolbox's programs in the usual places on this computer
+   * (read only; nothing is run). Items named in `skipCatalogIds` are not
+   * looked for. Each find Rust does not hold yet is held for review and
+   * registers by token, through the same `register` as a picked file.
+   */
+  detectInstallations(skipCatalogIds: string[]): Promise<NativeDetectedTool[]>;
   register(request: RegisterNativeToolRequest): Promise<NativeToolInstallation>;
   listInstallations(): Promise<NativeToolInstallation[]>;
   reverify(

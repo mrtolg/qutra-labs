@@ -10,6 +10,9 @@ export function setInstallationBinding(
   db: Database,
   installationId: string,
   catalogId: string,
+  /** "detected" marks a link the app made for a program it found; leave it
+      out for a link the user chose. */
+  source?: "detected",
 ): void {
   const bindings = db.collection("installationBindings");
   if (!catalogId || !canHoldInstallation(launcherItem(catalogId))) {
@@ -21,5 +24,6 @@ export function setInstallationBinding(
     catalogId,
     installationId,
     confirmedAt: now(),
+    ...(source ? { source } : {}),
   });
 }

@@ -1,4 +1,5 @@
 import type {
+  NativeDetectedTool,
   NativeToolInstallation,
   NativeToolRun,
   NativeToolRunEvent,
@@ -14,6 +15,7 @@ export interface E2eToolsSeam {
   installations: NativeToolInstallation[];
   runs: NativeToolRun[];
   files?: InvestigationFile[];
+  detect?(skipCatalogIds: string[]): NativeDetectedTool[];
   setEnabled?(id: string, enabled: boolean): NativeToolInstallation;
   runForm?(request: FormRunRequest): FormRunStarted;
   output?(runId: string, name: string): string;

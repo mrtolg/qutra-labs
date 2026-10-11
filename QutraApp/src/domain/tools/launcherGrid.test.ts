@@ -145,3 +145,50 @@ describe("launcher grid tiles", () => {
     expect(tiles.slice(1).every((t) => t.status.kind === "not_registered")).toBe(true);
   });
 });
+
+describe("links whose file is gone", () => {
+  it("never count as ready and show as a file that is missing", () => {
+    const tiles = launcherTiles(
+      [binding("burp", NMAP_INSTALL)],
+      [installation(NMAP_INSTALL, "Burp fixture", { fileMissing: true })],
+    );
+    expect(tile(tiles, "burp").status.kind).toBe("file_missing");
+    expect(tiles.filter((t) => t.status.kind === "ready")).toEqual([]);
+  });
+
+  it("lose to a working link to the same program", () => {
+    const tiles = launcherTiles(
+      [binding("zap", GHIDRA_INSTALL), binding("zap", ZAP_INSTALL)],
+      [
+        installation(GHIDRA_INSTALL, "ZAP old", { fileMissing: true }),
+        installation(ZAP_INSTALL, "ZAP"),
+      ],
+    );
+    expect(tile(tiles, "zap").status).toMatchObject({
+      kind: "ready",
+      installation: { id: ZAP_INSTALL },
+    });
+  });
+
+  it("are not offered as a registration to link a program to", () => {
+    const tiles = launcherTiles(
+      [],
+      [installation(GHIDRA_INSTALL, "Ghidra 12.1.2", { fileMissing: true })],
+    );
+    expect(tile(tiles, "ghidra").status.kind).toBe("not_registered");
+    expect(tile(tiles, "ghidra").candidates).toEqual([]);
+  });
+
+  it("sort after the ones that need a look and before the missing", () => {
+    const tiles = launcherTiles(
+      [binding("burp", NMAP_INSTALL), binding("zap", ZAP_INSTALL)],
+      [
+        installation(NMAP_INSTALL, "Burp fixture", { fileMissing: true }),
+        installation(ZAP_INSTALL, "ZAP", { changedSinceVerify: true }),
+      ],
+    );
+    const order = tiles.map((t) => t.catalogId);
+    expect(order.indexOf("zap")).toBeLessThan(order.indexOf("burp"));
+    expect(order.indexOf("burp")).toBeLessThan(order.indexOf("nuclei"));
+  });
+});
