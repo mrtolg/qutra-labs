@@ -231,6 +231,7 @@ export function Composer({
   chips,
   badge,
   model,
+  web,
 }: {
   draft: string;
   onDraft: (text: string) => void;
@@ -244,6 +245,8 @@ export function Composer({
   badge?: ReactNode;
   /** The model chip, first under the box. */
   model?: ReactNode;
+  /** The "İnternet" switch, after the model chip. */
+  web?: ReactNode;
 }) {
   const { t } = useT();
   return (
@@ -303,6 +306,7 @@ export function Composer({
         </div>
         <div className="asst-composer__foot">
           {model}
+          {web}
           <span className="asst-composer__grow" />
           {chips}
           {badge ?? (

@@ -19,6 +19,7 @@ export type CloudFacts = NonNullable<SavedMessage["cloud"]>;
 /** What a cloud turn in flight is waiting on, before or between its words. */
 export type CloudNote =
   | { kind: "thinking" }
+  | { kind: "searching" }
   | { kind: "retrying"; seconds: number }
   | { kind: "fallback"; from: string; to: string };
 
@@ -124,7 +125,9 @@ export function CloudTurnStatus({
         <p className="asst-recipient" data-testid="assistant-cloud-note">
           {note.kind === "thinking"
             ? t("jarvis.cloud.thinking")
-            : note.kind === "retrying"
+            : note.kind === "searching"
+              ? t("jarvis.web.searching")
+              : note.kind === "retrying"
               ? t("jarvis.cloud.retrying", { seconds: note.seconds })
               : t("jarvis.cloud.fallingBack", { from: note.from, to: note.to })}
         </p>
