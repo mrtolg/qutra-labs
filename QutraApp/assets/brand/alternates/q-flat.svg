@@ -1,0 +1,24 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Qutra Labs flat">
+  <!-- Alternate A: flat solid red, slightly thicker - best at 16px -->
+  <rect width="1024" height="1024" fill="#000000"/>
+  <path
+    fill="#E11D26"
+    d="
+      M 610 650
+      A 220 220 0 1 1 670 590
+      L 760 655
+      A 320 320 0 1 0 675 750
+      Z
+    "
+  />
+  <path
+    fill="#E11D26"
+    d="
+      M 545 545
+      L 630 470
+      L 840 690
+      L 755 765
+      Z
+    "
+  />
+</svg>

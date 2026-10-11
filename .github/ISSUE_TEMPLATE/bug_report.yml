@@ -1,0 +1,68 @@
+name: Bug report
+description: Report a problem in Qutra Labs
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please do not include
+        secrets, tokens, or private file paths in this report.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected instead.
+      placeholder: When I ..., Qutra Labs ...
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. See error
+    validations:
+      required: true
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: Runtime
+      options:
+        - Desktop (installed .exe)
+        - Desktop (tauri dev)
+        - Browser / demo mode
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Qutra Labs version
+      placeholder: e.g. 0.1.0 (see Settings › About)
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS & version
+      placeholder: e.g. Windows 11 23H2
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: UI language
+      options: [English, Türkçe, Deutsch, Español, Français, Italiano]
+    validations:
+      required: false
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics (optional)
+      description: |
+        Paste the redacted output of Settings › About › Copy diagnostics, or
+        Settings › Import/export › Export diagnostics. It is already redacted.
+      render: json
+    validations:
+      required: false

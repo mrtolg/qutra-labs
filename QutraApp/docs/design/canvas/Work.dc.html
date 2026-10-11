@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Qutra Labs — Work</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="hud.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>body{margin:0;background:var(--bg-0)}</style>
+</helmet>
+
+<div class="win" style="width:1440px;height:900px">
+  <div class="win__grid"></div>
+
+  <!-- Titlebar -->
+  <div class="tbar">
+    <span class="mark mark--q" aria-hidden="true"><svg width="20" height="20" viewBox="-1.34 -1.34 2.68 2.68" aria-hidden="true"><path fill="#ff2a22" d="M0.9093 0.4163A1 1 0 1 0 0.4346 0.9006L0.2644 0.7304A0.7768 0.7768 0 1 1 0.7374 0.2444Z"/><polygon fill="#ff2a22" points="0.1579,0.322 0.5141,0.322 1.0316,0.8395 0.6754,0.8395"/><polygon fill="#ff2a22" points="0.6754,0.8395 1.159,0.8395 1.35325,1.03375 0.86965,1.03375"/></svg></span>
+    <span class="brand">Qutra&nbsp;Labs</span>
+    <div class="tbar__c">
+      <div class="seg" role="tablist" aria-label="Surface">
+        <button role="tab" type="button" aria-current="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/></svg>Work</button>
+        <button role="tab" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2z"/></svg>Assistant</button>
+        <button role="tab" type="button"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 3v6l-5 9a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-5-9V3M8 3h8M8 13h8"/></svg>Lab</button>
+      </div>
+    </div>
+    <div class="row grow" style="justify-content:flex-end;gap:8px">
+      <button class="kbd" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>Search<kbd>Ctrl K</kbd></button>
+      <button class="icobtn" type="button" aria-label="Settings"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></button>
+    </div>
+  </div>
+
+  <div class="body">
+    <!-- Rail: open sessions -->
+    <nav class="rail" aria-label="Open sessions">
+      <button class="rail__b" aria-current="true" aria-label="recon session (active)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3"/></svg></button>
+      <button class="rail__b" aria-label="notes session"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3"/></svg></button>
+      <button class="rail__b" aria-label="Nmap run"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg></button>
+      <button class="rail__b" aria-label="New session"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 5v14M5 12h14"/></svg></button>
+    </nav>
+
+    <main class="surface">
+      <!-- tab strip (Work owns this) -->
+      <div class="tabs" role="tablist" aria-label="Sessions">
+        <button class="tab" role="tab" aria-selected="true">
+          <span class="dot" style="width:7px;height:7px"></span>recon · pwsh
+          <span class="x" role="button" aria-label="Close recon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></span>
+        </button>
+        <button class="tab" role="tab" aria-selected="false"><span class="dot" style="width:7px;height:7px;background:var(--tx-3);box-shadow:none;animation:none"></span>notes · pwsh</button>
+        <button class="tab" role="tab" aria-selected="false">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-2)" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>Nmap · .101
+          <span class="chip chip--live" style="height:17px;padding:0 6px;font-size:10px"><span class="dot" style="width:6px;height:6px"></span>62%</span>
+        </button>
+        <button class="tab" role="tab" aria-selected="false" aria-label="New session"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+        <span class="grow"></span>
+        <button class="btn btn--danger btn--sm" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>Stop all</button>
+      </div>
+
+      <!-- live shell -->
+      <pre class="term" aria-label="recon terminal, PowerShell"><span class="p">PS C:\src\qutra-app&gt;</span> <span class="c">git status</span>
+<span class="m">On branch main</span>
+<span class="m">nothing to commit, working tree clean</span>
+
+<span class="p">PS C:\src\qutra-app&gt;</span> <span class="c">nmap -sV -Pn --top-ports 50 192.168.56.101</span>
+<span class="m">Starting Nmap 7.95 ( https://nmap.org ) at 2026-09-19 21:14 +03</span>
+Nmap scan report for <span class="a">192.168.56.101</span>
+Host is up (0.00042s latency).
+Not shown: 47 closed tcp ports (reset)
+
+PORT     STATE  SERVICE   VERSION
+<span class="g">22/tcp   open</span>   ssh       OpenSSH 9.6p1 (protocol 2.0)
+<span class="g">80/tcp   open</span>   http      nginx 1.25.4
+<span class="g">443/tcp  open</span>   ssl/http  nginx 1.25.4
+<span class="a">3000/tcp open</span>   http      Node.js Express (OWASP Juice Shop)
+
+Service detection performed. Nmap done: 1 IP address (1 host up) scanned in 6.41s
+
+<span class="p">PS C:\src\qutra-app&gt;</span> <span class="caret" aria-hidden="true"></span></pre>
+
+      <!-- status strip -->
+      <div class="row" style="gap:16px;padding:8px 16px;border-top:1px solid var(--line);background:rgba(9,14,21,.55)">
+        <span class="chip chip--live"><span class="dot" style="width:7px;height:7px"></span>Live session</span>
+        <span class="mono faint" style="font-size:11.5px">pwsh 7.4.1</span>
+        <span class="mono faint" style="font-size:11.5px">C:\src\qutra-app</span>
+        <span class="mono faint" style="font-size:11.5px">PID 21884</span>
+        <span class="grow"></span>
+        <span class="chip chip--ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m5 12 4 4L19 6"/></svg>exit 0</span>
+        <span class="mono faint" style="font-size:11.5px">up 00:42:19</span>
+      </div>
+    </main>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

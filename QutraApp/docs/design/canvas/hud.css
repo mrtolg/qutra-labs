@@ -1,0 +1,268 @@
+/* Qutra Labs — HUD console shared styles.
+   Calm JARVIS console: dark, cool cyan/teal, glow reserved for live/active.
+   State is never colour-alone — every chip pairs colour with an icon + label.
+   All body text meets WCAG AA (>=4.5:1) on its surface.
+
+   Motion rules (rev 2):
+   - Only transform and opacity move. Transitions name their properties; nothing
+     transitions `all`, so a layout property can never animate by accident.
+   - Discrete actions (buttons) press down on :active. Navigation that happens
+     hundreds of times a day (surface switcher, rail, tabs) stays instant.
+   - Nothing loops except what blocks the user.
+   - Reduced motion keeps opacity and colour, drops movement and loops. */
+
+:root{
+  /* layered cool grounds */
+  --bg-0:#070b11; --bg-1:#0b111a; --bg-2:#0f1721; --bg-3:#152130; --bg-4:#1c2b3d;
+  --term:#060a10;
+  /* hairlines (cyan-tinted) */
+  --line:rgba(120,200,220,.12); --line-2:rgba(120,200,220,.22); --line-3:rgba(120,200,220,.40);
+  /* ink — all AA on --bg-1/2 */
+  --tx:#e9f2f6; --tx-2:#aec2cf; --tx-3:#839aa9;
+  /* signals */
+  --cyan:#37d6e0; --cyan-2:#74ecf3; --cyan-dim:#215c63;
+  --teal:#33c3aa;
+  --amber:#f2b13c; --amber-2:#ffcf6b;
+  --red:#ff5f6e;  --red-2:#ff98a1;
+  --green:#46d08a; --green-2:#7ee8b1;
+  --violet:#a99cf6; --sky:#5bb8ff;
+  --focus:#8ab4ff;
+  --ff:"Segoe UI Variable Text","Segoe UI Variable","Segoe UI",system-ui,-apple-system,sans-serif;
+  --ff-d:"Segoe UI Variable Display","Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono","Cascadia Mono",Consolas,ui-monospace,monospace;
+  --glow-cyan:0 0 0 1px rgba(55,214,224,.42), 0 0 30px -4px rgba(55,214,224,.40);
+  --glow-amber:0 0 0 1px rgba(242,177,60,.45), 0 0 28px -4px rgba(242,177,60,.34);
+  --sh:0 12px 34px -12px rgba(0,0,0,.7);
+  /* motion */
+  --ease-out:cubic-bezier(.23,1,.32,1);
+  --press:160ms;
+}
+*{box-sizing:border-box}
+.mono{font-family:var(--mono);font-feature-settings:"ss01"}
+.lbl{font:600 11px/1 var(--ff);letter-spacing:.10em;text-transform:uppercase;color:var(--tx-3)}
+.sec{color:var(--tx-2)} .faint{color:var(--tx-3)}
+.stack{display:flex;flex-direction:column}
+.row{display:flex;align-items:center}
+.grow{flex:1;min-width:0}
+.trunc{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---- the app window ---- */
+.win{position:relative;display:flex;flex-direction:column;overflow:hidden;
+  color:var(--tx);font-family:var(--ff);font-size:13px;
+  background:
+    radial-gradient(1200px 680px at 82% -10%, rgba(55,214,224,.07), transparent 58%),
+    radial-gradient(1000px 640px at -6% 112%, rgba(51,195,170,.055), transparent 55%),
+    var(--bg-1);}
+.win__grid{position:absolute;inset:0;pointer-events:none;opacity:.45;
+  background-image:linear-gradient(rgba(120,200,220,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,200,220,.035) 1px,transparent 1px);
+  background-size:34px 34px;-webkit-mask-image:radial-gradient(120% 120% at 50% 0,#000,transparent 78%);
+          mask-image:radial-gradient(120% 120% at 50% 0,#000,transparent 78%);}
+
+/* ---- titlebar ---- */
+.tbar{position:relative;z-index:2;display:flex;align-items:center;gap:14px;height:44px;
+  padding:0 12px 0 14px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(20,32,46,.66),rgba(11,17,26,.66));backdrop-filter:blur(8px)}
+.mark{display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 0 7px rgba(55,214,224,.6))}
+.mark--q{filter:drop-shadow(0 0 1.5px rgba(255,42,34,.9)) drop-shadow(0 0 5px rgba(255,16,16,.55))}
+/* the product mark is the Q+L monogram, red neon; the cyan hexagon lives on as Jarvis's avatar */
+.brand{font:600 12px/1 var(--ff);letter-spacing:.16em;color:var(--tx-2);text-transform:uppercase}
+.tbar__c{position:absolute;left:50%;transform:translateX(-50%)}
+
+/* segmented surface switcher — navigation: instant, no press scale */
+.seg{display:inline-flex;gap:2px;padding:3px;background:var(--bg-2);border:1px solid var(--line);border-radius:9px}
+.seg button{position:relative;display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 13px;
+  border:0;background:transparent;color:var(--tx-2);font:600 12.5px/1 var(--ff);border-radius:6px;cursor:pointer;
+  transition:background-color .16s ease,color .16s ease}
+.seg button:hover{color:var(--tx);background:rgba(120,200,220,.06)}
+.seg button[aria-current="true"]{color:var(--tx);background:var(--bg-4);box-shadow:inset 0 0 0 1px var(--line-2)}
+.seg button[aria-current="true"]::after{content:"";position:absolute;left:12px;right:12px;bottom:-4px;height:2px;
+  background:var(--cyan);border-radius:2px;box-shadow:0 0 8px rgba(55,214,224,.8)}
+
+.icobtn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;
+  border:1px solid transparent;background:transparent;color:var(--tx-2);cursor:pointer;
+  transition:background-color .16s ease,border-color .16s ease,color .16s ease,transform var(--press) var(--ease-out)}
+.icobtn:hover{background:var(--bg-3);color:var(--tx);border-color:var(--line)}
+.icobtn:active:not(:disabled){transform:scale(.95)}
+.kbd{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 10px;border:1px solid var(--line-2);
+  border-radius:8px;background:var(--bg-2);color:var(--tx-2);font:600 12px/1 var(--ff);cursor:pointer;
+  transition:border-color .16s ease,color .16s ease,transform var(--press) var(--ease-out)}
+.kbd:hover{color:var(--tx);border-color:var(--line-3)}
+.kbd:active{transform:scale(.97)}
+.kbd kbd{font-family:var(--mono);font-size:11px;color:var(--tx);background:var(--bg-4);border:1px solid var(--line);
+  border-radius:4px;padding:2px 5px;letter-spacing:.02em}
+
+/* ---- body: rail / surface ---- */
+.body{position:relative;z-index:1;display:flex;flex:1;min-height:0}
+.rail{display:flex;flex-direction:column;align-items:center;gap:6px;width:52px;padding:10px 0;
+  border-right:1px solid var(--line);background:rgba(9,14,21,.5)}
+/* rail is navigation: instant, no press scale */
+.rail__b{position:relative;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:9px;
+  border:1px solid transparent;background:transparent;color:var(--tx-3);cursor:pointer;
+  transition:background-color .16s ease,color .16s ease}
+.rail__b:hover{background:var(--bg-3);color:var(--tx-2)}
+.rail__b[aria-current="true"]{background:var(--bg-3);color:var(--cyan)}
+.rail__b[aria-current="true"]::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:2px;
+  background:var(--cyan);border-radius:2px;box-shadow:0 0 8px rgba(55,214,224,.8)}
+.rail__sp{flex:1}
+
+.surface{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+
+/* ---- panels ---- */
+.panel{background:linear-gradient(180deg,rgba(21,33,48,.35),rgba(15,23,33,.5));
+  border:1px solid var(--line);border-radius:13px;overflow:hidden}
+.panel--live{border-color:rgba(55,214,224,.32);box-shadow:var(--glow-cyan)}
+.panel--attn{border-color:rgba(242,177,60,.34);box-shadow:var(--glow-amber)}
+.panel__h{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.panel__h .ico{color:var(--cyan)} .panel--attn .panel__h .ico{color:var(--amber)}
+.panel__b{padding:6px 8px}
+.count{display:inline-flex;align-items:center;height:19px;padding:0 8px;border-radius:999px;
+  font:700 11px/1 var(--mono);color:var(--bg-0);background:var(--tx-2)}
+.count--attn{background:var(--amber);color:#2a1c02}
+
+/* ---- chips (colour + icon + label, never colour alone) ---- */
+.chip{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;
+  font:600 11.5px/1 var(--ff);border:1px solid var(--line-2);color:var(--tx-2);background:rgba(120,200,220,.05);white-space:nowrap}
+.chip svg{width:12px;height:12px}
+.chip--live{color:var(--cyan-2);border-color:var(--cyan-dim);background:rgba(55,214,224,.10)}
+.chip--ok{color:var(--green-2);border-color:rgba(70,208,138,.4);background:rgba(70,208,138,.10)}
+.chip--warn{color:var(--amber-2);border-color:rgba(242,177,60,.42);background:rgba(242,177,60,.10)}
+.chip--danger{color:var(--red-2);border-color:rgba(255,95,110,.42);background:rgba(255,95,110,.10)}
+.chip--muted{color:var(--tx-3)}
+
+/* ---- buttons — press down on :active; that is the feedback people feel most ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:32px;padding:0 13px;border-radius:8px;
+  border:1px solid var(--line-2);background:var(--bg-3);color:var(--tx);font:600 12.5px/1 var(--ff);cursor:pointer;
+  transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease,color .16s ease,
+    transform var(--press) var(--ease-out);white-space:nowrap}
+.btn:hover{background:var(--bg-4);border-color:var(--line-3)}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn svg{width:15px;height:15px}
+.btn--sm{height:27px;padding:0 10px;font-size:12px} .btn--sm svg{width:14px;height:14px}
+.btn--primary{background:linear-gradient(180deg,#48e0ea,#22c0cb);color:#03222a;border-color:transparent;text-shadow:0 1px 0 rgba(255,255,255,.15)}
+.btn--primary:hover{box-shadow:0 0 20px -3px rgba(55,214,224,.6);background:linear-gradient(180deg,#5ee7f0,#2bcad5)}
+.btn--primary:active:not(:disabled){box-shadow:0 0 12px -4px rgba(55,214,224,.5)}
+.btn--ghost{background:transparent;color:var(--tx-2)} .btn--ghost:hover{color:var(--tx);background:rgba(120,200,220,.06)}
+.btn--danger{background:rgba(255,95,110,.10);border-color:rgba(255,95,110,.4);color:var(--red-2)}
+.btn--danger:hover{background:rgba(255,95,110,.18);color:#ffd0d5}
+
+/* ---- live dot ----
+   Only what blocks the user pulses (amber: a pending approval). Live cyan dots
+   hold a steady glow; six simultaneous pings on Home read as noise in an app
+   that stays open for hours. */
+.dot{position:relative;flex:none;width:9px;height:9px;border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 0 3px rgba(55,214,224,.16),0 0 10px rgba(55,214,224,.8)}
+.dot--amber{background:var(--amber);box-shadow:0 0 0 3px rgba(242,177,60,.16),0 0 10px rgba(242,177,60,.8)}
+.dot--amber::after{content:"";position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(242,177,60,.6);
+  animation:ping 1.9s cubic-bezier(0,0,.2,1) infinite}
+@keyframes ping{0%{transform:scale(1);opacity:.9}70%,100%{transform:scale(2.1);opacity:0}}
+
+/* ---- data rows / table ---- */
+.rowcard{display:grid;align-items:center;gap:13px;padding:10px 10px;border-radius:10px;transition:background-color .14s ease}
+.rowcard:hover{background:rgba(120,200,220,.045)}
+.rowcard + .rowcard{box-shadow:0 -1px 0 var(--line)}
+.ricon{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;
+  background:var(--bg-3);border:1px solid var(--line);color:var(--tx-2);flex:none}
+.tbl{width:100%}
+.tbl__h,.tbl__r{display:grid;align-items:center;gap:14px;padding:9px 12px}
+.tbl__h{border-bottom:1px solid var(--line)}
+.tbl__r{border-bottom:1px solid var(--line);transition:background-color .14s ease}
+.tbl__r:hover{background:rgba(120,200,220,.045)}
+.tbl__r:last-child{border-bottom:0}
+.progress{height:3px;border-radius:2px;background:rgba(120,200,220,.14);overflow:hidden}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--cyan));
+  box-shadow:0 0 10px rgba(55,214,224,.7);border-radius:2px}
+
+/* corner ticks (HUD detail, used sparingly) */
+.ticks{position:relative}
+.ticks::before,.ticks::after{content:"";position:absolute;width:10px;height:10px;pointer-events:none}
+.ticks::before{top:7px;left:7px;border-top:1px solid var(--line-3);border-left:1px solid var(--line-3)}
+.ticks::after{bottom:7px;right:7px;border-bottom:1px solid var(--line-3);border-right:1px solid var(--line-3)}
+
+/* ---- terminal ---- */
+.term{flex:1;min-height:0;margin:0;padding:16px 18px;overflow:auto;background:
+   radial-gradient(680px 300px at 88% 0,rgba(55,214,224,.05),transparent 60%),var(--term);
+  font-family:var(--mono);font-size:13px;line-height:1.62;color:var(--tx-2);white-space:pre-wrap;word-break:break-word}
+.term .p{color:var(--cyan-2)} .term .c{color:var(--tx)} .term .g{color:var(--green-2)}
+.term .a{color:var(--amber-2)} .term .m{color:var(--tx-3)} .term .r{color:var(--red-2)}
+.caret{display:inline-block;width:8px;height:16px;vertical-align:-3px;background:var(--cyan);
+  box-shadow:0 0 8px rgba(55,214,224,.9);margin-left:3px;animation:blink 1.06s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* tabs (Work) — switched constantly: instant, no press scale */
+.tabs{display:flex;align-items:center;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line);background:rgba(9,14,21,.4)}
+.tab{position:relative;display:flex;align-items:center;gap:8px;height:34px;padding:0 11px;border-radius:8px 8px 0 0;
+  border:1px solid transparent;background:transparent;color:var(--tx-2);font:600 12.5px/1 var(--ff);cursor:pointer;
+  transition:background-color .15s ease,color .15s ease,border-color .15s ease}
+.tab:hover{background:var(--bg-2);color:var(--tx)}
+.tab[aria-selected="true"]{background:var(--bg-2);color:var(--tx);border-color:var(--line);border-bottom-color:transparent}
+.tab[aria-selected="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--cyan);
+  box-shadow:0 0 9px rgba(55,214,224,.8)}
+.tab .x{display:flex;color:var(--tx-3)} .tab .x:hover{color:var(--tx)}
+
+/* ---- tool launcher boxes ----
+   Two faces share one fixed frame. The rest face (.tool__center) overlays the
+   box; the open face (.tool__top / .tool__purpose / .tool__actions) is always
+   laid out but invisible. Opening crossfades opacity + transform only, so the
+   frame never reflows and the change can actually animate — `display` cannot.
+   The big logo shrinks and rises as it fades; the small logo, the purpose and
+   then the actions rise in behind it, 30 ms apart. */
+.grid-tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.tool{position:relative;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:12px;
+  height:212px;padding:18px;background:linear-gradient(180deg,rgba(21,33,48,.4),rgba(15,23,33,.5));
+  border:1px solid var(--line);border-radius:15px;overflow:hidden;text-align:center;
+  transition:background-color .2s ease,border-color .2s ease,box-shadow .2s ease}
+.tool:hover,.tool:focus-within,.tool.is-open{background:var(--bg-3);border-color:var(--line-3);box-shadow:var(--glow-cyan)}
+.tool[tabindex]{cursor:default}
+.tool__logo{display:flex;align-items:center;justify-content:center;width:80px;height:80px;border-radius:20px;flex:none;
+  font:800 32px/1 var(--ff-d);letter-spacing:-.03em;border:1px solid rgba(255,255,255,.06)}
+.tool__name{font:600 15.5px/1.15 var(--ff);color:var(--tx)}
+
+/* rest face — overlays the whole box */
+.tool__center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;
+  transform-origin:50% 30%;
+  transition:opacity .18s var(--ease-out),transform .24s var(--ease-out)}
+
+/* open face — always laid out, hidden at rest */
+.tool__top{display:flex;align-items:center;gap:12px}
+.tool__top .tool__logo{width:44px;height:44px;border-radius:12px;font-size:19px}
+.tool__purpose{display:block;color:var(--tx-2);font-size:12px;line-height:1.5;margin:10px 0 0}
+.tool__actions{display:flex;gap:9px;margin-top:auto}
+.tool__actions .btn{flex:1}
+.tool__top,.tool__purpose,.tool__actions{opacity:0;visibility:hidden;transform:translateY(6px);
+  transition:opacity .18s var(--ease-out),transform .22s var(--ease-out),visibility 0s linear .22s}
+
+/* open */
+.tool:hover .tool__center,.tool:focus-within .tool__center,.tool.is-open .tool__center{
+  opacity:0;transform:translateY(-14px) scale(.86);pointer-events:none}
+.tool:hover .tool__top,.tool:focus-within .tool__top,.tool.is-open .tool__top,
+.tool:hover .tool__purpose,.tool:focus-within .tool__purpose,.tool.is-open .tool__purpose,
+.tool:hover .tool__actions,.tool:focus-within .tool__actions,.tool.is-open .tool__actions{
+  opacity:1;visibility:visible;transform:none;transition-delay:0s}
+.tool:hover .tool__purpose,.tool:focus-within .tool__purpose,.tool.is-open .tool__purpose{transition-delay:30ms}
+.tool:hover .tool__actions,.tool:focus-within .tool__actions,.tool.is-open .tool__actions{transition-delay:60ms}
+
+/* pinned "at rest" exemplar — never opens, for the before/after spec board */
+.tool--rest,.tool--rest:hover,.tool--rest:focus-within{background:linear-gradient(180deg,rgba(21,33,48,.4),rgba(15,23,33,.5))!important;
+  border-color:var(--line)!important;box-shadow:none!important}
+.tool--rest .tool__center{opacity:1!important;transform:none!important;pointer-events:auto!important}
+.tool--rest .tool__top,.tool--rest .tool__purpose,.tool--rest .tool__actions{opacity:0!important;visibility:hidden!important}
+/* pinned "open" exemplar keeps its glow even without hover */
+.tool--pin{box-shadow:var(--glow-cyan)!important;border-color:var(--line-3)!important}
+
+/* annotation lines (spec board) */
+.anno{color:var(--tx-2);font-size:12.5px;line-height:1.45}
+.anno b{color:var(--cyan-2);font-weight:600}
+.dash{border:0;border-top:1px dashed var(--line-3);height:0}
+.node{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px rgba(55,214,224,.8);flex:none}
+
+/* ---- focus + motion ---- */
+a{color:var(--cyan-2);text-decoration:none} a:hover{color:#bff5f8;text-decoration:underline}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:8px}
+.is-focus{outline:2px solid var(--focus);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){
+  /* keep opacity and colour transitions; drop movement and anything that loops */
+  *,*::before,*::after{animation:none!important}
+  .btn:active:not(:disabled),.icobtn:active:not(:disabled),.kbd:active{transform:none}
+  .tool__center,.tool__top,.tool__purpose,.tool__actions{transform:none!important}
+}

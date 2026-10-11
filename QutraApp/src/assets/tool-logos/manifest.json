@@ -1,0 +1,380 @@
+{
+  "version": 1,
+  "about": "Official logos bundled for the tool catalog, 64 px PNG. Each entry names the source it was fetched from on 2026-10-10 and a licence note. A tool with no entry keeps its letter tile. 'plate' is the backdrop a transparent logo needs to stay visible: 'light' for dark ink, 'dark' for light ink, 'none' for an opaque square.",
+  "logos": {
+    "nmap": {
+      "file": "nmap.png",
+      "ids": [
+        "nmap"
+      ],
+      "source": "https://github.com/nmap.png (avatar https://avatars.githubusercontent.com/u/63385)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "wireshark": {
+      "file": "wireshark.png",
+      "ids": [
+        "wireshark",
+        "tshark"
+      ],
+      "source": "https://github.com/wireshark.png (avatar https://avatars.githubusercontent.com/u/6233056)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "light"
+    },
+    "zeek": {
+      "file": "zeek.png",
+      "ids": [
+        "zeek"
+      ],
+      "source": "https://github.com/zeek.png (avatar https://avatars.githubusercontent.com/u/1194067)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "light"
+    },
+    "suricata": {
+      "file": "suricata.png",
+      "ids": [
+        "suricata"
+      ],
+      "source": "https://suricata.io/wp-content/uploads/2021/01/cropped-favicon-180x180.png",
+      "licence": "Icon published on the project's official website (project licence: GPL-2.0). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "dark"
+    },
+    "zap": {
+      "file": "zap.png",
+      "ids": [
+        "zap"
+      ],
+      "source": "https://github.com/zaproxy.png (avatar https://avatars.githubusercontent.com/u/6716868)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "dark"
+    },
+    "burp": {
+      "file": "burp.png",
+      "ids": [
+        "burp"
+      ],
+      "source": "https://github.com/PortSwigger.png (avatar https://avatars.githubusercontent.com/u/13749115)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "nikto": {
+      "file": "nikto.png",
+      "ids": [
+        "nikto"
+      ],
+      "source": "https://cirt.net/wp-content/uploads/2025/08/cropped-alienhead_vectorized_square-180x180.gif",
+      "licence": "Icon published on the project's official website (project licence: GPL-2.0). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "nuclei": {
+      "file": "nuclei.png",
+      "ids": [
+        "nuclei"
+      ],
+      "source": "https://raw.githubusercontent.com/projectdiscovery/nuclei/dev/static/nuclei-logo.png",
+      "licence": "From the project's official repository (project licence: MIT). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "light"
+    },
+    "juice-shop": {
+      "file": "juice-shop.png",
+      "ids": [
+        "juice-shop",
+        "juiceshop"
+      ],
+      "source": "https://github.com/juice-shop.png (avatar https://avatars.githubusercontent.com/u/83415759)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "semgrep": {
+      "file": "semgrep.png",
+      "ids": [
+        "semgrep"
+      ],
+      "source": "https://github.com/semgrep.png (avatar https://avatars.githubusercontent.com/u/29760937)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "gitleaks": {
+      "file": "gitleaks.png",
+      "ids": [
+        "gitleaks"
+      ],
+      "source": "https://github.com/gitleaks.png (avatar https://avatars.githubusercontent.com/u/90395851)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "trivy": {
+      "file": "trivy.png",
+      "ids": [
+        "trivy"
+      ],
+      "source": "https://raw.githubusercontent.com/aquasecurity/trivy/main/docs/imgs/logo.png",
+      "licence": "From the project's official repository (project licence: Apache-2.0). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "light"
+    },
+    "ghidra": {
+      "file": "ghidra.png",
+      "ids": [
+        "ghidra"
+      ],
+      "source": "https://commons.wikimedia.org/wiki/File:Ghidra_logo.svg (rendered https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f6/Ghidra_logo.svg/330px-Ghidra_logo.svg.png",
+      "licence": "Wikimedia Commons file of the official Ghidra logo (Commons licence: Apache License 2.0). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "light"
+    },
+    "yara": {
+      "file": "yara.png",
+      "ids": [
+        "yara",
+        "yara-rules"
+      ],
+      "source": "https://raw.githubusercontent.com/VirusTotal/yara/master/extra/old-logo.png",
+      "licence": "From the project's official repository (project licence: BSD-3-Clause). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "light"
+    },
+    "volatility": {
+      "file": "volatility.png",
+      "ids": [
+        "volatility"
+      ],
+      "source": "https://github.com/volatilityfoundation.png (avatar https://avatars.githubusercontent.com/u/6001145)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "imhex": {
+      "file": "imhex.png",
+      "ids": [
+        "imhex"
+      ],
+      "source": "https://imhex.werwolv.net/assets/favicon-BnpGQ2_t.ico",
+      "licence": "Icon published on the project's official website (project licence: GPL-2.0). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "light"
+    },
+    "detect-it-easy": {
+      "file": "detect-it-easy.png",
+      "ids": [
+        "detect-it-easy"
+      ],
+      "source": "https://raw.githubusercontent.com/horsicq/Detect-It-Easy/master/docs/logo.png",
+      "licence": "From the project's official repository (project licence: MIT). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "dark"
+    },
+    "pe-bear": {
+      "file": "pe-bear.png",
+      "ids": [
+        "pe-bear"
+      ],
+      "source": "https://raw.githubusercontent.com/hasherezade/pe-bear/main/logo/main_ico.png",
+      "licence": "From the project's official repository (project licence: GPL-2.0). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "light"
+    },
+    "dnspyex": {
+      "file": "dnspyex.png",
+      "ids": [
+        "dnspyex"
+      ],
+      "source": "https://github.com/dnSpyEx.png (avatar https://avatars.githubusercontent.com/u/84912327)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "dark"
+    },
+    "ilspy": {
+      "file": "ilspy.png",
+      "ids": [
+        "ilspy"
+      ],
+      "source": "https://raw.githubusercontent.com/icsharpcode/ILSpy/master/BuildTools/packaging/linux/ilspy.png",
+      "licence": "From the project's official repository (project licence: MIT). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "dark"
+    },
+    "cyberchef": {
+      "file": "cyberchef.png",
+      "ids": [
+        "cyberchef-web",
+        "cyberchef"
+      ],
+      "source": "https://raw.githubusercontent.com/gchq/CyberChef/master/src/web/static/images/cyberchef-128x128.png",
+      "licence": "From the project's official repository (project licence: Apache-2.0). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "dark"
+    },
+    "exiftool": {
+      "file": "exiftool.png",
+      "ids": [
+        "exiftool"
+      ],
+      "source": "https://exiftool.org/favicon.ico",
+      "licence": "Icon published on the project's official website (project licence: Perl licence (Artistic or GPL)). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "light"
+    },
+    "jq": {
+      "file": "jq.png",
+      "ids": [
+        "jq"
+      ],
+      "source": "https://github.com/jqlang.png (avatar https://avatars.githubusercontent.com/u/104800540)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "velociraptor": {
+      "file": "velociraptor.png",
+      "ids": [
+        "velociraptor"
+      ],
+      "source": "https://github.com/Velocidex.png (avatar https://avatars.githubusercontent.com/u/36671444)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "dark"
+    },
+    "osquery": {
+      "file": "osquery.png",
+      "ids": [
+        "osquery"
+      ],
+      "source": "https://github.com/osquery.png (avatar https://avatars.githubusercontent.com/u/8315868)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "wazuh": {
+      "file": "wazuh.png",
+      "ids": [
+        "wazuh"
+      ],
+      "source": "https://github.com/wazuh.png (avatar https://avatars.githubusercontent.com/u/13752566)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "syft": {
+      "file": "syft.png",
+      "ids": [
+        "syft"
+      ],
+      "source": "https://github.com/anchore.png (avatar https://avatars.githubusercontent.com/u/16208487)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool. Syft is an Anchore project; this is Anchore's avatar.",
+      "plate": "light"
+    },
+    "grype": {
+      "file": "grype.png",
+      "ids": [
+        "grype"
+      ],
+      "source": "https://github.com/anchore.png (avatar https://avatars.githubusercontent.com/u/16208487)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool. Grype is an Anchore project; this is Anchore's avatar.",
+      "plate": "light"
+    },
+    "webgoat": {
+      "file": "webgoat.png",
+      "ids": [
+        "webgoat"
+      ],
+      "source": "https://github.com/WebGoat.png (avatar https://avatars.githubusercontent.com/u/7718244)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "dvwa": {
+      "file": "dvwa.png",
+      "ids": [
+        "dvwa"
+      ],
+      "source": "https://raw.githubusercontent.com/digininja/DVWA/master/dvwa/images/logo.png",
+      "licence": "From the project's official repository (project licence: GPL-3.0). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "dark"
+    },
+    "sqlmap": {
+      "file": "sqlmap.png",
+      "ids": [
+        "sqlmap"
+      ],
+      "source": "https://github.com/sqlmapproject.png (avatar https://avatars.githubusercontent.com/u/735289)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "amass": {
+      "file": "amass.png",
+      "ids": [
+        "amass"
+      ],
+      "source": "https://github.com/owasp-amass.png (avatar https://avatars.githubusercontent.com/u/128647419)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "hashcat": {
+      "file": "hashcat.png",
+      "ids": [
+        "hashcat"
+      ],
+      "source": "https://github.com/hashcat.png (avatar https://avatars.githubusercontent.com/u/15949799)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "metasploit": {
+      "file": "metasploit.png",
+      "ids": [
+        "metasploit"
+      ],
+      "source": "https://www.metasploit.com/includes/images/favicon.ico",
+      "licence": "Icon published on the project's official website (project licence: BSD-3-Clause). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "light"
+    },
+    "bloodhound": {
+      "file": "bloodhound.png",
+      "ids": [
+        "bloodhound"
+      ],
+      "source": "https://github.com/BloodHoundAD.png (avatar https://avatars.githubusercontent.com/u/25502277)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "dark"
+    },
+    "capa": {
+      "file": "capa.png",
+      "ids": [
+        "capa"
+      ],
+      "source": "https://raw.githubusercontent.com/mandiant/capa/master/.github/logo.png",
+      "licence": "From the project's official repository (project licence: Apache-2.0). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "light"
+    },
+    "trufflehog": {
+      "file": "trufflehog.png",
+      "ids": [
+        "trufflehog"
+      ],
+      "source": "https://github.com/trufflesecurity.png (avatar https://avatars.githubusercontent.com/u/79229934)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "sigma": {
+      "file": "sigma.png",
+      "ids": [
+        "sigma-rules",
+        "sigma"
+      ],
+      "source": "https://github.com/SigmaHQ.png (avatar https://avatars.githubusercontent.com/u/79842123)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "none"
+    },
+    "atomic-red-team": {
+      "file": "atomic-red-team.png",
+      "ids": [
+        "atomic-red-team"
+      ],
+      "source": "https://github.com/redcanaryco.png (avatar https://avatars.githubusercontent.com/u/6877001)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool. Atomic Red Team is a Red Canary project; this is Red Canary's avatar.",
+      "plate": "dark"
+    },
+    "caldera": {
+      "file": "caldera.png",
+      "ids": [
+        "caldera"
+      ],
+      "source": "https://raw.githubusercontent.com/mitre/caldera/master/static/img/caldera-logo.png",
+      "licence": "From the project's official repository (project licence: Apache-2.0). The mark is its owner's; it is bundled only to identify the tool.",
+      "plate": "dark"
+    },
+    "bind": {
+      "file": "bind.png",
+      "ids": [
+        "dns"
+      ],
+      "source": "https://github.com/isc-projects.png (avatar https://avatars.githubusercontent.com/u/3965132)",
+      "licence": "Official GitHub organization avatar. The mark is its owner's; it is bundled only to identify the tool. dig ships with ISC BIND; this is ISC's avatar.",
+      "plate": "none"
+    }
+  }
+}

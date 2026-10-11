@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "assistant",
+  "description": "Qutra local assistant broker. Six commands and one event channel — no filesystem, shell or network permission is granted here. The broker itself only ever addresses the pinned loopback endpoint (src/assistant/ollama.rs); the renderer cannot supply a host, port or URL.",
+  "windows": ["main"],
+  "permissions": []
+}

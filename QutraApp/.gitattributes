@@ -1,0 +1,41 @@
+# Normalize line endings: LF in the repo, native on checkout.
+* text=auto eol=lf
+
+# Windows-native scripts keep CRLF.
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Explicit text types.
+*.ts   text
+*.tsx  text
+*.js   text
+*.mjs  text
+*.cjs  text
+*.json text
+*.css  text
+*.html text
+*.md   text
+*.rs   text
+*.sql  text
+*.toml text
+*.yml  text
+*.yaml text
+
+# Binary assets — never diffed or EOL-converted.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.icns binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.exe  binary
+*.msi  binary
+*.pdf  binary
+
+# Lockfiles: keep but collapse in diffs.
+package-lock.json linguist-generated=true -diff
+Cargo.lock        linguist-generated=true -diff

@@ -1,0 +1,310 @@
+{
+  "version": 1,
+  "forms": [
+    {
+      "id": "nmap",
+      "executables": ["nmap.exe"],
+      "timeoutSec": 1800,
+      "fields": [
+        { "id": "target", "type": "target", "required": true },
+        { "id": "ports", "type": "ports", "required": true, "default": "22,80,443,3389,8080" }
+      ],
+      "presets": [
+        { "id": "quick", "output": "nmap-xml", "argv": ["-n", "-sT", "-T4", "-F", "--open", "-oX", "-", "{target}"] },
+        { "id": "services", "output": "nmap-xml", "argv": ["-n", "-sT", "-sV", "-T4", "--top-ports", "100", "--open", "-oX", "-", "{target}"] },
+        { "id": "ports", "output": "nmap-xml", "argv": ["-n", "-sT", "-T4", "-p", "{ports}", "-oX", "-", "{target}"] },
+        { "id": "discover", "output": "nmap-xml", "argv": ["-n", "-sn", "-oX", "-", "{target}"] }
+      ]
+    },
+    {
+      "id": "tshark",
+      "executables": ["tshark.exe"],
+      "timeoutSec": 300,
+      "fields": [
+        { "id": "file", "type": "file", "required": true, "accepts": ["pcap", "pcapng"] },
+        { "id": "filter", "type": "text", "required": true, "default": "http || dns", "maxLen": 200 }
+      ],
+      "presets": [
+        { "id": "hierarchy", "output": "text", "argv": ["-n", "-r", "{file}", "-q", "-z", "io,phs"] },
+        { "id": "conversations", "output": "text", "argv": ["-n", "-r", "{file}", "-q", "-z", "conv,ip"] },
+        { "id": "dns", "output": "csv", "argv": ["-n", "-r", "{file}", "-Y", "dns.flags.response == 0", "-T", "fields", "-E", "header=y", "-E", "separator=,", "-E", "quote=d", "-e", "frame.time_relative", "-e", "ip.src", "-e", "dns.qry.name"] },
+        { "id": "http", "output": "csv", "argv": ["-n", "-r", "{file}", "-Y", "http.request", "-T", "fields", "-E", "header=y", "-E", "separator=,", "-E", "quote=d", "-e", "ip.src", "-e", "http.host", "-e", "http.request.method", "-e", "http.request.uri"] },
+        { "id": "filter", "output": "csv", "argv": ["-n", "-r", "{file}", "-Y", "{filter}", "-T", "fields", "-E", "header=y", "-E", "separator=,", "-E", "quote=d", "-e", "frame.number", "-e", "frame.time_relative", "-e", "ip.src", "-e", "ip.dst", "-e", "_ws.col.protocol", "-e", "_ws.col.info"] }
+      ]
+    },
+    {
+      "id": "capinfos",
+      "executables": ["capinfos.exe"],
+      "timeoutSec": 120,
+      "fields": [{ "id": "file", "type": "file", "required": true, "accepts": ["pcap", "pcapng"] }],
+      "presets": [
+        { "id": "summary", "output": "keyvalue", "argv": ["{file}"] },
+        { "id": "table", "output": "csv", "argv": ["-T", "-m", "-Q", "{file}"] }
+      ]
+    },
+    {
+      "id": "editcap",
+      "executables": ["editcap.exe"],
+      "timeoutSec": 300,
+      "fields": [
+        { "id": "file", "type": "file", "required": true, "accepts": ["pcap", "pcapng"] },
+        { "id": "range", "type": "text", "required": true, "default": "1-100", "pattern": "^[0-9]{1,9}(-[0-9]{1,9})?$", "maxLen": 19 },
+        { "id": "out", "type": "output", "ext": "pcapng" }
+      ],
+      "presets": [
+        { "id": "range", "output": "text", "argv": ["-F", "pcapng", "-r", "{file}", "{out}", "{range}"] },
+        { "id": "dedupe", "output": "text", "argv": ["-F", "pcapng", "-d", "{file}", "{out}"] }
+      ]
+    },
+    {
+      "id": "mergecap",
+      "executables": ["mergecap.exe"],
+      "timeoutSec": 300,
+      "fields": [
+        { "id": "file", "type": "file", "required": true, "accepts": ["pcap", "pcapng"] },
+        { "id": "file2", "type": "file", "required": true, "accepts": ["pcap", "pcapng"] },
+        { "id": "out", "type": "output", "ext": "pcapng" }
+      ],
+      "presets": [
+        { "id": "chrono", "output": "text", "argv": ["-F", "pcapng", "-w", "{out}", "{file}", "{file2}"] },
+        { "id": "append", "output": "text", "argv": ["-F", "pcapng", "-a", "-w", "{out}", "{file}", "{file2}"] }
+      ]
+    },
+    {
+      "id": "text2pcap",
+      "executables": ["text2pcap.exe"],
+      "timeoutSec": 120,
+      "fields": [
+        { "id": "file", "type": "file", "required": true, "accepts": ["text"] },
+        { "id": "out", "type": "output", "ext": "pcapng" }
+      ],
+      "presets": [
+        { "id": "plain", "output": "text", "argv": ["-F", "pcapng", "{file}", "{out}"] },
+        { "id": "udp", "output": "text", "argv": ["-F", "pcapng", "-u", "1000,69", "{file}", "{out}"] }
+      ]
+    },
+    {
+      "id": "yara",
+      "executables": ["yara64.exe", "yara.exe", "yara32.exe"],
+      "timeoutSec": 300,
+      "fields": [
+        { "id": "rules", "type": "file", "required": true, "accepts": ["text"], "noIncludes": true },
+        { "id": "file", "type": "file", "required": true },
+        { "id": "folder", "type": "folder" }
+      ],
+      "presets": [
+        { "id": "file", "output": "lines", "argv": ["--no-warnings", "--disable-console-logs", "--print-strings", "--print-meta", "--print-tags", "--timeout=50", "{rules}", "{file}"] },
+        { "id": "folder", "output": "lines", "argv": ["--no-warnings", "--disable-console-logs", "--print-meta", "--print-tags", "--recursive", "--timeout=50", "{rules}", "{folder}"] }
+      ]
+    },
+    {
+      "id": "exiftool",
+      "executables": ["exiftool.exe"],
+      "timeoutSec": 120,
+      "fields": [{ "id": "file", "type": "file", "required": true }],
+      "presets": [
+        { "id": "all", "output": "json", "stdinPaths": true, "argv": ["-charset", "filename=utf8", "-json", "-G1", "{file}"] },
+        { "id": "when", "output": "json", "stdinPaths": true, "argv": ["-charset", "filename=utf8", "-json", "-G1", "-time:all", "-gps:all", "{file}"] }
+      ]
+    },
+    {
+      "id": "strings",
+      "executables": ["strings.exe", "strings64.exe"],
+      "timeoutSec": 300,
+      "fields": [
+        { "id": "file", "type": "file", "required": true },
+        { "id": "min", "type": "int", "required": true, "default": "6", "min": 3, "max": 64 }
+      ],
+      "presets": [
+        { "id": "all", "output": "lines", "argv": ["-accepteula", "-nobanner", "-n", "{min}", "{file}"] },
+        { "id": "offsets", "output": "lines", "argv": ["-accepteula", "-nobanner", "-o", "-n", "{min}", "{file}"] }
+      ]
+    },
+    {
+      "id": "sigcheck",
+      "executables": ["sigcheck.exe", "sigcheck64.exe"],
+      "timeoutSec": 300,
+      "fields": [
+        { "id": "file", "type": "file", "required": true },
+        { "id": "folder", "type": "folder" }
+      ],
+      "presets": [
+        { "id": "file", "output": "csv", "argv": ["-accepteula", "-nobanner", "-c", "-h", "{file}"] },
+        { "id": "folder", "output": "csv", "argv": ["-accepteula", "-nobanner", "-c", "-e", "-s", "{folder}"] }
+      ]
+    },
+    {
+      "id": "autoruns",
+      "executables": ["autorunsc.exe", "autorunsc64.exe"],
+      "timeoutSec": 900,
+      "fields": [],
+      "presets": [
+        { "id": "logon", "output": "csv", "argv": ["-accepteula", "-nobanner", "-a", "l", "-c", "-m"] },
+        { "id": "tasks", "output": "csv", "argv": ["-accepteula", "-nobanner", "-a", "t", "-c", "-m"] },
+        { "id": "services", "output": "csv", "argv": ["-accepteula", "-nobanner", "-a", "s", "-c", "-m"] }
+      ]
+    },
+    {
+      "id": "tcpvcon",
+      "executables": ["tcpvcon.exe", "tcpvcon64.exe"],
+      "timeoutSec": 120,
+      "fields": [],
+      "presets": [{ "id": "all", "output": "csv", "argv": ["-accepteula", "-nobanner", "-a", "-c", "-n"] }]
+    },
+    {
+      "id": "gitleaks",
+      "executables": ["gitleaks.exe"],
+      "timeoutSec": 600,
+      "fields": [
+        { "id": "folder", "type": "folder" },
+        { "id": "file", "type": "file", "required": true }
+      ],
+      "presets": [
+        { "id": "folder", "output": "json", "argv": ["dir", "{folder}", "--no-banner", "--no-color", "--redact", "--exit-code", "0", "--report-format", "json", "--report-path", "-"] },
+        { "id": "file", "output": "json", "argv": ["dir", "{file}", "--no-banner", "--no-color", "--redact", "--exit-code", "0", "--report-format", "json", "--report-path", "-"] }
+      ]
+    },
+    {
+      "id": "trufflehog",
+      "executables": ["trufflehog.exe"],
+      "timeoutSec": 600,
+      "fields": [{ "id": "folder", "type": "folder" }],
+      "presets": [
+        { "id": "folder", "output": "jsonl", "argv": ["filesystem", "{folder}", "--json", "--no-update", "--no-verification"] }
+      ]
+    },
+    {
+      "id": "trivy",
+      "executables": ["trivy.exe"],
+      "timeoutSec": 900,
+      "fields": [{ "id": "folder", "type": "folder" }],
+      "presets": [
+        { "id": "secrets", "output": "json", "argv": ["fs", "--scanners", "secret", "--format", "json", "--quiet", "--skip-db-update", "--skip-java-db-update", "--skip-check-update", "--skip-version-check", "--offline-scan", "{folder}"] },
+        { "id": "vulns", "output": "json", "argv": ["fs", "--scanners", "vuln", "--format", "json", "--quiet", "--skip-db-update", "--skip-java-db-update", "--skip-check-update", "--skip-version-check", "--offline-scan", "{folder}"] },
+        { "id": "updateDb", "output": "text", "network": "mirror.gcr.io, ghcr.io", "argv": ["fs", "--download-db-only", "--quiet", "--skip-version-check"] }
+      ]
+    },
+    {
+      "id": "grype",
+      "executables": ["grype.exe"],
+      "timeoutSec": 900,
+      "env": { "GRYPE_DB_AUTO_UPDATE": "false", "GRYPE_CHECK_FOR_APP_UPDATE": "false" },
+      "fields": [
+        { "id": "folder", "type": "folder" },
+        { "id": "file", "type": "file", "required": true, "accepts": ["text"] }
+      ],
+      "presets": [
+        { "id": "folder", "output": "json", "argv": ["dir:{folder}", "-o", "json"] },
+        { "id": "sbom", "output": "json", "argv": ["sbom:{file}", "-o", "json"] },
+        { "id": "updateDb", "output": "text", "network": "grype.anchore.io", "argv": ["db", "update"] }
+      ]
+    },
+    {
+      "id": "syft",
+      "executables": ["syft.exe"],
+      "timeoutSec": 900,
+      "env": { "SYFT_CHECK_FOR_APP_UPDATE": "false" },
+      "fields": [
+        { "id": "folder", "type": "folder" },
+        { "id": "file", "type": "file", "required": true }
+      ],
+      "presets": [
+        { "id": "table", "output": "text", "argv": ["dir:{folder}", "-o", "table", "-q"] },
+        { "id": "cyclonedx", "output": "json", "argv": ["dir:{folder}", "-o", "cyclonedx-json", "-q"] },
+        { "id": "file", "output": "text", "argv": ["file:{file}", "-o", "table", "-q"] }
+      ]
+    },
+    {
+      "id": "die",
+      "executables": ["diec.exe"],
+      "timeoutSec": 600,
+      "fields": [{ "id": "file", "type": "file", "required": true }],
+      "presets": [
+        { "id": "quick", "output": "json", "argv": ["-j", "{file}"] },
+        { "id": "deep", "output": "json", "argv": ["-j", "-d", "-u", "{file}"] }
+      ]
+    },
+    {
+      "id": "chainsaw",
+      "executables": ["chainsaw.exe"],
+      "timeoutSec": 900,
+      "fields": [
+        { "id": "file", "type": "file", "required": true, "accepts": ["evtx"] },
+        { "id": "keyword", "type": "text", "required": true, "maxLen": 200 }
+      ],
+      "presets": [
+        { "id": "search", "output": "json", "argv": ["search", "-q", "--json", "{keyword}", "{file}"] },
+        { "id": "dump", "output": "json", "argv": ["dump", "-q", "--json", "{file}"] }
+      ]
+    },
+    {
+      "id": "volatility",
+      "executables": ["vol.exe"],
+      "timeoutSec": 1800,
+      "env": { "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1" },
+      "fields": [{ "id": "file", "type": "file", "required": true }],
+      "presets": [
+        { "id": "info", "output": "json", "argv": ["-q", "--offline", "-r", "json", "-f", "{file}", "windows.info"] },
+        { "id": "pslist", "output": "json", "argv": ["-q", "--offline", "-r", "json", "-f", "{file}", "windows.pslist"] },
+        { "id": "netscan", "output": "json", "argv": ["-q", "--offline", "-r", "json", "-f", "{file}", "windows.netscan"] }
+      ]
+    },
+    {
+      "id": "ghidra",
+      "executables": ["ghidra-launcher.exe"],
+      "timeoutSec": 60,
+      "fields": [],
+      "presets": [{ "id": "open", "output": "text", "launch": "gui", "argv": [] }]
+    },
+    {
+      "id": "docker",
+      "executables": ["docker.exe"],
+      "timeoutSec": 120,
+      "fields": [
+        { "id": "image", "type": "text", "required": true, "pattern": "^[A-Za-z0-9][A-Za-z0-9._/:@-]{0,254}$", "maxLen": 255 }
+      ],
+      "presets": [
+        { "id": "ps", "output": "jsonl", "argv": ["ps", "-a", "--no-trunc", "--format", "json"] },
+        { "id": "images", "output": "jsonl", "argv": ["images", "--format", "json"] },
+        { "id": "inspect", "output": "json", "argv": ["image", "inspect", "{image}"] },
+        { "id": "version", "output": "json", "argv": ["version", "--format", "json"] }
+      ]
+    },
+    {
+      "id": "jq",
+      "executables": ["jq.exe"],
+      "timeoutSec": 60,
+      "fields": [
+        { "id": "file", "type": "file", "required": true, "accepts": ["text"] },
+        { "id": "expr", "type": "text", "required": true, "default": ".", "maxLen": 500 }
+      ],
+      "presets": [
+        { "id": "pretty", "output": "json", "argv": [".", "{file}"] },
+        { "id": "keys", "output": "json", "argv": ["keys", "{file}"] },
+        { "id": "custom", "output": "json", "argv": ["{expr}", "{file}"] }
+      ]
+    },
+    {
+      "id": "osquery",
+      "executables": ["osqueryi.exe"],
+      "timeoutSec": 120,
+      "fields": [],
+      "presets": [
+        { "id": "listening", "output": "json", "argv": ["--json", "SELECT p.pid, p.name, l.port, l.address, l.protocol FROM listening_ports l JOIN processes p USING (pid) ORDER BY l.port"] },
+        { "id": "processes", "output": "json", "argv": ["--json", "SELECT pid, parent, name, path FROM processes ORDER BY pid"] },
+        { "id": "users", "output": "json", "argv": ["--json", "SELECT uid, username, description, directory FROM users"] }
+      ]
+    },
+    {
+      "id": "fixture",
+      "executables": ["contextos-fixture.exe", "contextos_fixture.exe"],
+      "fixture": true,
+      "timeoutSec": 30,
+      "fields": [{ "id": "message", "type": "text", "required": true, "default": "Qutra Labs", "maxLen": 200 }],
+      "presets": [
+        { "id": "echo", "output": "lines", "argv": ["--mode", "echo", "{message}"] },
+        { "id": "fail", "output": "lines", "argv": ["--mode", "exit", "--code", "7"] }
+      ]
+    }
+  ]
+}

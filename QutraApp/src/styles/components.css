@@ -1,0 +1,796 @@
+/* ============================================================
+   Shared component vocabulary.
+   One button shape, one form-control vocabulary, everywhere.
+   ============================================================ */
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--control-h);
+  padding: 0 var(--sp-3);
+  border-radius: var(--r-2);
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: var(--fs-13);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* A button without a variant still answers the pointer: it fills and draws
+   its edge, so it reads as something to press. */
+.btn:where(:not(.btn--primary, .btn--secondary, .btn--ghost, .btn--danger, .btn--danger-outline, .btn--icon)):hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: color-mix(in oklch, var(--primary) 7%, var(--surface-raised));
+  color: var(--ink);
+}
+.btn--primary {
+  background: var(--primary);
+  color: var(--primary-ink);
+}
+.btn--primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+.btn--primary:active:not(:disabled) {
+  background: var(--primary-active);
+}
+.btn--secondary {
+  border-color: var(--border-strong);
+  background: var(--bg);
+}
+.btn--secondary:hover:not(:disabled) {
+  background: var(--surface-raised);
+}
+.btn--ghost {
+  color: var(--muted);
+}
+.btn--ghost:hover:not(:disabled) {
+  background: var(--surface-raised);
+  color: var(--ink);
+}
+.btn--danger {
+  background: var(--danger);
+  color: var(--danger-ink);
+}
+.btn--danger:hover:not(:disabled) {
+  background: var(--danger-hover);
+}
+.btn--danger-outline {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.btn--danger-outline:hover:not(:disabled) {
+  background: var(--danger-soft);
+}
+.btn--sm {
+  height: var(--control-h-sm);
+  padding: 0 var(--sp-2);
+  font-size: var(--fs-12);
+}
+.btn--icon {
+  width: var(--control-h);
+  padding: 0;
+  color: var(--muted);
+}
+.btn--icon:hover:not(:disabled) {
+  background: var(--surface-raised);
+  color: var(--ink);
+}
+.btn--icon.btn--sm {
+  width: var(--control-h-sm);
+}
+.btn.is-loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* ---------- Inputs ---------- */
+.input,
+.select,
+.textarea {
+  height: var(--control-h);
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--border-control);
+  border-radius: var(--r-2);
+  background: var(--bg);
+  font-size: var(--fs-13);
+  width: 100%;
+  transition: border-color var(--dur-1) var(--ease-out);
+}
+.textarea {
+  height: auto;
+  min-height: 72px;
+  padding: var(--sp-2);
+  resize: vertical;
+  line-height: 1.5;
+}
+.input:hover,
+.select:hover,
+.textarea:hover {
+  border-color: var(--muted);
+}
+.input:focus-visible,
+.select:focus-visible,
+.textarea:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-color: transparent;
+}
+/* A hint, not a value: one step quieter than entered text (still 4.5:1). */
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--faint);
+}
+.input[aria-invalid="true"],
+.textarea[aria-invalid="true"],
+.select[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+.input:disabled,
+.select:disabled,
+.textarea:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: var(--surface);
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.field > label,
+.field-label {
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--muted);
+}
+.field-error {
+  font-size: var(--fs-12);
+  color: var(--danger);
+}
+.form-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: var(--fs-12);
+  line-height: 1.45;
+}
+.field-hint {
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+
+.search-input {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: min(260px, 100%);
+  height: var(--control-h);
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--border-control);
+  border-radius: var(--r-2);
+  background: var(--bg);
+  color: var(--muted);
+}
+.search-input:hover {
+  border-color: var(--muted);
+}
+.search-input:focus-within {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-color: transparent;
+}
+.search-input input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+}
+.search-input input::placeholder {
+  color: var(--faint);
+}
+
+/* ---------- Checkbox / switch ---------- */
+.checkbox {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  font-size: var(--fs-13);
+}
+.checkbox input {
+  width: 15px;
+  height: 15px;
+  margin-top: 2px;
+  accent-color: var(--primary);
+  flex: none;
+}
+.switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+.switch-track {
+  width: 32px;
+  height: 18px;
+  border-radius: var(--r-pill);
+  background: var(--border-control);
+  position: relative;
+  flex: none;
+  transition: background-color var(--dur-1) var(--ease-out);
+}
+.switch-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bg);
+  transition: translate var(--dur-1) var(--ease-out);
+}
+.switch input:checked + .switch-track {
+  background: var(--primary);
+}
+.switch input:checked + .switch-track::after {
+  translate: 14px 0;
+}
+.switch input:focus-visible + .switch-track {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+.switch input:disabled + .switch-track {
+  opacity: 0.5;
+}
+
+/* ---------- Segmented control ---------- */
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-2);
+  background: var(--surface);
+  padding: 2px;
+  gap: 2px;
+}
+.segmented button {
+  border: 0;
+  background: transparent;
+  height: calc(var(--control-h) - 8px);
+  padding: 0 var(--sp-2);
+  /* Nested corners: the group's radius minus its 2 px padding. */
+  border-radius: calc(var(--r-2) - 2px);
+  font-size: var(--fs-12);
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.segmented button[aria-pressed="true"],
+.segmented button[aria-selected="true"] {
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: var(--shadow-1);
+}
+
+/* ---------- Tabs ---------- */
+.tabs {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  /* The divider is painted inside the box, so the selected tab's line sits on
+     it without overflowing: one pixel of overflow showed scroll arrows. */
+  box-shadow: inset 0 -1px 0 var(--border);
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+/* One line glides to the selected tab, as in the bars above. */
+.tabs__thumb {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--primary);
+  pointer-events: none;
+  transition:
+    transform var(--dur-3, 240ms) var(--ease-out),
+    width var(--dur-3, 240ms) var(--ease-out);
+}
+.tabs.has-thumb [role="tab"][aria-selected="true"] {
+  border-bottom-color: transparent;
+}
+.tabs [role="tab"] {
+  border: 0;
+  background: transparent;
+  padding: 7px var(--sp-3) 9px;
+  font-size: var(--fs-13);
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tabs [role="tab"]:hover {
+  color: var(--ink);
+}
+.tabs [role="tab"][aria-selected="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--primary);
+}
+
+/* ---------- Badges / status chips ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge--neutral {
+  background: var(--surface-raised);
+  color: var(--muted);
+}
+.badge--primary {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.badge--success {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.badge--warning {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+.badge--danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.badge--info {
+  background: var(--info-soft);
+  color: var(--info);
+}
+.badge--accent {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.badge--outline {
+  border: 1px solid var(--border-strong);
+  color: var(--muted);
+  background: transparent;
+}
+[data-theme="light"] .badge--primary {
+  color: var(--primary);
+}
+
+/* status dot — always paired with text, never color alone */
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex: none;
+}
+.dot--success {
+  background: var(--success);
+}
+.dot--warning {
+  background: var(--warning);
+}
+.dot--danger {
+  background: var(--danger);
+}
+.dot--muted {
+  background: var(--faint);
+}
+.dot--info {
+  background: var(--info);
+}
+
+/* ---------- Tables ---------- */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r-3);
+  background: var(--bg);
+}
+table.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-13);
+}
+.table th {
+  text-align: left;
+  padding: var(--cell-pad-y) var(--cell-pad-x);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+.table td {
+  padding: var(--cell-pad-y) var(--cell-pad-x);
+  border-bottom: 1px solid var(--border);
+  height: var(--row-h);
+  vertical-align: middle;
+}
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.table tbody tr {
+  cursor: default;
+}
+.table tbody tr:hover {
+  background: var(--surface);
+}
+.table tbody tr[aria-selected="true"],
+.table tbody tr.is-selected {
+  background: var(--selection-bg);
+}
+.table .cell-mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+}
+/* Counts, sizes and times line up in columns and do not jitter as they
+   change. */
+.table td,
+.badge,
+.mono,
+kbd.kbd {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- List rows ---------- */
+.row-list {
+  display: flex;
+  flex-direction: column;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: var(--row-h);
+  padding: var(--cell-pad-y) var(--sp-3);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  width: 100%;
+  background: transparent;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  cursor: pointer;
+  font-size: var(--fs-13);
+  color: var(--ink);
+}
+.row:hover {
+  background: var(--surface);
+}
+.row[aria-selected="true"],
+.row.is-selected {
+  background: var(--selection-bg);
+}
+.row:last-child {
+  border-bottom: 0;
+}
+
+/* ---------- Panels / sections ---------- */
+.panel {
+  border: 1px solid var(--border);
+  border-radius: var(--r-3);
+  background: var(--bg);
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--border);
+  min-height: 40px;
+}
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Canvas signature: section and column labels. */
+.lbl,
+.panel-title,
+.table th,
+.lab-table thead th {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.panel-body {
+  padding: var(--sp-3);
+}
+.panel-body--flush {
+  padding: 0;
+}
+
+.section-label {
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: var(--sp-2);
+}
+
+/* ---------- Dialog ---------- */
+dialog.dialog {
+  border: 1px solid var(--border);
+  border-radius: var(--r-3);
+  background: var(--bg);
+  color: var(--ink);
+  box-shadow: var(--shadow-3);
+  padding: 0;
+  width: min(560px, calc(100vw - 48px));
+  max-height: min(80vh, 720px);
+}
+dialog.dialog--wide {
+  width: min(760px, calc(100vw - 48px));
+}
+dialog.dialog::backdrop {
+  background: oklch(0.1 0.01 330 / 0.45);
+}
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-bottom: 1px solid var(--border);
+}
+.dialog-title {
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+.dialog-body {
+  padding: var(--sp-4);
+  overflow-y: auto;
+  max-height: calc(80vh - 130px);
+}
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--border);
+}
+
+/* ---------- Menus (portal-rendered) ---------- */
+.menu {
+  position: fixed;
+  z-index: var(--z-dropdown);
+  min-width: 180px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  box-shadow: var(--shadow-2);
+  padding: 4px;
+}
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 6px 8px;
+  /* Nested corners: the menu's radius minus its 4 px padding. */
+  border-radius: calc(var(--r-2) - 4px);
+  font-size: var(--fs-13);
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+}
+.menu-item:hover,
+.menu-item:focus-visible {
+  background: var(--surface-raised);
+}
+.menu-item--danger {
+  color: var(--danger);
+}
+.menu-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+/* ---------- Toasts ---------- */
+.toast-region {
+  position: fixed;
+  bottom: var(--sp-4);
+  right: var(--sp-4);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  width: 320px;
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  box-shadow: var(--shadow-2);
+  padding: var(--sp-2) var(--sp-3);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  font-size: var(--fs-13);
+}
+.toast--success {
+  border-color: var(--success);
+}
+.toast--danger {
+  border-color: var(--danger);
+}
+.toast--info {
+  border-color: var(--info);
+}
+
+/* ---------- Empty / skeleton states ---------- */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-10) var(--sp-4);
+  text-align: center;
+  color: var(--muted);
+}
+/* Only the state's own icon is quiet: `.empty svg` also greyed the icon
+   inside the action button (a grey plus on the cyan "Yeni inceleme"). */
+.empty > svg {
+  color: var(--faint);
+  margin-bottom: var(--sp-1);
+}
+/* The title leads by size, not only by weight; the action sits apart from
+   the hint it answers. */
+.empty-title {
+  font-size: var(--fs-16);
+  font-weight: 600;
+  color: var(--ink);
+}
+.empty p {
+  font-size: var(--fs-13);
+  max-width: 44ch;
+}
+.empty > p + * {
+  margin-top: var(--sp-2);
+}
+
+.skeleton {
+  border-radius: var(--r-1);
+  background: var(--surface-raised);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* ---------- Keyboard hints ---------- */
+kbd.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: var(--r-1);
+  background: var(--surface);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ---------- Toolbar ---------- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.toolbar .spacer {
+  flex: 1;
+}
+/* Fields in a toolbar carry their visible label above them; the row's
+   buttons line up with the inputs, not with the labels. */
+.toolbar--fields {
+  align-items: flex-end;
+}
+
+/* ---------- Progress ---------- */
+.progress {
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--surface-raised);
+  overflow: hidden;
+}
+.progress > div {
+  height: 100%;
+  background: var(--primary);
+  border-radius: var(--r-pill);
+  transition: width var(--dur-2) var(--ease-out);
+}
+
+/* ---------- Spinner ---------- */
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- Utility ---------- */
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+}
+.muted {
+  color: var(--muted);
+}
+.faint {
+  color: var(--faint);
+}
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.flex {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}

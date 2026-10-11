@@ -1,0 +1,7 @@
+-- Lockstep marker with app migration v5 (Security Laboratory).
+-- Engagements, authorization scopes, assets, targets, services, tool
+-- definitions/installations/profiles, runs and artifacts are stored as
+-- collections in the generic `records(collection, id, data)` table, so no
+-- structural change is required. This marker keeps the native migration
+-- version aligned with the application schema version.
+UPDATE kv SET value = value WHERE key = 'meta';

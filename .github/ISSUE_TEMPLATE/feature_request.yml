@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest an idea for Qutra Labs
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the workflow pain or the context-recovery gap.
+      placeholder: When I switch between projects, I ...
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should Qutra Labs do? How would it fit the existing UI?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Fit with product principles
+      options:
+        - label: Works local-first (no account or cloud requirement)
+        - label: Respects the privacy model (opt-in capture, no telemetry)
+        - label: Keeps the interface dense but calm (no marketing UI)
+    validations:
+      required: false

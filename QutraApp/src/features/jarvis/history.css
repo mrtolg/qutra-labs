@@ -1,0 +1,471 @@
+/* The Jarvis page: the history panel beside the conversation. The
+   panel reads like a case log: small mono headings with a
+   rule running out of them, a rail down each day's conversations with a
+   mark per conversation, and the open one's mark lit in the accent. */
+.jv {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.jv > .asst,
+.jv > .asst-setup {
+  flex: 1;
+  min-width: 0;
+}
+
+.jvh {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: 276px;
+  min-height: 0;
+  border-right: 1px solid var(--border);
+  background: color-mix(in oklch, var(--surface-sunken) 55%, transparent);
+}
+.jvh__top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 12px 6px;
+}
+.jvh-search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 6px 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--faint);
+  transition:
+    border-color var(--dur-1) ease,
+    box-shadow var(--dur-1) ease;
+}
+.jvh-search:focus-within {
+  border-color: color-mix(in oklch, var(--primary) 60%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 16%, transparent);
+}
+.jvh-search__l {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  padding-right: 8px;
+  border-right: 1px solid var(--border);
+  color: var(--muted);
+  font: 600 12px/1 var(--font-ui);
+  cursor: text;
+}
+.jvh-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font: 400 12.5px/1 var(--font-ui);
+}
+.jvh-search input::placeholder {
+  color: var(--faint);
+}
+.jvh-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.jvh-search input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.jvh-search__clear,
+.jvh-sec__add,
+.jvh-more {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--faint);
+  cursor: pointer;
+}
+.jvh-search__clear:hover,
+.jvh-sec__add:hover,
+.jvh-more:hover {
+  background: color-mix(in oklch, var(--surface-raised) 80%, transparent);
+  color: var(--ink);
+}
+.jvh-back {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 8px 0 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent-text);
+  font: 600 12px/1 var(--font-ui);
+  cursor: pointer;
+}
+.jvh-back:hover {
+  background: var(--primary-soft);
+}
+
+.jvh__scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 0 8px 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ---------- Sections: a mono heading and a rule running out of it ---------- */
+.jvh-sec {
+  margin-top: 14px;
+}
+.jvh-sec__h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  padding: 0 4px 4px 8px;
+}
+.jvh-sec__t {
+  margin: 0;
+  color: var(--faint);
+  font: 600 var(--fs-11)/1 var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.jvh-sec__rule {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ---------- A conversation ---------- */
+.jvh-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+}
+.jvh-row__open {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 34px 7px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: 500 13px/1.3 var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  transition:
+    background-color var(--dur-1) ease,
+    color var(--dur-1) ease;
+}
+.jvh-row__t {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.jvh-row__time {
+  flex: none;
+  color: var(--faint);
+  font: 500 var(--fs-11)/1 var(--font-mono);
+  transition: opacity var(--dur-1) ease;
+}
+.jvh-row__pin {
+  flex: none;
+  align-self: center;
+  color: var(--accent-text);
+}
+.jvh-row .jvh-more {
+  position: absolute;
+  right: 4px;
+  opacity: 0;
+  transition: opacity var(--dur-1) ease;
+}
+.jvh-row:hover .jvh-row__open {
+  background: color-mix(in oklch, var(--surface-raised) 65%, transparent);
+  color: var(--ink);
+}
+.jvh-row:hover .jvh-more,
+.jvh-row:focus-within .jvh-more,
+.jvh-row.is-menu .jvh-more {
+  opacity: 1;
+}
+.jvh-row:hover .jvh-row__time,
+.jvh-row:focus-within .jvh-row__time,
+.jvh-row.is-menu .jvh-row__time {
+  opacity: 0;
+}
+.jvh-row.is-active .jvh-row__open {
+  background: var(--primary-soft);
+  color: var(--ink);
+}
+.jvh-row.is-dragging {
+  opacity: 0.45;
+}
+.jvh-row__open:focus-visible,
+.jvh-more:focus-visible,
+.jvh-folder__open:focus-visible,
+.jvh-sec__add:focus-visible,
+.jvh-search__clear:focus-visible,
+.jvh-archive:focus-visible,
+.jvh-back:focus-visible,
+.jvh-hint--btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+/* ---------- The log rail: a line down each day, a mark per conversation ---------- */
+.jvh-log {
+  position: relative;
+  padding-left: 14px;
+}
+.jvh-log::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 8px;
+  width: 1px;
+  background: var(--border-strong);
+}
+.jvh-log > .jvh-row::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -9px;
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface-sunken);
+}
+.jvh-log > .jvh-row.is-active::before {
+  border-color: var(--primary);
+  background: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 22%, transparent);
+}
+
+/* ---------- Folders ---------- */
+.jvh-folder {
+  border-radius: 9px;
+  transition:
+    background-color var(--dur-1) ease,
+    box-shadow var(--dur-1) ease;
+}
+.jvh-folder.is-over,
+.jvh-dates.is-over {
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 1.5px color-mix(in oklch, var(--primary) 70%, transparent);
+}
+.jvh-dates {
+  border-radius: 9px;
+}
+.jvh-folder__row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.jvh-folder__open {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 7px 34px 7px 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font: 600 13px/1.3 var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+}
+.jvh-folder__open:hover {
+  background: color-mix(in oklch, var(--surface-raised) 65%, transparent);
+}
+.jvh-folder__open svg {
+  flex: none;
+  color: var(--accent-text);
+}
+.jvh-folder__open .jvh-folder__chev {
+  color: var(--faint);
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.jvh-folder__open[aria-expanded="true"] .jvh-folder__chev {
+  transform: rotate(90deg);
+}
+.jvh-folder__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.jvh-folder__row .jvh-more {
+  position: absolute;
+  right: 4px;
+  opacity: 0;
+  transition: opacity var(--dur-1) ease;
+}
+.jvh-folder__row:hover .jvh-more,
+.jvh-folder__row:focus-within .jvh-more,
+.jvh-folder__row .jvh-more[aria-expanded="true"] {
+  opacity: 1;
+}
+.jvh-folder__items {
+  margin: 0 0 4px 13px;
+  padding-left: 8px;
+  border-left: 1px solid var(--border-strong);
+}
+.jvh-folder--new {
+  padding: 2px 0;
+}
+.jvh-count {
+  flex: none;
+  min-width: 20px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: color-mix(in oklch, var(--surface-raised) 85%, transparent);
+  color: var(--muted);
+  font: 600 var(--fs-11)/1 var(--font-mono);
+  text-align: center;
+}
+
+/* ---------- Inline names, hints, the archive ---------- */
+.jvh-name {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 30px;
+  padding: 0 9px;
+  border: 1px solid color-mix(in oklch, var(--primary) 60%, transparent);
+  border-radius: 8px;
+  outline: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font: 500 13px/1 var(--font-ui);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 16%, transparent);
+}
+.jvh-hint {
+  margin: 2px 0 6px;
+  padding: 6px 9px;
+  color: var(--faint);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.jvh-hint--btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  border: 1px dashed var(--border-strong);
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.jvh-hint--btn:hover {
+  border-color: color-mix(in oklch, var(--primary) 50%, transparent);
+  color: var(--ink);
+}
+.jvh-empty {
+  margin: 28px 10px 0;
+  color: var(--faint);
+  font-size: 12.5px;
+  line-height: 1.5;
+  text-align: center;
+}
+.jvh-hit__snip {
+  margin: -2px 0 6px;
+  padding: 0 10px;
+  overflow: hidden;
+  color: var(--faint);
+  font-size: 11.5px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.jvh__foot {
+  padding: 8px;
+  border-top: 1px solid var(--border);
+}
+.jvh-archive {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: 600 12.5px/1 var(--font-ui);
+  cursor: pointer;
+}
+.jvh-archive span:first-of-type {
+  flex: 1;
+  text-align: left;
+}
+.jvh-archive:hover {
+  background: color-mix(in oklch, var(--surface-raised) 65%, transparent);
+  color: var(--ink);
+}
+
+/* The label that follows the pointer while a conversation is dragged. */
+.jvh-ghost {
+  position: fixed;
+  z-index: var(--z-tooltip);
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 240px;
+  padding: 6px 10px;
+  border: 1px solid color-mix(in oklch, var(--primary) 60%, transparent);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-3);
+  color: var(--ink);
+  font: 600 12.5px/1.2 var(--font-ui);
+  pointer-events: none;
+}
+.jvh-ghost span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body[data-row-drag="true"] {
+  cursor: grabbing;
+  user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jvh-folder__open .jvh-folder__chev {
+    transition: none;
+  }
+}
+[data-reduce-motion="true"] .jvh-folder__open .jvh-folder__chev {
+  transition: none;
+}

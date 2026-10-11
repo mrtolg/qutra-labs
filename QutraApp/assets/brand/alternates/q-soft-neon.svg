@@ -1,0 +1,44 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Qutra Labs soft neon">
+  <!-- Alternate B: same geometry as master with restrained outer glow -->
+  <defs>
+    <linearGradient id="qRed" gradientUnits="userSpaceOnUse" x1="240" y1="780" x2="820" y2="220">
+      <stop offset="0" stop-color="#2A0408"/>
+      <stop offset="0.25" stop-color="#7A0E16"/>
+      <stop offset="0.58" stop-color="#D41C26"/>
+      <stop offset="0.85" stop-color="#F03238"/>
+      <stop offset="1" stop-color="#FF5258"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" fill="#000000"/>
+
+  <g filter="url(#glow)">
+    <path
+      fill="url(#qRed)"
+      d="
+        M 617.1 637.1
+        A 204 204 0 1 1 667.1 587.1
+        L 745.6 642.1
+        A 300 300 0 1 0 672.1 715.6
+        Z
+      "
+    />
+    <path
+      fill="url(#qRed)"
+      d="
+        M 555 555
+        L 625 495
+        L 825 705
+        L 755 765
+        Z
+      "
+    />
+  </g>
+</svg>

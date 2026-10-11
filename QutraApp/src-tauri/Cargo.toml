@@ -1,0 +1,94 @@
+[package]
+name = "contextos"
+version = "0.1.0"
+description = "Qutra Labs — local-first desktop operations workbench"
+authors = ["Mert Olgun"]
+edition = "2021"
+license = "MIT"
+
+[lib]
+name = "contextos_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["image-png"] }
+tauri-plugin-sql = { version = "2", features = ["sqlite"] }
+# The document store's own write path (src/storage_writes.rs) runs each batch
+# as one transaction on one connection of the plugin's pool. Same version and
+# backend as tauri-plugin-sql's sqlx, so both resolve to the same crate.
+sqlx = { version = "0.8", default-features = false, features = ["sqlite", "runtime-tokio"] }
+tauri-plugin-opener = "2"
+tauri-plugin-notification = "2"
+tauri-plugin-global-shortcut = "2"
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+sha1 = "0.10"
+md-5 = "0.10"
+hex = "0.4"
+uuid = { version = "1", features = ["v4", "serde"] }
+# Assistant broker transport. rustls rather than native-tls: the only endpoint
+# is loopback HTTP, so a platform TLS stack would be dependency weight for no
+# benefit. Streaming is required for token-by-token output.
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
+futures-util = { version = "0.3", default-features = false, features = ["std"] }
+# Masks secrets before a cloud turn (src/ai/mask.rs). Already in
+# the tree through tauri-utils; its engine runs in linear time, so no input
+# can make masking hang.
+regex = "1"
+# Decodes a fetched tool logo and re-encodes it as the app's own 64 px PNG
+# (src/tool_logos.rs). Already in the tree through the clipboard plugin
+# (arboard), same version; this adds only the JPEG and ICO decoders.
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "ico", "bmp"] }
+tokio = { version = "1", features = ["time", "rt", "macros", "sync", "net"] }
+# OS-backed secure storage for secrets (Windows Credential Manager). Secrets
+# never touch SQLite, logs or exports — see src/secure.rs and ADR 0005.
+keyring = { version = "3", default-features = false, features = ["windows-native"] }
+# Interactive terminal backend. ConPTY on Windows; spawns shells as an argv,
+# never a shell string.
+portable-pty = "0.8"
+# Built-in tools (src/builtin_tools/). All three are already
+# in the tree through reqwest's rustls-tls feature (same versions, the same
+# ring provider), so nothing new is downloaded: the TLS inspector needs the
+# handshake itself (chain, protocol, cipher), which reqwest does not expose.
+rustls = { version = "0.23", default-features = false, features = ["std", "tls12", "ring"] }
+tokio-rustls = { version = "0.26", default-features = false, features = ["tls12", "ring"] }
+webpki-roots = "1"
+# Inflates an Office file's docProps for the metadata inspector; already in
+# the tree through png/flate2.
+miniz_oxide = { version = "0.8", default-features = false, features = ["with-alloc"] }
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.58", features = [
+  "Win32_Foundation",
+  "Win32_Globalization",
+  "Win32_UI_WindowsAndMessaging",
+  "Win32_System_Threading",
+  "Win32_System_JobObjects",
+  "Win32_Security",
+  "Win32_Security_Cryptography",
+  "Win32_Security_WinTrust",
+  "Win32_Storage_FileSystem",
+  "Win32_Graphics_Gdi",
+  "Win32_NetworkManagement_IpHelper",
+  "Win32_System_Diagnostics_ToolHelp",
+] }
+
+[dev-dependencies]
+tempfile = "3"
+# test-util unifies with the [dependencies] tokio above for test builds only
+# (feature unification across dep/dev-dep of the same crate version) — it
+# gives broker.rs's approval-timeout test tokio::time::pause()/advance()
+# without paying for test-util in the release binary.
+tokio = { version = "1", features = ["test-util"] }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

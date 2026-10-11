@@ -1,0 +1,524 @@
+/* Jarvis's settings: a sheet from the right edge over
+   the conversation, its sections down its own left edge. */
+.jvs {
+  width: min(820px, 94vw);
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0 0 0 auto;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-3);
+}
+.jvs[open] {
+  animation: jvs-in 260ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.jvs::backdrop {
+  background: color-mix(in oklch, var(--bg) 55%, transparent);
+}
+@keyframes jvs-in {
+  from {
+    transform: translateX(32px);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jvs[open] {
+    animation: jvs-fade 160ms ease-out;
+  }
+}
+[data-reduce-motion="true"] .jvs[open] {
+  animation: jvs-fade 160ms ease-out;
+}
+@keyframes jvs-fade {
+  from {
+    opacity: 0;
+  }
+}
+.jvs__in {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+.jvs__h {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 16px 0 22px;
+  border-bottom: 1px solid var(--border);
+}
+.jvs__title {
+  margin: 0;
+  font: 600 15px/1.2 var(--font-display);
+}
+.jvs__close {
+  margin-left: auto;
+}
+.jvs__body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.jvs__nav {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 2px;
+  width: 196px;
+  padding: 14px 10px;
+  border-right: 1px solid var(--border);
+  background: color-mix(in oklch, var(--surface-sunken) 55%, transparent);
+}
+.jvs__tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: 600 13px/1 var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+}
+.jvs__tab:hover {
+  background: color-mix(in oklch, var(--surface-raised) 65%, transparent);
+  color: var(--ink);
+}
+.jvs__tab[aria-current="page"] {
+  background: var(--primary-soft);
+  color: var(--ink);
+}
+.jvs__tab[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  bottom: 9px;
+  left: -10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--primary);
+}
+.jvs__tab svg {
+  flex: none;
+}
+.jvs__tab[aria-current="page"] svg {
+  color: var(--accent-text);
+}
+.jvs__tab:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+.jvs__pane {
+  flex: 1;
+  min-width: 0;
+  padding: 22px 26px 32px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ---------- A section ---------- */
+.jvs-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 600px;
+}
+.jvs-sec__t {
+  margin: 0;
+  font: 600 18px/1.2 var(--font-display);
+}
+.jvs-sec__lead {
+  margin: -8px 0 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.jvs-muted {
+  margin: 0;
+  color: var(--faint);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.jvs-warn {
+  color: var(--warning);
+}
+.jvs-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.jvs-field__l {
+  padding: 0;
+  color: var(--ink);
+  font: 600 12.5px/1.3 var(--font-ui);
+}
+.jvs-text {
+  min-height: 84px;
+  resize: vertical;
+  line-height: 1.5;
+}
+.jvs-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.jvs-actions > .jvs-muted {
+  margin-right: auto;
+}
+.jvs-callout {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in oklch, var(--primary) 35%, transparent);
+  border-radius: 10px;
+  background: var(--primary-soft);
+  font-size: 12.5px;
+}
+.jvs-callout > span {
+  flex: 1;
+}
+
+/* Response style: three choices side by side, each saying what it does. */
+.jvs-style {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.jvs-style legend {
+  margin-bottom: 8px;
+}
+.jvs-style__opts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.jvs-style__opt {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 11px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-1) ease,
+    background-color var(--dur-1) ease;
+}
+.jvs-style__opt input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.jvs-style__opt:has(input:checked) {
+  border-color: color-mix(in oklch, var(--primary) 70%, transparent);
+  background: var(--primary-soft);
+}
+.jvs-style__opt:has(input:focus-visible) {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.jvs-style__name {
+  font: 600 13px/1.2 var(--font-ui);
+}
+.jvs-style__hint {
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+.jvs-preview {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.jvs-preview summary {
+  color: var(--muted);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.jvs-preview[open] summary {
+  margin-bottom: 8px;
+}
+.jvs-preview__text {
+  max-height: 240px;
+  margin: 0 0 8px;
+  padding: 10px 12px;
+  overflow: auto;
+  border-radius: 8px;
+  background: var(--surface-sunken);
+  font: 11.5px/1.5 var(--font-mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Memory ---------- */
+.jvs-switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 12px;
+  align-items: center;
+  padding: 12px 14px;
+  font: 600 13px/1.3 var(--font-ui);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface-raised);
+  cursor: pointer;
+}
+.jvs-switch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.jvs-switch__track {
+  position: relative;
+  grid-row: span 2;
+  align-self: start;
+  flex: none;
+  width: 34px;
+  height: 20px;
+  margin-top: 1px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-sunken);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+.jvs-switch__track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition:
+    transform 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 160ms ease;
+}
+.jvs-switch input:checked + .jvs-switch__track {
+  border-color: color-mix(in oklch, var(--primary) 70%, transparent);
+  background: var(--primary-soft-strong, var(--primary-soft));
+}
+.jvs-switch input:checked + .jvs-switch__track::after {
+  background: var(--primary);
+  transform: translateX(14px);
+}
+.jvs-switch input:focus-visible + .jvs-switch__track {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.jvs-switch .jvs-muted {
+  font-weight: 400;
+}
+.jvs-add {
+  display: flex;
+  gap: 8px;
+}
+.jvs-add .input {
+  flex: 1;
+  min-width: 0;
+}
+.jvs-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 16px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 11px;
+  color: var(--faint);
+  text-align: center;
+}
+.jvs-empty p {
+  max-width: 40ch;
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+/* Memory entries as index cards: the note, then when and what to do. */
+.jvs-mems {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.jvs-mems.is-off {
+  opacity: 0.55;
+}
+.jvs-mem {
+  padding: 10px 12px 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-raised);
+}
+.jvs-mem__text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.jvs-mem__foot {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 4px;
+}
+.jvs-mem__date {
+  margin-right: auto;
+  color: var(--faint);
+  font: 500 11px/1 var(--font-mono);
+}
+.jvs-mem__edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 6px;
+}
+
+/* ---------- Model ---------- */
+.jvs-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.jvs-group__t {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 4px 0 2px;
+  color: var(--faint);
+  font: 600 var(--fs-11)/1 var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.jvs-model {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-raised);
+}
+.jvs-model:has(input:checked) {
+  border-color: color-mix(in oklch, var(--primary) 65%, transparent);
+  background: var(--primary-soft);
+}
+.jvs-model.is-blocked {
+  background: transparent;
+}
+.jvs-model__l {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+.jvs-model.is-blocked .jvs-model__l {
+  cursor: default;
+}
+.jvs-model__l input {
+  flex: none;
+  accent-color: var(--primary);
+}
+.jvs-model__t {
+  min-width: 0;
+  overflow: hidden;
+  font: 600 13px/1.2 var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.jvs-model.is-blocked .jvs-model__t {
+  color: var(--muted);
+}
+.jvs-model__badge {
+  flex: none;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: color-mix(in oklch, var(--primary) 22%, transparent);
+  color: var(--accent-text);
+  font: 600 var(--fs-11)/1 var(--font-ui);
+}
+.jvs-model__note {
+  flex: none;
+  margin-left: auto;
+  color: var(--warning);
+  font-size: 11.5px;
+}
+
+/* ---------- Keys: the Settings cards, at the sheet's width ---------- */
+.jvs-keys .cloud-connections > .section-label {
+  display: none;
+}
+
+/* ---------- Data ---------- */
+.jvs-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+.jvs-stat {
+  padding: 12px 12px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-raised);
+}
+.jvs-stat dt {
+  color: var(--faint);
+  font-size: 11.5px;
+}
+.jvs-stat dd {
+  margin: 6px 0 0;
+  font: 600 22px/1 var(--font-mono);
+}
+.jvs-data {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+}
+.jvs-data__row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 16px;
+}
+.jvs-data__row + .jvs-data__row {
+  border-top: 1px solid var(--border);
+}
+.jvs-data__row > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+.jvs-data__t {
+  margin: 0 0 3px;
+  font: 600 13px/1.3 var(--font-ui);
+}
+.jvs-data__acts {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 8px;
+}

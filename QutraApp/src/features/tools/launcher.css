@@ -1,0 +1,617 @@
+/* Araç kutusu. A dense launcher: the readiness strip on top says how much of
+   the kit works now and filters the lists; ready programs are cards with
+   their actions in view, everything else is a two- or three-column list with
+   its next step. Nothing moves on hover; only colours change. */
+
+.tbx {
+  --tbx-ready: var(--success);
+  --tbx-unlinked: var(--warning);
+  --tbx-attention: var(--danger);
+  --tbx-missing: var(--border-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------- Head ---------- */
+
+.tbx-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+.tbx-head__title h1 {
+  margin: 0;
+  font: 650 22px/1.2 var(--font-display, var(--font-ui));
+  letter-spacing: -0.01em;
+}
+.tbx-head__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.tbx-head__meta a {
+  color: var(--accent-text);
+  font-weight: 600;
+}
+.tbx-meta-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--success);
+}
+.tbx-search {
+  width: min(340px, 100%);
+}
+.tbx-search .input {
+  width: 100%;
+}
+
+/* ---------- Readiness strip ---------- */
+
+.tbx-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tbx-meter__bar {
+  display: flex;
+  gap: 3px;
+  height: 6px;
+}
+.tbx-meter__bar span {
+  min-width: 6px;
+  border-radius: 999px;
+  background: var(--tbx-missing);
+}
+.tbx-meter__bar .is-ready {
+  background: var(--tbx-ready);
+}
+.tbx-meter__bar .is-unlinked {
+  background: var(--tbx-unlinked);
+}
+.tbx-meter__bar .is-attention {
+  background: var(--tbx-attention);
+}
+.tbx-meter__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+.tbx-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 28px;
+  padding: 0 10px 0 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: 550 12.5px/1 var(--font-ui);
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+.tbx-legend strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.tbx-legend:hover:not(:disabled) {
+  background: var(--surface-raised);
+  color: var(--ink);
+}
+.tbx-legend[aria-pressed="true"] {
+  border-color: var(--border-strong);
+  background: var(--surface-raised);
+  color: var(--ink);
+}
+.tbx-legend:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.tbx-legend__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--tbx-missing);
+}
+.tbx-legend.is-ready .tbx-legend__dot {
+  background: var(--tbx-ready);
+}
+.tbx-legend.is-unlinked .tbx-legend__dot {
+  background: var(--tbx-unlinked);
+}
+.tbx-legend.is-attention .tbx-legend__dot {
+  background: var(--tbx-attention);
+}
+.tbx-meter__action {
+  margin-left: auto;
+}
+
+/* ---------- Category chips ---------- */
+
+.tbx-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tbx-chip {
+  height: 28px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: 600 12px/1 var(--font-ui);
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+.tbx-chip:hover {
+  border-color: var(--border-strong);
+  color: var(--ink);
+}
+.tbx-chip[aria-pressed="true"] {
+  border-color: color-mix(in oklch, var(--accent) 50%, transparent);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.tbx-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tbx-empty {
+  padding: 20px 0;
+}
+
+/* ---------- Sections ---------- */
+
+.tbx-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+.tbx-section__title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  color: var(--muted);
+  font: 650 11.5px/1.2 var(--font-ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.tbx-section__title span {
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+.tbx-section__lead,
+.tbx-section__empty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+/* Ready programs: cards with every action in view. */
+.tbx-ready {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tbx-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  transition: border-color 140ms ease;
+}
+.tbx-card:hover,
+.tbx-card:focus-within {
+  border-color: color-mix(in oklch, var(--success) 45%, var(--border));
+}
+.tbx-card__body {
+  min-width: 0;
+}
+.tbx-card__name {
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font: 650 14.5px/1.3 var(--font-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tbx-card__purpose {
+  margin: 2px 0 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tbx-card__facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 10px;
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.tbx-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  grid-column: 1 / -1;
+}
+.tbx-card__admin {
+  align-self: start;
+  margin: -4px -6px 0 0;
+  color: var(--muted);
+}
+
+/* Everything else: a list in columns, each row with its next step. */
+.tbx-waiting {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr));
+  column-gap: 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tbx-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  padding: 7px 4px;
+  border-bottom: 1px solid var(--border);
+}
+.tbx-row__body {
+  min-width: 0;
+}
+.tbx-row__line {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+.tbx-row__name {
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font: 600 13.5px/1.3 var(--font-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tbx-row__next {
+  margin: 2px 0 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tbx-row__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tbx-status {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font: 600 11.5px/1 var(--font-ui);
+}
+.tbx-status::before {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--tbx-missing);
+  content: "";
+}
+.tbx-status.is-ready {
+  color: var(--tbx-ready);
+}
+.tbx-status.is-ready::before {
+  background: var(--tbx-ready);
+}
+.tbx-status.is-unlinked {
+  color: var(--tbx-unlinked);
+}
+.tbx-status.is-unlinked::before {
+  background: var(--tbx-unlinked);
+}
+.tbx-status.is-attention {
+  color: var(--tbx-attention);
+}
+.tbx-status.is-attention::before {
+  background: var(--tbx-attention);
+}
+
+/* The user's own registered programs, folded away until asked for. */
+.tbx-others {
+  margin-top: 6px;
+}
+.tbx-others summary {
+  width: fit-content;
+  color: var(--muted);
+  font: 650 11.5px/1.2 var(--font-ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.tbx-others summary span {
+  margin-left: 6px;
+  color: var(--faint);
+}
+.tbx-others__logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 10px 0 4px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+/* ---------- Built-in tools ---------- */
+
+.tbx-builtins {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+/* The built-in tools read like the program list above them: two columns
+   of rows divided by hairlines, not a wall of identical tiles. The open
+   one is tinted and its icon takes the accent. */
+.tbx-builtin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr));
+  gap: 0 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tbx-builtin {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: 100%;
+  min-height: 54px;
+  padding: 8px 6px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+.tbx-builtin:hover {
+  background: color-mix(in oklch, var(--primary) 4.5%, transparent);
+}
+.tbx-builtin[aria-expanded="true"] {
+  background: color-mix(in oklch, var(--accent) 7%, transparent);
+}
+/* Rows touch: the ring goes inside so it never sits on the neighbour. */
+.tbx-builtin:focus-visible {
+  outline-offset: -2px;
+}
+.tbx-builtin__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  color: var(--muted);
+}
+.tbx-builtin[aria-expanded="true"] .tbx-builtin__icon,
+.tbx-builtin:hover .tbx-builtin__icon {
+  color: var(--accent-text);
+}
+.tbx-builtin__text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+.tbx-builtin__text strong {
+  color: var(--ink);
+  font: 600 13px/1.3 var(--font-ui);
+}
+.tbx-builtin__text span {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.tbx-bench {
+  border: 1px solid color-mix(in oklch, var(--accent) 40%, var(--border));
+  border-radius: 12px;
+  background: var(--surface);
+}
+.tbx-bench__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px 8px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.tbx-bench__head h3 {
+  margin: 0;
+  font: 650 13.5px/1.3 var(--font-ui);
+}
+.tbx-bench__body {
+  padding: 14px;
+}
+
+.tbx-footnote {
+  margin: 4px 0 0;
+  color: var(--faint);
+  font-size: 12px;
+}
+
+/* ---------- Dialogs ---------- */
+
+.tbx-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.tbx-guide__lead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tbx-guide__lead p {
+  margin: 0;
+  color: var(--ink);
+}
+.tbx-guide section h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  color: var(--muted);
+  font: 650 11.5px/1.2 var(--font-ui);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.tbx-guide section p,
+.tbx-guide ul,
+.tbx-guide ol {
+  margin: 0;
+}
+.tbx-guide ul,
+.tbx-guide ol {
+  padding-left: 18px;
+}
+.tbx-guide__columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+.tbx-guide__command {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+.tbx-guide__command span {
+  color: var(--faint);
+  font-size: 11.5px;
+}
+.tbx-guide__command code {
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-sunken);
+  font: 12.5px/1.4 var(--font-mono, monospace);
+  overflow-wrap: anywhere;
+}
+.tbx-guide__boundary {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--warning-soft);
+}
+
+.tbx-linklist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 320px;
+  margin: 12px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.tbx-linklist li {
+  display: grid;
+  grid-template-columns: auto auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.tbx-linklist__arrow {
+  color: var(--faint);
+}
+.tbx-linklist__file {
+  overflow: hidden;
+  color: var(--muted);
+  font-family: var(--font-mono, monospace);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.launcher-admin ol {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+  padding-left: 20px;
+}
+.launcher-command {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+.launcher-command code {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-sunken);
+  font: 12.5px/1.4 var(--font-mono, monospace);
+  overflow-wrap: anywhere;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tbx-legend,
+  .tbx-chip,
+  .tbx-card,
+  .tbx-builtin {
+    transition: none;
+  }
+}
+[data-reduce-motion="true"] .tbx-legend,
+[data-reduce-motion="true"] .tbx-chip,
+[data-reduce-motion="true"] .tbx-card,
+[data-reduce-motion="true"] .tbx-builtin {
+  transition: none;
+}

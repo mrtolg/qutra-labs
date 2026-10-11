@@ -1,0 +1,263 @@
+/* ============================================================
+   Base reset + typography + a11y foundations
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+/* The reset above also zeroes the auto margins the UA stylesheet gives a
+   modal <dialog>, which pins every dialog to the top-left corner. */
+dialog {
+  margin: auto;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-ui);
+  font-size: var(--fs-13);
+  /* Light text on a dark ground reads tighter than it is; a little more
+     leading keeps 13 px descriptions from packing into blocks. */
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+#root {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: var(--fs-20);
+}
+h2 {
+  font-size: var(--fs-16);
+}
+h3 {
+  font-size: var(--fs-14);
+}
+
+p {
+  max-width: 72ch;
+  /* No single orphaned word on the last line of a short description. */
+  text-wrap: pretty;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+pre {
+  overflow-x: auto;
+}
+
+a {
+  color: var(--accent-text);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+::selection {
+  background: var(--selection-bg);
+}
+
+/* The parts the browser draws carry the palette too: a quiet thumb on a
+   clear track instead of the default grey bar, and a caret in the accent.
+   scrollbar-color inherits, so this themes every scroll area. */
+html {
+  scrollbar-color: color-mix(in oklch, var(--faint) 55%, transparent) transparent;
+}
+input,
+textarea,
+[contenteditable="true"] {
+  caret-color: var(--primary);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* --- Focus visibility (WCAG 2.4.7 / 2.4.11) --- */
+:focus {
+  outline: none;
+}
+/* The ring follows the control's own corners: forcing a radius here turned
+   pills and square rows into 4 px boxes the moment they took focus. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* Rows, menu items and tabs sit edge to edge inside scrolling lists, which
+   clip an outside ring and let it overlap the neighbour: draw it inside. */
+.row:focus-visible,
+.menu-item:focus-visible,
+.tabs [role="tab"]:focus-visible,
+.table tbody tr:focus-visible {
+  outline-offset: -2px;
+}
+
+/* --- Screen-reader-only utility --- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- Skip link (WCAG 2.4.1 Bypass Blocks) --- */
+.skip-link {
+  position: fixed;
+  left: var(--sp-3);
+  top: var(--sp-2);
+  z-index: 10000;
+  padding: 8px 12px;
+  background: var(--surface-raised, var(--surface));
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  box-shadow: var(--shadow-2);
+  font-size: var(--fs-13);
+  font-weight: 600;
+  text-decoration: none;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+  clip: auto;
+  clip-path: none;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  text-decoration: none;
+}
+
+.shell {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.main:focus,
+.main:focus-visible {
+  outline: none;
+}
+
+/* --- Scroll areas --- */
+.scroll-y {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* --- Reduced motion: keep colour/opacity, drop movement and loops --- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+  .btn:active:not(:disabled),
+  .btn--icon:active:not(:disabled),
+  .btn:hover:not(:disabled) {
+    transform: none !important;
+  }
+  .btn {
+    transition-property: background-color, border-color, color, box-shadow, opacity;
+  }
+  .switch-track::after {
+    transition-duration: 0s !important;
+  }
+  .progress > div {
+    transition: none !important;
+  }
+  .topbar-seg__thumb,
+  .subnav__thumb,
+  .tabs__thumb,
+  .lab-disc__chev {
+    transition: none !important;
+  }
+}
+
+/* App-level reduced-motion override from Settings */
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+  animation: none !important;
+  scroll-behavior: auto !important;
+}
+[data-reduce-motion="true"] .btn:active:not(:disabled),
+[data-reduce-motion="true"] .btn--icon:active:not(:disabled),
+[data-reduce-motion="true"] .btn:hover:not(:disabled) {
+  transform: none !important;
+}
+[data-reduce-motion="true"] .btn {
+  transition-property: background-color, border-color, color, box-shadow, opacity;
+}
+[data-reduce-motion="true"] .switch-track::after {
+  transition-duration: 0s !important;
+}
+[data-reduce-motion="true"] .progress > div {
+  transition: none !important;
+}
+[data-reduce-motion="true"] .topbar-seg__thumb,
+[data-reduce-motion="true"] .subnav__thumb,
+[data-reduce-motion="true"] .tabs__thumb,
+[data-reduce-motion="true"] .lab-disc__chev {
+  transition: none !important;
+}

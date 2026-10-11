@@ -1,0 +1,55 @@
+/* A tool's logo or its letter tile. One square, one radius, at any size;
+   the plate keeps a transparent mark's ink visible in every theme. */
+
+.tlogo {
+  --size: var(--logo-size, 32px);
+  --tile: var(--primary);
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--size);
+  height: var(--size);
+  overflow: hidden;
+  border-radius: calc(var(--size) * 0.24);
+}
+.tlogo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.tlogo--plate-none {
+  background: var(--surface-raised);
+}
+.tlogo--plate-light {
+  background: oklch(0.96 0.004 250);
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.06);
+}
+.tlogo--plate-dark {
+  background: oklch(0.22 0.01 250);
+  box-shadow: inset 0 0 0 1px oklch(1 0 0 / 0.06);
+}
+
+.tlogo--letter {
+  border: 1px solid color-mix(in oklch, var(--tile) 32%, transparent);
+  background: color-mix(in oklch, var(--tile) 14%, transparent);
+  color: var(--tile);
+  font: 700 calc(var(--size) * 0.46) / 1 var(--font-ui);
+}
+.tlogo--letter[data-cat="web"] {
+  --tile: var(--success);
+}
+.tlogo--letter[data-cat="code"],
+.tlogo--letter[data-cat="detection"] {
+  --tile: var(--info);
+}
+.tlogo--letter[data-cat="dfir"] {
+  --tile: var(--accent);
+}
+.tlogo--letter[data-cat="reverse"],
+.tlogo--letter[data-cat="password"] {
+  --tile: var(--warning);
+}
+.tlogo--letter[data-cat="emulation"] {
+  --tile: var(--danger);
+}

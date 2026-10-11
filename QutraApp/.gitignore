@@ -1,0 +1,67 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+build
+*.local
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Rust / Tauri
+src-tauri/target
+src-tauri/gen
+src-tauri/WixTools
+**/*.rs.bk
+
+# The Vite dev server this checkout started (scripts/dev-server-owner.ts)
+.qutra-dev-server.json
+
+# Local databases & secure stores (never commit user data or secrets)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.stronghold
+*.hold
+
+# Secrets & signing material
+.env
+.env.*
+!.env.example
+*.pem
+*.pfx
+*.p12
+*.key
+*.cer
+signing/
+
+# Release artifacts (distributed via GitHub Releases, not committed)
+release-artifacts/
+
+# Brand icon scratch (extracted ICO frames)
+assets/brand/_ico-frames/
+
+# Downloaded theme references (see docs/THEME_REFS.md)
+vendor/theme-refs/
+
+# Test output (screenshots under e2e/screenshots are intentional README assets — kept)
+coverage
+playwright-report
+test-results
+**/*.log
+
+# Editor / OS clutter
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+.DS_Store
+Thumbs.db
+desktop.ini

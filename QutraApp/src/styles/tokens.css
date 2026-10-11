@@ -1,0 +1,242 @@
+/* ============================================================
+   Qutra Labs design tokens
+   OKLCH-based, light + dark, density-aware.
+   These are the base values; the default dark look is the HUD pack in
+   themes.css (cyan primary, teal accent). This base light/dark pair is
+   the older rose pack and stays for the light mode and other packs.
+   ============================================================ */
+
+:root {
+  /* --- Neutral surfaces (light) --- */
+  --bg: oklch(1 0 0);
+  --surface: oklch(0.975 0.004 330);
+  --surface-raised: oklch(0.95 0.008 330);
+  --surface-sunken: oklch(0.965 0.006 330);
+  --surface-pressed: oklch(0.92 0.008 330);
+  --ink: oklch(0.2 0.018 330);
+  --muted: oklch(0.44 0.018 330);
+  --faint: oklch(0.54 0.014 330);
+  --border: oklch(0.88 0.01 330);
+  --border-strong: oklch(0.78 0.012 330);
+  /* The edge that tells a field or a switch apart from the ground: at least
+     3:1 against --bg and --surface (WCAG 1.4.11). Hairlines stay quieter. */
+  --border-control: oklch(0.62 0.012 330);
+
+  /* --- Brand --- */
+  --primary: oklch(0.45 0.15 330);
+  --primary-hover: oklch(0.4 0.15 330);
+  --primary-active: oklch(0.36 0.14 330);
+  --primary-ink: oklch(0.99 0 0);
+  --primary-soft: oklch(0.45 0.15 330 / 0.09);
+  --primary-soft-strong: oklch(0.45 0.15 330 / 0.16);
+
+  --accent: oklch(0.7 0.13 190);
+  --accent-text: oklch(0.44 0.09 190);
+  --accent-soft: oklch(0.7 0.13 190 / 0.14);
+
+  /* --- Semantic --- */
+  --success: oklch(0.49 0.13 150);
+  --success-soft: oklch(0.49 0.13 150 / 0.12);
+  --warning: oklch(0.5 0.11 70);
+  --warning-soft: oklch(0.68 0.13 75 / 0.16);
+  --danger: oklch(0.5 0.18 25);
+  --danger-hover: oklch(0.45 0.18 25);
+  --danger-soft: oklch(0.5 0.18 25 / 0.1);
+  --danger-ink: oklch(0.99 0 0);
+  --info: oklch(0.5 0.11 240);
+  --info-soft: oklch(0.5 0.11 240 / 0.11);
+
+  --git-add: oklch(0.5 0.13 150);
+  --git-del: oklch(0.5 0.17 20);
+
+  --focus-ring: oklch(0.52 0.16 240);
+  --selection-bg: oklch(0.45 0.15 330 / 0.12);
+
+  /* --- Charts (color-blind-considerate, verified against bg) --- */
+  --chart-1: oklch(0.5 0.14 330);
+  --chart-2: oklch(0.55 0.11 190);
+  --chart-3: oklch(0.55 0.12 85);
+  --chart-4: oklch(0.5 0.12 250);
+  --chart-5: oklch(0.55 0.13 150);
+  --chart-6: oklch(0.45 0.02 330);
+  --chart-grid: oklch(0.92 0.005 330);
+
+  /* --- Elevation --- */
+  --shadow-1: 0 1px 2px oklch(0.2 0.02 330 / 0.08);
+  --shadow-2: 0 2px 8px oklch(0.2 0.02 330 / 0.12);
+  --shadow-3: 0 4px 16px oklch(0.2 0.02 330 / 0.16);
+
+  /* --- Typography --- */
+  --font-ui:
+    "Segoe UI Variable Text", "Segoe UI", Inter, system-ui, -apple-system,
+    sans-serif;
+  --font-display:
+    "Segoe UI Variable Display", "Segoe UI Variable Text", "Segoe UI",
+    Inter, system-ui, -apple-system, sans-serif;
+  --font-mono: "Cascadia Mono", Consolas, "JetBrains Mono", monospace;
+  /* 11 and 18 were referenced by lab/github/settings CSS long before they
+     existed here, so those declarations were silently dropped and the text
+     rendered at whatever it inherited. They are real steps in use — 11 for
+     dense meta labels, 18 for section headings — so the scale now carries
+     them rather than the call sites being rewritten to a size nobody chose. */
+  --fs-11: 0.6875rem;
+  --fs-12: 0.75rem;
+  --fs-13: 0.8125rem;
+  --fs-14: 0.875rem;
+  --fs-16: 1rem;
+  --fs-18: 1.125rem;
+  --fs-20: 1.25rem;
+  --fs-24: 1.5rem;
+  --fs-30: 1.875rem;
+
+  /* --- Spacing (4/8 system) --- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+
+  /* --- Radii (DESIGN.md rev 2: small marks 4, controls 8, panels 13,
+     chips pill). Page CSS that hard-codes 6/10/14 should move onto these. --- */
+  --r-1: 4px;
+  --r-2: 8px;
+  --r-3: 13px;
+  --r-pill: 999px;
+
+  /* --- Z scale --- */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-overlay: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+
+  /* --- Density: comfortable (default) --- */
+  --row-h: 36px;
+  --control-h: 32px;
+  --control-h-sm: 26px;
+  --cell-pad-x: 12px;
+  --cell-pad-y: 8px;
+
+  /* --- Layout --- */
+  --topbar-h: 44px;
+  --sidebar-w: 232px;
+  --sidebar-rail-w: 52px;
+  --inspector-w: 340px;
+
+  /* --- Motion --- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-1: 150ms;
+  --dur-2: 200ms;
+  --dur-3: 250ms;
+
+  color-scheme: light;
+}
+
+/* Base dark palette (Qutra Labs dark). Themes override only hues/surfaces that differ. */
+[data-mode="dark"] {
+  --bg: oklch(0.13 0.004 330);
+  --surface: oklch(0.16 0.008 330);
+  --surface-raised: oklch(0.2 0.012 330);
+  --surface-sunken: oklch(0.115 0.006 330);
+  --surface-pressed: oklch(0.18 0.01 330);
+  --ink: oklch(0.94 0.005 330);
+  --muted: oklch(0.72 0.012 330);
+  --faint: oklch(0.64 0.012 330);
+  --border: oklch(0.29 0.015 330);
+  --border-strong: oklch(0.38 0.015 330);
+  --border-control: oklch(0.5 0.012 330);
+
+  --primary: oklch(0.68 0.17 330);
+  --primary-hover: oklch(0.73 0.16 330);
+  --primary-active: oklch(0.63 0.16 330);
+  --primary-ink: oklch(0.13 0.02 330);
+  --primary-soft: oklch(0.68 0.17 330 / 0.14);
+  --primary-soft-strong: oklch(0.68 0.17 330 / 0.24);
+
+  --accent: oklch(0.76 0.12 190);
+  --accent-text: oklch(0.78 0.11 190);
+  --accent-soft: oklch(0.76 0.12 190 / 0.16);
+
+  --success: oklch(0.74 0.14 150);
+  --success-soft: oklch(0.74 0.14 150 / 0.15);
+  --warning: oklch(0.78 0.13 80);
+  --warning-soft: oklch(0.78 0.13 80 / 0.15);
+  --danger: oklch(0.7 0.17 25);
+  --danger-hover: oklch(0.75 0.16 25);
+  --danger-soft: oklch(0.7 0.17 25 / 0.14);
+  --danger-ink: oklch(0.13 0.004 330);
+  --info: oklch(0.74 0.11 240);
+  --info-soft: oklch(0.74 0.11 240 / 0.14);
+
+  --git-add: oklch(0.74 0.14 150);
+  --git-del: oklch(0.7 0.16 20);
+
+  --focus-ring: oklch(0.76 0.12 240);
+  --selection-bg: oklch(0.68 0.17 330 / 0.2);
+
+  --chart-1: oklch(0.72 0.15 330);
+  --chart-2: oklch(0.74 0.11 190);
+  --chart-3: oklch(0.78 0.12 85);
+  --chart-4: oklch(0.72 0.11 250);
+  --chart-5: oklch(0.74 0.13 150);
+  --chart-6: oklch(0.7 0.01 330);
+  --chart-grid: oklch(0.24 0.01 330);
+
+  --shadow-1: 0 1px 2px oklch(0 0 0 / 0.4);
+  --shadow-2: 0 2px 8px oklch(0 0 0 / 0.45);
+  --shadow-3: 0 4px 16px oklch(0 0 0 / 0.5);
+
+  color-scheme: dark;
+}
+
+/* --- Compact density --- */
+[data-density="compact"] {
+  --row-h: 28px;
+  --control-h: 28px;
+  --control-h-sm: 24px;
+  --cell-pad-x: 8px;
+  --cell-pad-y: 4px;
+  --topbar-h: 40px;
+}
+
+/* --- High-contrast boost (Settings › Increase contrast) ---
+   Applied on top of the active theme. Strong borders, darker muted text,
+   thicker focus — previously this only nudged two tokens and felt broken. */
+[data-contrast="high"] {
+  --border: oklch(0.35 0.02 285);
+  --border-strong: oklch(0.2 0.02 285);
+  --border-control: oklch(0.2 0.02 285);
+  --muted: oklch(0.28 0.02 285);
+  --faint: oklch(0.38 0.015 285);
+  --focus-ring: oklch(0.4 0.18 265);
+  --shadow-1: 0 0 0 1px oklch(0.2 0 0 / 0.5);
+}
+[data-mode="dark"][data-contrast="high"] {
+  --border: oklch(0.72 0.01 285);
+  --border-strong: oklch(0.9 0.005 285);
+  --border-control: oklch(0.9 0.005 285);
+  --muted: oklch(0.88 0.01 285);
+  --faint: oklch(0.78 0.01 285);
+  --focus-ring: oklch(0.9 0.12 100);
+  --shadow-1: 0 0 0 1px oklch(1 0 0 / 0.55);
+}
+[data-contrast="high"] :focus-visible {
+  outline-width: 3px;
+  outline-offset: 2px;
+}
+
+/* Solid panel surfaces — never translucent (glass themes removed). */
+.panel,
+.wb-sidebar,
+.wb-inspector,
+.wb-bottom,
+.topbar,
+.workbench-titlebar {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}

@@ -1,0 +1,3529 @@
+/* Security Laboratory — dense, operational, honest scope signalling. */
+
+.lab-safety {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--warning-soft, var(--border));
+  border-radius: 8px;
+  background: var(--warning-soft, var(--surface-sunken));
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+
+.lab-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lab-card-title { margin: 0; font-size: 0.95rem; font-weight: 600; }
+.lab-textarea { min-height: 68px; resize: vertical; font-family: var(--font-mono); font-size: 0.85rem; }
+/* An example, not a value: monospace placeholders read as filled in. */
+.lab-textarea::placeholder { color: var(--faint); font-style: italic; }
+.lab-ack { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; }
+
+.lab-add-row { display: flex; gap: 8px; }
+.lab-add-row .input { flex: 1; }
+
+.lab-live {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  background: var(--surface-sunken);
+  flex-wrap: wrap;
+}
+.lab-normalized { font-size: 0.82rem; color: var(--muted); }
+.lab-normalized code { color: var(--ink); font-family: var(--font-mono); }
+
+.lab-targets { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.lab-target {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.lab-target-raw { font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink); }
+.lab-target-norm { font-size: 0.8rem; color: var(--muted); }
+
+.lab-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 550;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.lab-badge.is-allowed {
+  color: var(--accent-text);
+  background: var(--accent-soft);
+}
+.lab-badge.is-blocked {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.lab-import-head { display: flex; gap: 8px; }
+.lab-parsed { font-size: 0.82rem; color: var(--muted); margin: 0; }
+.lab-import-msg { font-size: 0.85rem; color: var(--accent-text); margin: 0; font-weight: 550; }
+
+.lab-findings { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.lab-finding {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.88rem;
+}
+.lab-finding-status {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  color: var(--muted);
+}
+.lab-sev {
+  display: inline-flex;
+  align-items: center;
+  min-width: 62px;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+.lab-sev.sev-critical { color: var(--danger-ink); background: var(--danger); border-color: var(--danger); }
+.lab-sev.sev-high { color: var(--danger); background: var(--danger-soft); border-color: var(--danger-soft); }
+.lab-sev.sev-medium { color: var(--warning); background: var(--warning-soft); border-color: var(--warning-soft); }
+.lab-sev.sev-low { color: var(--accent-text); background: var(--accent-soft); border-color: var(--accent-soft); }
+.lab-sev.sev-info { color: var(--muted); background: var(--surface-sunken); }
+
+.lab-view-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.lab-view-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 550;
+}
+.lab-view-tabs button:hover { color: var(--ink); background: var(--surface-sunken); }
+.lab-view-tabs button.is-active { color: var(--ink); border-bottom-color: var(--accent); }
+.lab-view-tabs button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+
+.lab-tools-shell { display: flex; flex-direction: column; gap: 14px; }
+.lab-tools-toolbar,
+.lab-runs-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.lab-tools-toolbar h2,
+.lab-runs-head h2 { margin: 0; font-size: 1rem; }
+.lab-tools-toolbar p,
+.lab-runs-head p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  max-width: 68ch;
+  font-size: 0.82rem;
+}
+.lab-tools-actions,
+.lab-tool-inline-actions,
+.lab-command-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.lab-tool-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 1px solid var(--danger);
+  border-radius: 6px;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.lab-tool-error p { flex: 1; margin: 0; overflow-wrap: anywhere; }
+
+/* The native boundary is a full surface, not a footnote: an EmptyState above,
+   and below it the three routes that actually exist from here. */
+.lab-native-unavailable {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  padding: var(--sp-5) var(--sp-4) var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-3);
+  background: var(--surface);
+}
+/* The statement reads from the left edge like the three routes under it,
+   not as a centred block over a row of cards. */
+.lab-native-unavailable .empty {
+  align-items: flex-start;
+  padding: 0 var(--sp-1);
+  text-align: left;
+}
+
+/* Three routes as open columns divided by hairlines, not three cards
+   inside the panel's card. */
+.lab-native-cta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--sp-4) 0;
+  margin: 0;
+  padding: var(--sp-4) 0 0;
+  border-top: 1px solid var(--border);
+  list-style: none;
+}
+.lab-native-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-5);
+}
+.lab-native-cta:first-child {
+  padding-left: var(--sp-1);
+}
+.lab-native-cta + .lab-native-cta {
+  box-shadow: -1px 0 0 var(--border);
+}
+.lab-native-cta > svg { color: var(--muted); }
+.lab-native-cta h3 {
+  margin: 0;
+  font-size: var(--fs-13);
+  font-weight: 600;
+  color: var(--ink);
+}
+.lab-native-cta p {
+  margin: 0;
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+.lab-native-cta-steps {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+.lab-native-cta-code {
+  display: block;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: var(--r-1);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  font-size: var(--fs-12);
+  color: var(--ink);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+/* Keeps the action on a common baseline so the three columns stay aligned
+   even when body copy length differs across locales. */
+.lab-native-cta > :last-child { margin-top: auto; }
+
+/* Tools: the list of registered programs beside the chosen one. The list
+   scrolls by itself, so forty tools never push the run card off screen. */
+.lab-tool-workbench {
+  display: grid;
+  grid-template-columns: minmax(200px, 248px) minmax(0, 1fr);
+  min-height: 410px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.lab-tool-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 6px;
+  border-right: 1px solid var(--border);
+  background: var(--surface-sunken);
+}
+.lab-tool-search { padding: 0 2px; }
+.lab-tool-search__box { position: relative; display: flex; align-items: center; }
+.lab-tool-search__box > svg {
+  position: absolute;
+  left: 8px;
+  color: var(--muted);
+  pointer-events: none;
+}
+.lab-tool-search__box .input { width: 100%; padding-left: 28px; }
+.lab-tool-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: min(64vh, 640px);
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.lab-tool-row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 46px;
+  padding: 6px 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+}
+.lab-tool-row:hover { background: color-mix(in oklch, var(--primary) 6%, var(--surface)); }
+.lab-tool-row.is-active {
+  border-color: color-mix(in oklch, var(--primary) 35%, var(--border));
+  background: var(--surface);
+}
+.lab-tool-row:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.lab-tool-row-main { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.lab-tool-row-main strong,
+.lab-tool-row-main small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-tool-row-main strong { font-size: 0.84rem; font-weight: 600; }
+.lab-tool-row-main small { color: var(--muted); font-size: 0.72rem; }
+.lab-tool-nomatch { margin: 4px 8px; color: var(--muted); font-size: var(--fs-12); }
+.is-danger { color: var(--danger); }
+.is-success { color: var(--success); }
+
+.lab-tool-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px 16px;
+}
+.lab-tool-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+.lab-tool-head > div { min-width: 0; }
+.lab-tool-head h3 { margin: 0; font-size: 1.05rem; }
+.lab-tool-head p { margin: 3px 0 0; color: var(--muted); font-size: var(--fs-12); }
+
+/* The run card: the one thing this view is for, so it carries the weight. */
+.lab-tool-run {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid color-mix(in oklch, var(--primary) 22%, var(--border));
+  border-radius: 10px;
+  background: var(--surface-raised);
+}
+.lab-tool-run__title { margin: 0; font-size: var(--fs-13); font-weight: 650; }
+.lab-tool-run__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px 12px;
+  align-items: end;
+}
+.lab-tool-run__grid > .lab-arg-wide { grid-column: 1 / -1; }
+.lab-arg-flag {
+  margin-left: 6px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+.lab-arg-req { color: var(--danger); }
+.lab-arg-help { color: var(--muted); font-size: 0.72rem; }
+.lab-arg-bool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--control-h);
+  font-size: var(--fs-13);
+}
+.lab-tool-run__note { margin: 0; color: var(--muted); font-size: var(--fs-12); }
+.lab-tool-run__empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+}
+.lab-tool-run__empty p { max-width: 62ch; margin: 0; color: var(--muted); font-size: var(--fs-13); }
+.lab-tool-run__callout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in oklch, var(--warning) 45%, var(--border));
+  border-radius: 8px;
+  background: color-mix(in oklch, var(--warning) 8%, var(--surface));
+}
+.lab-tool-run__callout > svg { flex: none; color: var(--warning); }
+.lab-tool-run__callout p { flex: 1; margin: 0; font-size: var(--fs-12); }
+.lab-tool-verdict {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-12);
+}
+.lab-tool-verdict.is-ok { color: var(--success); }
+.lab-tool-verdict.is-blocked { color: var(--danger); }
+.lab-tool-run__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 2px;
+}
+.lab-tool-run__hint { margin: 0; color: var(--muted); font-size: var(--fs-12); }
+.lab-tool-run__hint.is-blocked { color: var(--danger); }
+
+/* A section that opens on request (identity, advanced settings). */
+.lab-disc {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.lab-disc--warning { border-color: color-mix(in oklch, var(--danger) 45%, var(--border)); }
+.lab-disc__h { margin: 0; font-size: inherit; }
+.lab-disc__h > button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.lab-disc__h > button:hover { background: color-mix(in oklch, var(--primary) 5%, transparent); }
+.lab-disc__h > button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.lab-disc__chev { flex: none; color: var(--muted); transition: transform 160ms var(--ease-out, ease); }
+.lab-disc.is-open .lab-disc__chev { transform: rotate(90deg); }
+.lab-disc__title { flex: none; font-size: var(--fs-13); font-weight: 600; }
+.lab-disc__sum {
+  min-width: 0;
+  margin-left: auto;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--fs-12);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lab-disc--warning .lab-disc__sum { color: var(--danger); }
+.lab-disc__body { padding: 0 12px 12px; border-top: 1px solid var(--border); }
+
+.lab-tool-identity { display: flex; flex-direction: column; gap: 12px; padding-top: 12px; }
+.lab-tool-identity__warn {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: var(--fs-12);
+}
+.lab-tool-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px 16px;
+  margin: 0;
+}
+.lab-tool-facts__wide { grid-column: 1 / -1; }
+.lab-tool-facts dt { color: var(--muted); font-size: 0.7rem; }
+.lab-tool-facts dd { margin: 2px 0 0; overflow-wrap: anywhere; font-size: var(--fs-12); }
+.lab-grow { flex: 1; }
+.lab-tool-meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin: 12px 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.lab-tool-meta > div { min-width: 0; padding: 7px 9px; border-right: 1px solid var(--border); }
+.lab-tool-meta > div:last-child { border-right: 0; }
+.lab-tool-meta dt { color: var(--muted); font-size: 0.69rem; }
+.lab-tool-meta dd {
+  margin: 2px 0 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.lab-profile-editor { display: flex; flex-direction: column; gap: 12px; padding-top: 12px; }
+.lab-profile-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 6px;
+}
+.lab-profile-name { flex: 1 1 240px; }
+.lab-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px 12px;
+}
+.lab-profile-checks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+}
+.lab-profile-save { display: flex; justify-content: flex-end; }
+.lab-profile-checks label,
+.lab-arg-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.lab-args-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.lab-args-head h5 { margin: 0; font-size: 0.86rem; }
+.lab-args-head p { margin: 2px 0 0; color: var(--muted); font-size: 0.75rem; }
+.lab-arg-list { display: flex; flex-direction: column; gap: 8px; }
+.lab-arg-row {
+  display: grid;
+  grid-template-columns:
+    minmax(120px, 1.2fr)
+    minmax(90px, 0.8fr)
+    minmax(120px, 1fr)
+    auto auto 28px;
+  gap: 6px 8px;
+  align-items: end;
+}
+.lab-arg-row > .lab-arg-check,
+.lab-arg-row > .btn { margin-bottom: 6px; }
+.lab-arg-row__wide { grid-column: 1 / -1; }
+.lab-arg-row .input,
+.lab-arg-row .select { min-width: 0; }
+.input--mono { font-family: var(--font-mono); }
+
+.lab-command-runner {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-sunken);
+}
+.lab-command-preview { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.lab-command-preview span { color: var(--muted); font-size: 0.69rem; }
+.lab-command-preview code {
+  min-height: 30px;
+  padding: 6px 8px;
+  overflow: auto hidden;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--surface);
+  white-space: nowrap;
+}
+.lab-command-errors {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--danger);
+  font-size: 0.75rem;
+}
+
+.lab-runs {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.lab-runs-head { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.lab-runs-empty { margin: 0; padding: 18px 12px; color: var(--muted); }
+.lab-run-grid { display: grid; grid-template-columns: minmax(240px, 34%) minmax(0, 1fr); min-height: 260px; }
+.lab-run-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  gap: 1px;
+  padding: 5px;
+  border-right: 1px solid var(--border);
+  background: var(--surface-sunken);
+  overflow: auto;
+}
+.lab-run-list > li {
+  margin: 0;
+}
+.lab-run-row {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 82px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 5px 7px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+}
+.lab-run-row:hover { background: var(--surface); }
+.lab-run-row.is-active { background: var(--surface); border-color: var(--border); }
+.lab-run-state {
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+.lab-run-state.state-running,
+.lab-run-state.state-succeeded { color: var(--success); }
+.lab-run-state.state-failed,
+.lab-run-state.state-timed_out { color: var(--danger); }
+.lab-run-command {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.73rem;
+}
+.lab-run-row time { color: var(--muted); font-size: 0.67rem; }
+.lab-run-output { min-width: 0; }
+.lab-run-output > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  min-height: 48px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.lab-run-output > header > div { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.lab-run-output > header strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+}
+.lab-run-output > header span { color: var(--muted); font-size: 0.68rem; }
+.lab-output-handoff {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  background: var(--surface-sunken);
+  color: var(--muted);
+  font-size: var(--fs-12);
+}
+.lab-output-handoff > svg {
+  flex: none;
+  color: var(--primary);
+}
+.lab-output-handoff > span {
+  flex: 1;
+  min-width: 0;
+}
+.lab-run-artifacts { display: flex; gap: 5px; padding: 6px 8px; border-top: 1px solid var(--border); }
+
+.lab-add-tool { display: flex; flex-direction: column; gap: 12px; }
+.lab-add-identity { display: flex; align-items: flex-start; gap: 10px; }
+.lab-add-identity > div { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.lab-add-identity code { color: var(--muted); overflow-wrap: anywhere; font-size: 0.75rem; }
+.lab-add-tool .lab-tool-meta { margin: 0; grid-template-columns: 2fr 1fr 1fr; }
+.lab-add-tool .lab-tool-meta dd { white-space: normal; overflow-wrap: anywhere; }
+.lab-add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.lab-add-wide { grid-column: 1 / -1; }
+.lab-register-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-sunken);
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 900px) {
+  .lab-layout { grid-template-columns: 1fr; }
+  .lab-tool-workbench,
+  .lab-run-grid { grid-template-columns: 1fr; }
+  .lab-tool-list,
+  .lab-run-list { border-right: 0; border-bottom: 1px solid var(--border); }
+  .lab-profile-grid { grid-template-columns: 1fr 1fr; }
+  .lab-arg-row { grid-template-columns: 1fr 1fr; padding-bottom: 7px; border-bottom: 1px solid var(--border); }
+}
+
+@media (max-width: 620px) {
+  .lab-tools-toolbar,
+  .lab-runs-head,
+  .lab-command-runner { align-items: stretch; flex-direction: column; }
+  .lab-profile-grid,
+  .lab-add-grid { grid-template-columns: 1fr; }
+  .lab-add-wide { grid-column: auto; }
+  .lab-tool-meta { grid-template-columns: 1fr 1fr; }
+  .lab-tool-meta > div { border-bottom: 1px solid var(--border); }
+  .lab-tool-identity-title { flex-direction: column; }
+}
+
+/* ===================== Workbench Lab: view-driven IA ===================== */
+/* ---------- Lab surface ----------
+   Classes under a lab- prefix, mapped to the
+   app tokens (bg-1 → surface-sunken, bg-2 → surface, bg-3 → surface-raised,
+   bg-4 → surface-pressed, line → border, line-2 → border-strong, tx-2 → muted,
+   tx-3 → faint, cyan → primary). The surface scrolls as one; the header, the
+   blocked bar and the view switcher never shrink. */
+.lab-page {
+  gap: 14px;
+  padding: 18px 22px 20px;
+  overflow-y: auto;
+}
+.lab-page > * {
+  flex: none;
+}
+.lab-head {
+  --head-tone: var(--border-strong);
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--surface-raised) 35%, transparent),
+    color-mix(in oklch, var(--surface) 50%, transparent)
+  );
+}
+/* The case file's state tints its icon tile (cyan under way, amber paused,
+   green done) and the chip says it in words. A coloured band on the card's
+   top edge said it a third time, as decoration. */
+.lab-head[data-status="active"] {
+  --head-tone: var(--primary);
+}
+.lab-head[data-status="paused"] {
+  --head-tone: var(--warning);
+}
+.lab-head[data-status="completed"] {
+  --head-tone: var(--success);
+}
+.lab-head__top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 16px 16px 14px 18px;
+}
+.lab-head__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border: 1px solid color-mix(in oklch, var(--head-tone) 45%, var(--border-strong));
+  border-radius: 11px;
+  background: color-mix(in oklch, var(--head-tone) 9%, var(--surface-raised));
+  color: var(--accent-text);
+}
+.lab-head__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.lab-head__title,
+.lab-head__switch {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.lab-eyebrow {
+  color: var(--muted);
+  font: 500 12.5px/1.3 var(--font-ui);
+}
+.lab-eyebrow__sep {
+  margin: 0 6px;
+  color: var(--faint);
+}
+.lab-head__name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.lab-head__input {
+  min-width: 120px;
+  max-width: 520px;
+  field-sizing: content;
+  height: 32px;
+  margin-left: -8px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  font: 600 17px/1 var(--font-display);
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+.lab-head__input:hover {
+  border-color: var(--border-strong);
+  background: color-mix(in oklch, var(--surface-sunken) 60%, transparent);
+}
+.lab-head__input:focus-visible {
+  border-color: var(--primary);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+.lab-head__grow {
+  flex: 1;
+}
+.lab-head__h1 {
+  min-width: 0;
+  max-width: 620px;
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font: 600 22px/1.2 var(--font-display);
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lab-head__rename {
+  color: var(--faint);
+}
+.lab-head__name:hover .lab-head__rename {
+  color: var(--ink);
+}
+
+/* The switch between engagements: every engagement with
+   when it was made, so equal names can be told apart, and archiving to clear
+   the list. */
+.lab-switch {
+  position: relative;
+}
+.lab-switch__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: var(--control-h);
+  padding: 0 11px;
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 600 12.5px/1 var(--font-ui);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-1) ease,
+    background-color var(--dur-1) ease;
+}
+.lab-switch__btn:hover,
+.lab-switch__btn[aria-expanded="true"] {
+  border-color: color-mix(in oklch, var(--primary) 45%, transparent);
+  background: color-mix(in oklch, var(--primary) 7%, var(--surface));
+}
+.lab-switch__panel {
+  position: absolute;
+  z-index: var(--z-dropdown);
+  top: calc(100% + 6px);
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(440px, calc(100vw - 32px));
+  max-height: min(520px, 70vh);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-3);
+  animation: lab-switch-in 160ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@keyframes lab-switch-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.lab-switch__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--faint);
+}
+.lab-switch__list {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  list-style: none;
+}
+.lab-switch__item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 9px;
+  transition: background-color 140ms ease;
+}
+.lab-switch__item:hover {
+  background: color-mix(in oklch, var(--primary) 6%, transparent);
+}
+.lab-switch__item.is-current {
+  background: var(--primary-soft);
+}
+.lab-switch__row {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  padding: 9px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.lab-switch__check {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 16px;
+  height: 18px;
+  color: var(--accent-text);
+}
+.lab-switch__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.lab-switch__name {
+  overflow: hidden;
+  font: 600 13px/1.3 var(--font-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lab-switch__meta {
+  color: var(--faint);
+  font-size: 11.5px;
+}
+.lab-switch__archive {
+  flex: none;
+  margin-right: 4px;
+  opacity: 0;
+}
+.lab-switch__item:hover .lab-switch__archive,
+.lab-switch__archive:focus-visible {
+  opacity: 1;
+}
+.lab-switch__empty {
+  padding: 14px 10px;
+  color: var(--muted);
+}
+.lab-switch__foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+}
+.lab-switch__new {
+  margin-left: auto;
+}
+
+/* ---------- Every investigation (?list=1) ----------
+   A dense ledger: one row per investigation, its state as a coloured edge
+   and a word, sortable columns, and the name as the row's link. */
+.lab-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.lab-list__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px 20px;
+  padding: 6px 2px 2px;
+}
+.lab-list__h1 {
+  margin: 0;
+  color: var(--ink);
+  font: 600 24px/1.15 var(--font-display);
+  letter-spacing: -0.012em;
+}
+.lab-list__sum {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.lab-list__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.lab-list__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 240px;
+  height: var(--control-h);
+  padding: 0 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--faint);
+}
+.lab-list__search:focus-within {
+  border-color: var(--primary);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+.lab-list__search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+}
+.lab-list__seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+}
+.lab-list__seg button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font: 600 12.5px/1 var(--font-ui);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-1) ease,
+    color var(--dur-1) ease;
+}
+.lab-list__seg button:hover {
+  color: var(--ink);
+}
+.lab-list__seg button[aria-pressed="true"] {
+  background: var(--surface-pressed);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+  color: var(--ink);
+}
+.lab-list__n {
+  color: var(--faint);
+  font: 600 11px/1 var(--font-mono);
+}
+.lab-list__empty {
+  margin: 0;
+  padding: 32px 20px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+/* clip, not hidden: the header row stays sticky against the page scroll. */
+.lab-list__frame {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in oklch, var(--surface) 45%, transparent);
+  overflow: clip;
+}
+.lab-list__table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+}
+.lab-list__w-name {
+  width: 34%;
+}
+.lab-list__w-status {
+  width: 12%;
+}
+.lab-list__w-scope {
+  width: 16%;
+}
+.lab-list__w-num {
+  width: 8%;
+}
+.lab-list__w-findings {
+  width: 14%;
+}
+.lab-list__w-when {
+  width: 12%;
+}
+.lab-list__w-act {
+  width: 52px;
+}
+.lab-list__table th {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  height: 38px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border-strong);
+  background: var(--surface-raised);
+  color: var(--faint);
+  font: 600 11px/1 var(--font-ui);
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.lab-list__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+.lab-list__sort:hover,
+.lab-list__sort.is-active {
+  color: var(--ink);
+}
+.lab-list__sort svg {
+  opacity: 0.5;
+}
+.lab-list__sort.is-active svg {
+  color: var(--accent-text);
+  opacity: 1;
+}
+.lab-list__table td {
+  height: 54px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lab-list__table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.lab-list__table .lab-list__c-num {
+  padding-right: 22px;
+  color: var(--ink);
+  font: 500 13px/1 var(--font-mono);
+  text-align: right;
+}
+.lab-list__table th.lab-list__c-num {
+  font: 600 11px/1 var(--font-ui);
+}
+.lab-list__table th.lab-list__c-num .lab-list__sort {
+  flex-direction: row-reverse;
+}
+.lab-list__c-act {
+  text-align: right;
+}
+/* The row is the name link's target (InvestigationList); the archive
+   button sits above it. */
+/* State reads in the Durum column (a dot and a word); the row carries no
+   coloured stripe down its edge as well. */
+.lab-list__row {
+  position: relative;
+  transition: background-color 140ms ease;
+}
+.lab-list__row:hover {
+  background: color-mix(in oklch, var(--primary) 5%, transparent);
+}
+
+.lab-list__open {
+  display: block;
+  overflow: hidden;
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lab-list__open::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+/* Focus rings the whole row (the link's target) and underlines the name. */
+.lab-list__open:focus-visible {
+  outline: none;
+  box-shadow: 0 2px 0 var(--focus-ring);
+}
+.lab-list__open:focus-visible::after {
+  box-shadow: inset 0 0 0 2px var(--focus-ring);
+}
+.lab-list__open:hover {
+  text-decoration: none;
+}
+.lab-list__c-act .btn {
+  position: relative;
+  z-index: 1;
+}
+.lab-list__row.is-archived .lab-list__open {
+  color: var(--muted);
+}
+.lab-list__ncell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.lab-list__kind {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  color: var(--muted);
+}
+.lab-list__row:hover .lab-list__kind {
+  color: var(--accent-text);
+}
+.lab-list__name {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.lab-list__sub {
+  color: var(--faint);
+  font-size: 11.5px;
+}
+.lab-list__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 12.5px;
+}
+.lab-list__dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+.lab-list__status.is-active {
+  color: var(--accent-text);
+}
+.lab-list__status.is-active .lab-list__dot {
+  background: var(--primary);
+}
+.lab-list__status.is-paused .lab-list__dot {
+  background: var(--warning);
+}
+.lab-list__status.is-completed .lab-list__dot {
+  background: var(--success);
+}
+.lab-list__when {
+  font-size: 12.5px;
+}
+
+/* The engagement's folder, in the header's facts row. */
+.lab-folder {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--muted);
+}
+.lab-folder__path {
+  max-width: 280px;
+  overflow: hidden;
+  color: var(--ink);
+  font: 500 12px/1 var(--font-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lab-folder.is-none {
+  color: var(--warning);
+}
+
+/* Starting an engagement. */
+.lab-create {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: min(520px, 80vw);
+}
+.lab-create__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.lab-create__lead,
+.lab-create__hint {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.lab-create__notes {
+  height: auto;
+  min-height: 60px;
+  padding-top: 8px;
+  resize: vertical;
+}
+.lab-create__folder {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in oklch, var(--surface-sunken) 55%, transparent);
+}
+.lab-create__h {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--ink);
+  font: 600 13px/1 var(--font-ui);
+}
+.lab-create__path {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-sunken);
+  color: var(--accent-text);
+  font: 500 12.5px/1.4 var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.lab-create__folder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.lab-create__error {
+  margin: 0;
+}
+.lab-head__stats {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 8px;
+  min-height: 58px;
+  padding: 10px 16px 10px 18px;
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 13px 13px;
+  background: color-mix(in oklch, var(--surface-sunken) 30%, transparent);
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.lab-head__sep {
+  width: 1px;
+  height: 30px;
+  margin: 0 8px;
+  background: var(--border-strong);
+}
+/* A readout: a small label over its value, as on an instrument. The value
+   comes first in the markup, so it is read first ("2 targets"). */
+.lab-readout {
+  display: inline-flex;
+  flex-direction: column-reverse;
+  gap: 6px;
+  min-width: 64px;
+  padding: 0 16px;
+  border-left: 1px solid var(--border);
+}
+.lab-readout:first-child {
+  padding-left: 0;
+  border-left: 0;
+}
+.lab-readout > span {
+  color: var(--faint);
+  font: 600 var(--fs-11)/1 var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.lab-stat.lab-readout strong {
+  color: var(--ink);
+  font: 600 18px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.lab-stat.lab-readout strong.is-live {
+  color: var(--accent-text);
+}
+.lab-stat.lab-readout strong.is-attn {
+  color: var(--warning);
+}
+/* While the count is not known the readout says why, in one line. */
+.lab-readout.is-note {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+.lab-status-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--muted);
+  font: 600 11.5px/1 var(--font-ui);
+}
+.lab-status-chip.status-active {
+  border-color: color-mix(in oklch, var(--primary) 38%, transparent);
+  background: var(--primary-soft);
+  color: var(--accent-text);
+}
+.lab-status-chip.status-completed {
+  color: var(--info);
+}
+.lab-scope-badge,
+.lab-scope-counts {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  font: 600 11.5px/1 var(--font-ui);
+}
+.lab-scope-badge.is-allowed {
+  color: var(--success);
+  background: var(--success-soft);
+  border-color: color-mix(in oklch, var(--success) 40%, transparent);
+}
+.lab-scope-badge.is-warn {
+  color: var(--warning);
+  background: var(--warning-soft);
+  border-color: color-mix(in oklch, var(--warning) 42%, transparent);
+}
+.lab-scope-badge.is-blocked {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-color: color-mix(in oklch, var(--danger) 42%, transparent);
+}
+.lab-scope-badge.is-neutral,
+.lab-scope-counts {
+  color: var(--muted);
+}
+.lab-stat strong {
+  color: var(--ink);
+  font: 600 13px/1 var(--font-mono);
+}
+.lab-stat strong.is-live {
+  color: var(--accent-text);
+}
+.lab-stat--muted {
+  color: var(--faint);
+}
+/* A failed run read: the count is unknown, said in words with a retry. */
+.lab-stat:has(.lab-stat__warn) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.lab-stat__warn {
+  color: var(--warning);
+}
+
+/* Only while a target is out of scope: the one red bar on the surface. */
+.lab-blocked {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 14px;
+  border: 1px solid color-mix(in oklch, var(--danger) 42%, transparent);
+  border-radius: 10px;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.lab-blocked p {
+  flex: 1;
+  max-width: none;
+  margin: 0;
+  color: var(--ink);
+  font-size: 13px;
+}
+.lab-blocked strong {
+  margin-right: 4px;
+}
+.lab-blocked .btn {
+  flex: none;
+  color: var(--ink);
+}
+
+/* A view count, as in the overview's panel headers. */
+.lab-views__n {
+  display: inline-flex;
+  align-items: center;
+  height: 17px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--muted);
+  /* A count that may carry words ("6 adımdan 3 tamamlandı"): the UI face
+     with even numerals, at the 11 px floor, not mono. */
+  font: 600 var(--fs-11)/1 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+.lab-views__n.is-live {
+  border-color: color-mix(in oklch, var(--primary) 38%, transparent);
+  color: var(--accent-text);
+}
+
+/* A view's list beside the record it has open (?item=). */
+.lab-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+  gap: 14px;
+  align-items: start;
+}
+.lab-split--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+.lab-split__list {
+  min-width: 0;
+}
+@media (max-width: 1099px) {
+  .lab-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.lab-record {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--surface);
+}
+.lab-record:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.lab-record__h {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 10px 11px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.lab-record__names {
+  flex: 1;
+  min-width: 0;
+}
+.lab-record__t {
+  margin: 0;
+  color: var(--faint);
+  font: 600 11px/1.4 var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.lab-record__s {
+  margin: 4px 0 0;
+  color: var(--ink);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.lab-record__b {
+  padding: 12px 14px 14px;
+}
+/* The Tools view has its own two columns; an open tool adds a third. */
+.lab-tool-workbench:has(> .lab-record) {
+  grid-template-columns: minmax(190px, 232px) minmax(0, 1fr) minmax(280px, 340px);
+}
+.lab-tool-workbench > .lab-record {
+  border-width: 0 0 0 1px;
+  border-radius: 0;
+}
+.lab-view-body {
+  min-width: 0;
+}
+
+/* Overview: panels with a labelled header, the severity band, recent
+   runs beside the findings that still need evidence and the report. */
+.lab-panel {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklch, var(--surface-raised) 35%, transparent),
+    color-mix(in oklch, var(--surface) 50%, transparent)
+  );
+  overflow: hidden;
+}
+.lab-panel--attn {
+  border-color: color-mix(in oklch, var(--warning) 34%, transparent);
+}
+.lab-panel--attn .lab-panel__ico {
+  color: var(--warning);
+}
+.lab-panel__h {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.lab-panel__ico {
+  flex: none;
+  color: var(--primary);
+}
+.lab-panel__t {
+  margin: 0;
+  color: var(--faint);
+  font: 600 11px/1 var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.lab-panel__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent-text);
+  font: 600 12.5px/1.4 var(--font-ui);
+  cursor: pointer;
+}
+.lab-panel__link:hover {
+  text-decoration: underline;
+}
+/* Specific enough to beat list resets such as .lab-inline-list. */
+.lab-panel .lab-panel__b {
+  margin: 0;
+  padding: 10px 14px 12px;
+}
+.lab-panel__empty {
+  color: var(--muted);
+  font-size: 13px;
+}
+.lab-sevband {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  padding: 4px 6px 8px;
+}
+.lab-sevband__c {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 10px 14px;
+}
+.lab-sevband__c + .lab-sevband__c {
+  box-shadow: -1px 0 0 var(--border);
+}
+.lab-sevband__c strong {
+  color: var(--ink);
+  font: 600 28px/1 var(--font-mono);
+}
+.lab-sevband__c strong.is-zero {
+  color: var(--faint);
+}
+.lab-sevband__c span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font: 600 12px/1 var(--font-ui);
+}
+.lab-sevband__c.sev-critical span,
+.lab-sevband__c.sev-high span {
+  color: var(--danger);
+}
+.lab-sevband__c.sev-medium span {
+  color: var(--warning);
+}
+.lab-sevband__c.sev-low span {
+  color: var(--accent-text);
+}
+.lab-ov-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+@media (max-width: 1099px) {
+  .lab-ov-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lab-sevband {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.lab-ov-side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.lab-ov-runs {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.lab-ov-runs th {
+  padding: 12px 14px 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--faint);
+  font: 600 11px/1 var(--font-ui);
+  letter-spacing: 0.1em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.lab-ov-runs td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.lab-ov-runs tr:last-child td {
+  border-bottom: 0;
+}
+.lab-ov-runs__cmd {
+  max-width: 0;
+  width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.lab-panel .lab-ov-needs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  list-style: none;
+}
+.lab-ov-needs button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--faint);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.lab-ov-needs button:hover {
+  border-color: var(--border);
+  background: var(--surface-raised);
+}
+.lab-ov-needs__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.lab-ov-needs__main strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+.lab-ov-needs__main small {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+.lab-ov-report p {
+  margin: 0 0 12px;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.lab-ov-report__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+}
+.lab-view-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.lab-empty-note {
+  color: var(--muted);
+  font-size: var(--fs-13);
+  padding: var(--sp-4) 0;
+}
+
+/* ---- Private Lab --------------------------------------------------- */
+.private-lab {
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.private-lab-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-5);
+  padding-bottom: var(--sp-4);
+}
+.private-lab-head h2 {
+  margin: 3px 0 4px;
+  font-size: var(--fs-20);
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+.private-lab-head p {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-12);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.private-lab-local {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--success);
+  font-size: var(--fs-11);
+  font-weight: 600;
+}
+.private-lab-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(78px, 1fr));
+  min-width: min(460px, 48%);
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  background: var(--surface);
+  overflow: hidden;
+}
+.private-lab-metrics > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 8px 10px;
+  border-right: 1px solid var(--border);
+}
+.private-lab-metrics > div:last-child {
+  border-right: 0;
+}
+.private-lab-metrics dt {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--fs-11);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.private-lab-metrics dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-14);
+  font-weight: 700;
+}
+.private-lab-metrics .is-warning dd {
+  color: var(--warning);
+}
+.private-lab-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bg);
+}
+.private-lab-panel {
+  min-width: 0;
+  padding-top: var(--sp-4);
+  animation: private-lab-panel-in var(--dur-2) var(--ease-out);
+}
+@keyframes private-lab-panel-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .private-lab-panel { animation: none; }
+}
+[data-reduce-motion="true"] .private-lab-panel {
+  animation: none;
+}
+.private-lab-filters {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) 180px 180px 180px;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-3);
+}
+.private-lab-search {
+  position: relative;
+  min-width: 0;
+}
+.private-lab-search > svg {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 8px;
+  color: var(--muted);
+  transform: translateY(-50%);
+}
+.private-lab-search .input {
+  width: 100%;
+  padding-left: 29px;
+}
+.private-lab-workspace {
+  display: grid;
+  grid-template-columns: minmax(560px, 1fr) minmax(330px, 390px);
+  gap: var(--sp-3);
+  align-items: start;
+  min-width: 0;
+}
+.private-lab-table {
+  min-width: 0;
+}
+.private-lab-table .lab-table {
+  min-width: 0;
+  table-layout: fixed;
+}
+.private-lab-table th:nth-child(1) { width: 22%; }
+.private-lab-table th:nth-child(2) { width: 15%; }
+.private-lab-table th:nth-child(3) { width: 31%; }
+.private-lab-table th:nth-child(4) { width: 23%; }
+.private-lab-table th:nth-child(5) { width: 9%; }
+.private-lab-table td {
+  overflow-wrap: anywhere;
+}
+.private-lab-table td {
+  vertical-align: top;
+}
+.private-lab-table td:first-child strong {
+  display: block;
+  margin-bottom: 2px;
+}
+.private-lab-evidence {
+  display: block;
+  overflow: hidden;
+  max-width: 190px;
+  color: var(--muted);
+  font-size: var(--fs-11);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.private-lab-install {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-size: var(--fs-11);
+  line-height: 1.35;
+}
+.private-lab-install.is-verified {
+  color: var(--success);
+}
+.private-lab-install.is-changed {
+  color: var(--warning);
+}
+.private-lab-row-actions {
+  display: inline-flex;
+  gap: 2px;
+}
+.private-lab-empty {
+  margin: 0;
+  padding: var(--sp-6);
+  color: var(--muted);
+  font-size: var(--fs-12);
+  text-align: center;
+}
+.private-lab-inspector {
+  position: sticky;
+  top: 42px;
+  min-width: 0;
+  max-height: calc(100vh - 250px);
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  background: var(--surface);
+}
+.private-lab-inspector > section,
+.private-lab-inspector-head,
+.private-lab-inspector-purpose,
+.private-lab-inspector-actions {
+  margin: 0;
+  padding: var(--sp-3);
+  border-bottom: 1px solid var(--border);
+}
+.private-lab-inspector > section:last-of-type {
+  border-bottom: 1px solid var(--border);
+}
+.private-lab-inspector-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.private-lab-inspector-head > div {
+  min-width: 0;
+}
+.private-lab-inspector-head span:first-child {
+  color: var(--muted);
+  font-size: var(--fs-11);
+}
+.private-lab-inspector-head h3 {
+  margin: 2px 0 0;
+  font-size: var(--fs-16);
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.private-lab-inspector-purpose {
+  color: var(--muted);
+  font-size: var(--fs-12);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.private-lab-inspector section h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 7px;
+  font-size: var(--fs-12);
+  letter-spacing: 0;
+}
+.private-lab-inspector section > p,
+.private-lab-guide-columns p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-12);
+  line-height: 1.5;
+}
+.private-lab-command {
+  margin-top: var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-1);
+  overflow: hidden;
+}
+.private-lab-command > span {
+  display: block;
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-raised);
+  color: var(--muted);
+  font-size: var(--fs-11);
+}
+.private-lab-command code,
+.private-lab-command p {
+  display: block;
+  margin: 0;
+  padding: 8px;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: var(--fs-11);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.private-lab-command p {
+  color: var(--warning);
+  font-family: inherit;
+}
+.private-lab-guide-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+}
+.private-lab-inspector ul,
+.private-lab-inspector ol {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: var(--fs-11);
+  line-height: 1.5;
+}
+.private-lab-inspector li {
+  padding: 2px 0;
+}
+.private-lab-boundary {
+  background: var(--success-soft, var(--surface-raised));
+}
+.private-lab-boundary h4,
+.private-lab-boundary p {
+  color: var(--success);
+}
+.private-lab-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.private-lab-tags span {
+  padding: 2px 6px;
+  border-radius: var(--r-1);
+  background: var(--surface-raised);
+  color: var(--muted);
+  font-size: var(--fs-11);
+}
+.private-lab-native dl {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+.private-lab-native dl > div {
+  display: grid;
+  grid-template-columns: 82px minmax(0, 1fr);
+  gap: var(--sp-2);
+  padding: 4px 0;
+}
+.private-lab-native dt {
+  color: var(--muted);
+  font-size: var(--fs-11);
+}
+.private-lab-native dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--fs-11);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.private-lab-inspector-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  border-bottom: 0;
+}
+.private-lab-inspector-empty {
+  display: flex;
+  min-height: 260px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-6);
+  color: var(--muted);
+  text-align: center;
+}
+.private-lab-inspector-empty h3 {
+  margin: var(--sp-2) 0 3px;
+  color: var(--ink);
+  font-size: var(--fs-14);
+}
+.private-lab-inspector-empty p {
+  max-width: 30ch;
+  margin: 0;
+  font-size: var(--fs-12);
+  line-height: 1.5;
+}
+/* The panel's top padding would land inside this frame as an empty band;
+   the gap goes outside it instead. */
+.private-lab-playbooks {
+  margin-top: var(--sp-4);
+  padding-top: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  overflow: hidden;
+}
+.private-lab-playbook {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(250px, 1.2fr) minmax(180px, 0.8fr) auto;
+  gap: var(--sp-4);
+  align-items: center;
+  padding: var(--sp-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.private-lab-playbook:last-child {
+  border-bottom: 0;
+}
+.private-lab-playbook h3 {
+  margin: 0 0 4px;
+  font-size: var(--fs-13);
+  letter-spacing: 0;
+}
+.private-lab-playbook p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-11);
+  line-height: 1.45;
+}
+.private-lab-field-label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: var(--fs-11);
+  font-weight: 600;
+}
+.private-lab-tool-chain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.private-lab-tool-chain li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-1);
+  color: var(--muted);
+  font-size: var(--fs-11);
+}
+.private-lab-tool-chain svg {
+  color: var(--success);
+}
+.private-lab-dataset-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  background: var(--border);
+  gap: 1px;
+  overflow: hidden;
+}
+.private-lab-dataset {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+  padding: var(--sp-3);
+  background: var(--surface);
+}
+.private-lab-dataset > div {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-2);
+}
+.private-lab-dataset strong {
+  font-size: var(--fs-12);
+}
+.private-lab-dataset .mono {
+  color: var(--muted);
+  font-size: var(--fs-11);
+  white-space: nowrap;
+}
+.private-lab-dataset p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-11);
+  line-height: 1.45;
+}
+.private-lab-dataset small {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  color: var(--success);
+  font-size: var(--fs-11);
+  line-height: 1.4;
+}
+.private-lab-dataset .btn {
+  align-self: flex-start;
+  margin-top: auto;
+}
+.private-lab-activity-empty {
+  display: flex;
+  min-height: 180px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  color: var(--muted);
+}
+.private-lab-activity-empty p {
+  margin: 0;
+  font-size: var(--fs-12);
+}
+
+@container (max-width: 1040px) {
+  .private-lab-head {
+    flex-direction: column;
+  }
+  .private-lab-metrics {
+    width: 100%;
+    min-width: 0;
+  }
+  .private-lab-filters {
+    grid-template-columns: minmax(0, 1fr) 1fr 1fr;
+  }
+  .private-lab-search {
+    grid-column: 1 / -1;
+  }
+  .private-lab-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .private-lab-inspector {
+    position: static;
+    max-height: none;
+  }
+  .private-lab-playbook {
+    grid-template-columns: 1fr 1.2fr;
+  }
+}
+@container (max-width: 620px) {
+  .private-lab-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+  .private-lab-metrics > div:nth-child(2) {
+    border-right: 0;
+  }
+  .private-lab-metrics > div:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--border);
+  }
+  .private-lab-filters {
+    grid-template-columns: 1fr;
+  }
+  .private-lab-search {
+    grid-column: auto;
+  }
+  .private-lab-guide-columns,
+  .private-lab-playbook,
+  .private-lab-dataset-list {
+    grid-template-columns: 1fr;
+  }
+  .private-lab-table .lab-table {
+    min-width: 0;
+  }
+  .private-lab-table th:nth-child(1) { width: 48%; }
+  .private-lab-table th:nth-child(4) { width: 38%; }
+  .private-lab-table th:nth-child(5) { width: 14%; }
+  .private-lab-table th:nth-child(2),
+  .private-lab-table td:nth-child(2),
+  .private-lab-table th:nth-child(3),
+  .private-lab-table td:nth-child(3) {
+    display: none;
+  }
+  .private-lab-tabs {
+    overflow-x: auto;
+  }
+}
+
+/* ---- Dense tables (Runs / Findings / Evidence) ---- */
+.lab-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+}
+.lab-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-12);
+}
+.lab-table thead th {
+  text-align: left;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+}
+.lab-table tbody td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  max-width: 240px;
+}
+.lab-table tbody tr {
+  cursor: pointer;
+}
+.lab-table tbody tr:hover {
+  background: var(--surface-raised);
+}
+.lab-table tbody tr.is-selected {
+  background: var(--primary-soft);
+}
+.lab-table tbody tr:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+.lab-table-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+.lab-evidence-missing {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+/* ---- Filter bar ---- */
+/* Each select carries its label above it; the checkbox lines up with the
+   selects, not with the middle of the label-and-select stack. */
+.lab-filter-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.select--sm {
+  height: var(--control-h-sm, 28px);
+  font-size: var(--fs-12);
+  padding: 0 6px;
+}
+.lab-filter-check {
+  display: inline-flex;
+  align-items: center;
+  height: var(--control-h-sm, 28px);
+  gap: 5px;
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+
+/* ---- Overview bands ---- */
+.lab-band {
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  background: var(--surface);
+  padding: var(--sp-3);
+}
+.lab-band--warn {
+  border-color: color-mix(in oklch, var(--warning) 40%, var(--border));
+  background: var(--warning-soft);
+}
+.lab-band-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: var(--sp-2);
+}
+.lab-sev-band {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.lab-sev-cell {
+  flex: 1;
+  min-width: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  background: var(--bg);
+}
+.lab-sev-cell strong {
+  font-size: var(--fs-20);
+  font-weight: 700;
+  line-height: 1;
+}
+.lab-sev-cell span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.lab-sev-cell.sev-critical strong { color: var(--danger); }
+.lab-sev-cell.sev-high strong { color: var(--warning); }
+.lab-overview-split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--sp-4);
+  align-items: start;
+}
+.lab-inline-list,
+.lab-inline-runs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: var(--fs-12);
+}
+.lab-inline-runs li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lab-inline-runs .mono {
+  min-width: 0;
+}
+
+/* ---- Methodology ---- */
+.lab-method-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.lab-method-head h3 {
+  margin: 0;
+  font-size: var(--fs-14);
+}
+.lab-method-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.lab-method-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  font-size: var(--fs-13);
+}
+.lab-method-list li.is-done {
+  color: var(--ink);
+}
+.lab-method-state {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* What to do next in a new engagement: three steps to a
+   first scan, each with the button that does it. */
+/* The step guide is a static checklist, not live work: a plain panel edge,
+   no lit ring (glow only for what runs). */
+.lab-start {
+  border-color: var(--border-strong);
+}
+.lab-start__lead {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 12px 16px 0;
+  color: var(--ink);
+  font-size: 13.5px;
+}
+.lab-start__note {
+  color: var(--muted);
+  font-size: 12.5px;
+}
+/* The steps are a sequence inside the panel, not six cards inside a card:
+   open columns divided by hairlines, the number leading each one. */
+.lab-start__steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  column-gap: 24px;
+  margin: 0;
+  padding: 4px 16px 10px;
+  list-style: none;
+}
+.lab-start__step {
+  display: flex;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+.lab-start__n {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid color-mix(in oklch, var(--primary) 45%, transparent);
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--accent-text);
+  font: 700 13px/1 var(--font-ui);
+}
+.lab-start__step.is-done .lab-start__n {
+  border-color: color-mix(in oklch, var(--success) 45%, transparent);
+  background: var(--success-soft);
+  color: var(--success);
+}
+.lab-start__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+.lab-start__t {
+  margin: 0;
+  color: var(--ink);
+  font: 600 13.5px/1.3 var(--font-ui);
+}
+.lab-start__step.is-done .lab-start__t {
+  color: var(--muted);
+}
+.lab-start__body p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.lab-start__go {
+  margin-top: 4px;
+}
+
+/* ---------- Every Lab view says what it is for ---------- */
+/* On a wide window a view keeps to a readable width instead of stretching
+   its fields across the screen. */
+.lab-page > * {
+  width: min(1320px, 100%);
+  margin-inline: auto;
+}
+.lab-vh {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 2px 2px 4px;
+}
+.lab-vh__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid color-mix(in oklch, var(--primary) 35%, transparent);
+  border-radius: 10px;
+  background: var(--primary-soft);
+  color: var(--accent-text);
+}
+.lab-vh__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.lab-vh__title {
+  margin: 0;
+  color: var(--ink);
+  font: 600 16px/1.2 var(--font-display);
+}
+.lab-vh__purpose {
+  max-width: 80ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.lab-vh__action {
+  flex: none;
+  margin-left: auto;
+}
+
+.lab-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 44px 24px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 14px;
+  background: color-mix(in oklch, var(--surface-raised) 30%, transparent);
+  text-align: center;
+}
+.lab-empty__icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--accent-text);
+}
+.lab-empty__title {
+  margin: 0;
+  color: var(--ink);
+  font: 600 15px/1.3 var(--font-ui);
+}
+.lab-empty__hint {
+  max-width: 60ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.lab-empty__action {
+  margin-top: 6px;
+}
+
+/* ---------- Scope: authorisation on the left, targets on the right ---------- */
+.lab-scope-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.lab-scope-grid .lab-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.lab-field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.lab-count {
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--surface-pressed);
+  color: var(--muted);
+  font: 600 11px/18px var(--font-ui);
+  text-align: center;
+}
+.lab-field-hint {
+  margin: -4px 0 0;
+  color: var(--faint);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.lab-ack {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in oklch, var(--warning) 40%, transparent);
+  border-radius: 10px;
+  background: color-mix(in oklch, var(--warning) 6%, transparent);
+  cursor: pointer;
+}
+.lab-ack.is-on {
+  border-color: color-mix(in oklch, var(--success) 45%, transparent);
+  background: var(--success-soft);
+}
+.lab-ack input {
+  margin-top: 3px;
+}
+.lab-ack__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: var(--ink);
+  font-weight: 600;
+}
+.lab-ack__text small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.lab-targets-empty {
+  margin: 0;
+  padding: 18px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+/* ---------- Methodology: the road through an engagement ---------- */
+.lab-road {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(880px, 100%);
+}
+.lab-road__progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+.lab-road__bar {
+  flex: 1;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--surface-pressed);
+}
+.lab-road__bar > div {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--primary);
+}
+.lab-road__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lab-road__step {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding: 0 0 18px;
+}
+.lab-road__step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 30px;
+  bottom: 2px;
+  left: 14px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--border);
+}
+.lab-road__step.is-done:not(:last-child)::before {
+  background: color-mix(in oklch, var(--success) 45%, transparent);
+}
+.lab-road__n {
+  z-index: 1;
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--muted);
+  font: 700 13px/1 var(--font-ui);
+}
+.lab-road__step.is-next .lab-road__n {
+  border-color: color-mix(in oklch, var(--primary) 55%, transparent);
+  background: var(--primary-soft);
+  color: var(--accent-text);
+}
+.lab-road__step.is-done .lab-road__n {
+  border-color: color-mix(in oklch, var(--success) 45%, transparent);
+  background: var(--success-soft);
+  color: var(--success);
+}
+.lab-road__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  padding: 4px 0 0;
+}
+.lab-road__t {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--ink);
+  font: 600 14px/1.3 var(--font-ui);
+}
+.lab-road__step.is-done .lab-road__t {
+  color: var(--muted);
+}
+.lab-road__state {
+  color: var(--faint);
+  font: 600 11px/1 var(--font-ui);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.lab-road__step.is-next .lab-road__state {
+  color: var(--accent-text);
+}
+.lab-road__body p {
+  max-width: 70ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* ---------- Findings import ---------- */
+.lab-import .lab-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lab-import-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+}
+.lab-file-btn {
+  position: relative;
+  cursor: pointer;
+}
+.lab-file-btn:focus-within {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+/* `.lab-add-row .input { flex: 1 }` is for a field placed straight in the
+   row; inside a labelled Field (a column) it collapsed the input's height. */
+.lab-scope-grid .field > input.input {
+  flex: none;
+  height: var(--control-h);
+}
+
+/* Scope and Targets are separate sections, one card each. */
+.lab-scope-grid--one { grid-template-columns: minmax(0, 640px); }
+
+/* The Overview's six road steps sit in two rows of three on a wide window. */
+@media (min-width: 1100px) {
+  .lab-start__steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* The scope strip at the top of every investigation view. Its
+   width and spacing come from `.lab-page > *` and the page's gap. */
+.lab-strip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-13);
+  text-align: left;
+  cursor: pointer;
+}
+.lab-strip:hover { border-color: var(--border-strong); }
+.lab-strip:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.lab-strip.is-blocked { border-color: var(--danger); }
+.lab-strip__text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lab-strip__edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* The Report section. */
+.lab-report__saved {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  font-size: var(--fs-13);
+}
+.lab-report__saved li { display: flex; gap: 12px; align-items: baseline; }
+/* What the report holds and masks. */
+.lab-report__options {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  border: 0;
+  min-width: 0;
+}
+.lab-report__options legend {
+  padding: 0;
+  margin-bottom: 4px;
+}
+.lab-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-13);
+}
+.lab-report__status {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: var(--fs-12);
+}
+.lab-report__status p {
+  margin: 0;
+}
+.lab-report__preview {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  line-height: 1.5;
+}
+
+/* Tools › Registered tools: which investigation the runs belong to. */
+.lab-tools-for {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: var(--fs-13);
+}
+.lab-tools-for a { color: var(--accent); }
+
+/* ---------- Targets and files ---------- */
+.lab-tf {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+/* With no card open the list stands alone; it keeps a readable width. */
+.lab-split--single .lab-tf {
+  max-width: 760px;
+}
+.lab-tf__add.is-first-step {
+  border-color: color-mix(in oklch, var(--accent) 55%, var(--border));
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 14%, transparent);
+}
+.lab-tf__first {
+  margin: -4px 0 0;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+.lab-tf__note {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.lab-tf__file-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.lab-tf__hint {
+  color: var(--faint);
+  font-size: 12.5px;
+}
+.lab-tf__files {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.lab-tf__file {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.lab-tf__file:hover {
+  background: var(--surface-sunken);
+}
+.lab-tf__file[aria-current="true"],
+.lab-tf .lab-target[aria-current="true"] {
+  border-color: color-mix(in oklch, var(--accent) 60%, var(--border));
+  background: var(--accent-soft);
+}
+.lab-tf__file:focus-visible,
+.lab-target__select:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.lab-tf__file-icon {
+  color: var(--muted);
+}
+.lab-tf__file-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+.lab-tf__file-meta {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+/* A target row: what was typed and what it reads as, then the badge and
+   Remove. The first two open the target's card. */
+.lab-tf .lab-target {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+.lab-target__select {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(80px, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* A file's or a target's card, inside its LabDetail. */
+.lab-fcard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.lab-fcard__facts {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.lab-fcard__facts > div {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 10px;
+  font-size: 13px;
+}
+.lab-fcard__facts dt {
+  color: var(--muted);
+}
+.lab-fcard__facts dd {
+  margin: 0;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.lab-fcard__facts code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.lab-fcard__sub {
+  margin: 4px 0 0;
+  color: var(--faint);
+  font: 600 11px/1.4 var(--font-ui);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.lab-fcard__hashes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* The algorithm and Copy on one line, the full digest under them. */
+.lab-fcard__hash {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 8px;
+}
+.lab-fcard__algo {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.lab-fcard__digest {
+  grid-column: 1 / -1;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: var(--surface-sunken);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.45;
+  word-break: break-all;
+  user-select: all;
+}
+.lab-fcard__note {
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.lab-fcard__note svg {
+  flex: none;
+  margin-top: 2px;
+}
+.lab-fcard__note.is-warn {
+  color: var(--ink);
+}
+.lab-fcard__note.is-warn svg {
+  color: var(--warning);
+}
+.lab-fcard__open {
+  align-self: flex-start;
+}
+
+/* Önerilen analiz: the steps for the file's kind, then what they
+   found in three layers. */
+.lab-ana {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.lab-ana__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.lab-ana__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.lab-ana__step {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  font-size: 13px;
+}
+.lab-ana__step > svg {
+  color: var(--faint);
+}
+.lab-ana__step.is-done > svg {
+  color: var(--success);
+}
+.lab-ana__step.is-failed > svg,
+.lab-ana__step.is-running > svg {
+  color: var(--warning);
+}
+.lab-ana__name {
+  color: var(--ink);
+}
+.lab-ana__state {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+/* A failed step's reason is a sentence: in an `auto` column it would take
+   the whole row and squeeze the step's name to nothing in the narrow
+   panel, so it gets its own row under the name. */
+.lab-ana__step.is-failed .lab-ana__state {
+  grid-column: 2 / -1;
+  grid-row: 2;
+  color: var(--ink);
+  white-space: normal;
+}
+.lab-ana__step.is-install > svg,
+.lab-ana__step.is-consent > svg,
+.lab-ana__step.is-rules > svg,
+.lab-ana__step.is-check > svg {
+  color: var(--warning);
+}
+.lab-ana__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px;
+}
+/* A note or the rules choice sits under its row, in the columns after the icon. */
+.lab-ana__step-note,
+.lab-ana__rules {
+  grid-column: 2 / -1;
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.lab-ana__rules {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+/* What a program said when it failed, beside the facts it still gave. */
+.lab-fcard__facts > div.is-warn dt,
+.lab-fcard__facts > div.is-warn dd {
+  color: var(--ink);
+}
+.lab-fcard__facts > div.is-warn dt {
+  font-weight: 600;
+}
+.lab-fcard__facts > div.is-warn dd {
+  border-left: 2px solid var(--warning);
+  padding-left: 8px;
+}
+.lab-ana__refusal {
+  margin: 0;
+  font-size: 12.5px;
+}
+/* An evidence row of a finding wraps, so its origin sits under it. */
+.evidence-item.lab-evidence-row {
+  flex-wrap: wrap;
+}
+.evidence-item.lab-evidence-row > .truncate {
+  flex: 1 1 8rem;
+}
+/* Where a piece of evidence came from, and its raw output checked again. */
+.lab-origin {
+  flex-basis: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 19px;
+}
+.lab-origin__line {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.lab-origin__open {
+  align-self: flex-start;
+}
+/* Busy; it keeps focus, so it is not disabled. */
+.lab-origin__open[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: progress;
+}
+.lab-origin .lab-fcard__note.is-ok svg {
+  color: var(--success);
+}
+.lab-origin__raw {
+  margin: 0;
+  padding: 8px 10px;
+  max-height: 240px;
+  overflow: auto;
+  border-radius: 6px;
+  background: var(--surface-sunken);
+  font: 11.5px/1.45 var(--font-mono);
+  white-space: pre;
+}
+/* A finding without evidence: a draft that cannot be confirmed. */
+.lab-draft {
+  display: inline-block;
+  padding: 0 6px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+.lab-draft-note {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+/* Keep a flagged observation as evidence, or make it a finding. */
+.lab-ana__keep {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 4px;
+}
+.lab-ana__kept {
+  color: var(--muted);
+}
+.lab-ana__kept svg {
+  color: var(--success);
+}
+/* Busy or not possible now; it keeps focus, so it is not disabled. */
+.lab-ana .btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+/* A kept observation says so: a state, not a dimmed control. */
+.lab-ana .btn.lab-ana__kept[aria-disabled="true"] {
+  opacity: 1;
+  cursor: default;
+}
+.lab-ana__layers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lab-ana__layer {
+  margin: 6px 0 0;
+  color: var(--faint);
+  font: 600 11px/1.4 var(--font-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.lab-ana__flags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lab-ana__flag {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  gap: 8px;
+  font-size: 13px;
+}
+.lab-ana__flag > svg {
+  margin-top: 2px;
+  color: var(--warning);
+}
+.lab-ana__flag-head,
+.lab-ana__hint {
+  margin: 0;
+}
+.lab-ana__hint {
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.lab-ana__items {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lab-ana__items code {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  word-break: break-all;
+}
+.lab-ana__items summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+}
+.lab-ana__raw > summary {
+  cursor: pointer;
+  color: var(--accent-text);
+  font-size: 13px;
+}
+.lab-ana__out pre {
+  margin: 4px 0 0;
+  padding: 8px 10px;
+  max-height: 360px;
+  overflow: auto;
+  border-radius: 6px;
+  background: var(--surface-sunken);
+  color: var(--ink);
+  font: 12px/1.45 var(--font-mono);
+  white-space: pre;
+}
+
+/* Files dragged over the window: an outline over the investigation says
+   where they will go. */
+.lab-drop {
+  position: fixed;
+  inset: 8px;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  border: 2px dashed color-mix(in oklch, var(--accent) 70%, transparent);
+  border-radius: 16px;
+  background: color-mix(in oklch, var(--accent) 7%, transparent);
+  pointer-events: none;
+}
+.lab-drop__label {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: var(--shadow-2);
+}
+.lab-tf__file-missing {
+  color: var(--warning);
+  font-weight: 600;
+}
+/* Busy while a pick copies and hashes; it keeps focus, so it is not disabled. */
+.lab-tf__file-add .btn[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: progress;
+}
+.lab-fcard__exact {
+  color: var(--muted);
+  font-size: 12px;
+}

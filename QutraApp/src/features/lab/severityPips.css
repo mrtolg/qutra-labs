@@ -1,0 +1,45 @@
+/* Open findings by severity (Home and the Investigations list). A pip is a
+   count on a tinted square in its severity's colour; the colour is never the
+   only signal, the words are in the tooltip and for screen readers. */
+.sev-pips {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+}
+.sev-pips--none {
+  color: var(--faint);
+  font: 500 12px/1 var(--font-mono);
+}
+.sev-pip {
+  --sev: var(--muted);
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid color-mix(in oklch, var(--sev) 45%, transparent);
+  border-radius: 5px;
+  background: color-mix(in oklch, var(--sev) 14%, transparent);
+  color: var(--sev);
+  font: 600 11.5px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.sev-pip--critical {
+  --sev: var(--danger);
+}
+.sev-pip--high {
+  --sev: var(--warning);
+}
+.sev-pip--medium {
+  --sev: var(--info);
+}
+.sev-pip--low,
+.sev-pip--info {
+  --sev: var(--muted);
+}
+@media (forced-colors: active) {
+  .sev-pip {
+    border-color: CanvasText;
+  }
+}

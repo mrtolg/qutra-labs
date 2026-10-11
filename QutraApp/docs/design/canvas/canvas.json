@@ -1,0 +1,22 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-09-19T00:00:00Z" },
+  "title": "Qutra Labs Console Redesign",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1440, "h": 900, "title": "Home — live dashboard" },
+    "Assistant.dc.html": { "x": 1520, "y": 0, "w": 1440, "h": 900, "title": "Assistant — Jarvis", "is_interactive": true },
+    "Work.dc.html": { "x": 0, "y": 1020, "w": 1440, "h": 900, "title": "Work — terminal" },
+    "Tools.dc.html": { "x": 1520, "y": 1020, "w": 1440, "h": 900, "title": "Tools — launcher (hover a box)", "is_interactive": true },
+    "ToolsHover.dc.html": { "x": 760, "y": 2040, "w": 1440, "h": 820, "title": "Tools — hover interaction (before / after)", "is_interactive": true }
+  },
+  "order": ["Main.dc.html", "Assistant.dc.html", "Work.dc.html", "Tools.dc.html", "ToolsHover.dc.html"],
+  "notes": {
+    "title": { "x": 0, "y": -380, "text": "QUTRA LABS — HUD CONSOLE", "kind": "title1", "maxW": 1440, "color": "teal" },
+    "sub": { "x": 0, "y": -250, "text": "A calm JARVIS-style operator console. Three surfaces (Work · Assistant · Lab), everything else via Ctrl+K. Dark and cool-toned — cyan/teal, never rose. Glow is reserved for what is live. Every state pairs colour with an icon + label. WCAG AA, visible focus, reduced-motion aware, Windows 11 native.", "size": "l", "maxW": 1440, "color": "gray" },
+    "n_surfaces": { "x": 0, "y": 950, "text": "The three surfaces + Home", "kind": "title1", "maxW": 1440, "color": "teal" },
+    "n_tools": { "x": 1520, "y": 950, "text": "Tool launcher — hover / focus a box to reveal actions", "size": "l", "maxW": 1440, "color": "gray" }
+  },
+  "designSystems": []
+}

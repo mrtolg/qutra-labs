@@ -1,0 +1,188 @@
+/* The one navigation bar's second row. The row for the
+   chosen area slides in under the top bar, and one highlight glides between
+   its sections, as in the top bar. base.css removes the slide and the glide
+   under reduced motion, so the row then simply appears. */
+.subnav {
+  flex: none;
+  height: 40px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+}
+.subnav__in {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding: 0 14px;
+  animation: subnav-in 240ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@keyframes subnav-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.subnav__tabs {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.subnav__tab {
+  z-index: 1;
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 7px;
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font: 600 12.5px/1 var(--font-ui);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--dur-1) ease,
+    background-color var(--dur-1) ease;
+}
+.subnav__tab:hover:not(:disabled) {
+  color: var(--ink);
+  background: color-mix(in oklch, var(--primary) 6%, transparent);
+}
+.subnav__tab:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+/* The top bar switches areas with a raised pill; this row's sections are
+   tabs, marked by a line on the row's edge, so the two levels never look
+   alike. Before the line is measured, the current section
+   carries it itself. */
+.subnav__tab[aria-current="page"] {
+  color: var(--ink);
+}
+.subnav__tab[aria-current="page"]::after,
+.subnav__thumb {
+  border-radius: 2px;
+  background: var(--primary);
+}
+.subnav__tab[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  right: 10px;
+  bottom: -6px;
+  left: 10px;
+  height: 2px;
+}
+.subnav__tabs.has-thumb .subnav__tab[aria-current="page"]::after {
+  display: none;
+}
+.subnav__thumb {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  pointer-events: none;
+  transition:
+    transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    width 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+@media (forced-colors: active) {
+  .subnav__tab[aria-current="page"] {
+    outline: 2px solid CanvasText;
+  }
+}
+.subnav__n {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--surface-pressed);
+  color: var(--muted);
+  font: 600 11px/18px var(--font-ui);
+  text-align: center;
+}
+.subnav__n.is-live {
+  background: var(--primary-soft);
+  color: var(--accent-text);
+}
+/* Which engagement the Lab's views belong to. */
+.subnav__eng {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 7px;
+  max-width: 240px;
+  height: 28px;
+  padding: 0 11px;
+  border: 1px solid color-mix(in oklch, var(--primary) 38%, transparent);
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--accent-text);
+  font: 600 12px/1 var(--font-ui);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-1) ease,
+    border-color var(--dur-1) ease;
+}
+.subnav__eng:hover {
+  border-color: color-mix(in oklch, var(--primary) 60%, transparent);
+  background: color-mix(in oklch, var(--primary) 18%, transparent);
+}
+.subnav__eng-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.subnav__actions {
+  display: flex;
+  flex: none;
+  gap: 6px;
+  margin-left: auto;
+}
+.subnav__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font: 600 12px/1 var(--font-ui);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-1) ease,
+    border-color var(--dur-1) ease,
+    color var(--dur-1) ease;
+}
+.subnav__action:hover {
+  border-color: color-mix(in oklch, var(--primary) 40%, transparent);
+  background: color-mix(in oklch, var(--primary) 7%, transparent);
+  color: var(--ink);
+}
+/* A conversation's title can be long; the tab keeps to a readable width. */
+.subnav__conv-t {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Every investigation, first in the Lab's row, set apart from the open
+   investigation's sections by a hairline. */
+.subnav__div {
+  flex: none;
+  width: 1px;
+  height: 18px;
+  background: var(--border-strong);
+}

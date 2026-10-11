@@ -1,0 +1,47 @@
+name: Release
+
+# Tag-triggered Windows build. Push a tag like v0.1.0 to build the installer
+# and publish a draft GitHub Release with the artifacts.
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: QutraApp/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: QutraApp/src-tauri
+      - run: npm ci
+        working-directory: QutraApp
+
+      # Code signing is optional and secret-driven. Provide the secrets
+      # WINDOWS_CERTIFICATE (base64 .pfx) and WINDOWS_CERTIFICATE_PASSWORD to
+      # enable it; without them the build produces an unsigned installer.
+      - name: Build Tauri app (Windows installer)
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # TAURI_SIGNING_PRIVATE_KEY / _PASSWORD are for the updater, not
+          # Authenticode; leave unset unless you use the updater.
+        with:
+          projectPath: QutraApp
+          tagName: ${{ github.ref_name }}
+          releaseName: "Qutra Labs ${{ github.ref_name }}"
+          releaseBody: "See CHANGELOG.md for details."
+          releaseDraft: true
+          prerelease: false
+          args: --bundles nsis,msi

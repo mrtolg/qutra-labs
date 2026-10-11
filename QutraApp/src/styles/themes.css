@@ -1,0 +1,284 @@
+/* ============================================================
+   Qutra Labs themes — solid surfaces by default.
+   Choices: Qutra Labs, HUD, Catppuccin, High Contrast. Every window is
+   flat and opaque: no OS window effects, no CSS backdrop-filter / glass.
+   Body text / action labels checked in src/lib/theme.contrast.test.ts.
+   ============================================================ */
+
+/* Qutra Labs light — :root in tokens.css is the base; explicit for studio. */
+[data-theme="contextos"][data-mode="light"],
+[data-theme="contextRose"][data-mode="light"],
+[data-theme="hud"][data-mode="light"] {
+  color-scheme: light;
+}
+
+/* HUD dark — canvas tokens as oklch. First hud block so the contrast
+   test reads these values. Light HUD is not designed; light mode reuses
+   the Qutra Labs light group above. */
+[data-theme="hud"][data-mode="dark"] {
+  --bg: oklch(0.176 0.021 258.3);
+  --surface: oklch(0.202 0.023 254.3);
+  --surface-raised: oklch(0.244 0.033 254.5);
+  --surface-pressed: oklch(0.285 0.039 253.5);
+  --surface-sunken: oklch(0.148 0.015 256.7);
+  --ink: oklch(0.956 0.011 226.0);
+  --muted: oklch(0.803 0.029 236.3);
+  --faint: oklch(0.673 0.034 236.6);
+  --border: oklch(0.789 0.083 215.6 / 0.12);
+  --border-strong: oklch(0.789 0.083 215.6 / 0.22);
+  --border-control: oklch(0.55 0.05 215.6);
+  --primary: oklch(0.802 0.126 201.4);
+  --primary-hover: oklch(0.833 0.125 201.5);
+  --primary-active: oklch(0.738 0.120 202.5);
+  --primary-ink: oklch(0.234 0.039 218.4);
+  --primary-soft: oklch(0.802 0.126 201.4 / 0.10);
+  --primary-soft-strong: oklch(0.802 0.126 201.4 / 0.18);
+  --accent: oklch(0.737 0.124 178.1);
+  --accent-text: oklch(0.877 0.108 200.5);
+  --accent-soft: oklch(0.737 0.124 178.1 / 0.10);
+  --success: oklch(0.766 0.156 157.0);
+  --success-soft: oklch(0.766 0.156 157.0 / 0.10);
+  --warning: oklch(0.802 0.147 77.9);
+  --warning-soft: oklch(0.802 0.147 77.9 / 0.10);
+  --danger: oklch(0.698 0.194 18.3);
+  --danger-hover: oklch(0.789 0.124 14.7);
+  --danger-soft: oklch(0.698 0.194 18.3 / 0.10);
+  --danger-ink: oklch(0.176 0.021 258.3);
+  --info: oklch(0.756 0.135 244.1);
+  --info-soft: oklch(0.756 0.135 244.1 / 0.10);
+  --focus-ring: oklch(0.769 0.117 261.6);
+  --selection-bg: oklch(0.802 0.126 201.4 / 0.22);
+  --terminal-bg: oklch(0.143 0.015 255.2);
+  --chart-1: oklch(0.802 0.126 201.4);
+  --chart-2: oklch(0.737 0.124 178.1);
+  color-scheme: dark;
+}
+
+[data-theme="hud"] .btn--danger {
+  background: var(--danger-soft);
+  border-color: color-mix(in oklch, var(--danger) 40%, transparent);
+  color: var(--danger-hover);
+}
+[data-theme="hud"] .btn--danger:hover:not(:disabled) {
+  background: color-mix(in oklch, var(--danger) 18%, transparent);
+}
+
+[data-theme="hud"] body,
+[data-theme="hud"] .main {
+  background: transparent;
+}
+
+/* A flat ground (the quiet HUD). The coloured light
+   washes and the grid texture read as decoration on a screen that stays
+   open for hours; depth comes from the layered grounds and hairlines. */
+[data-theme="hud"] .shell {
+  background: var(--bg);
+}
+
+[data-theme="hud"] .topbar,
+[data-theme="hud"] .workbench {
+  position: relative;
+  z-index: 1;
+}
+
+/* Qutra Labs dark — graphite workbench, rose actions, solid panels. */
+[data-theme="contextos"][data-mode="dark"],
+[data-theme="contextRose"][data-mode="dark"] {
+  --bg: oklch(0.16 0.008 285);
+  --surface: oklch(0.2 0.01 285);
+  --surface-raised: oklch(0.24 0.012 285);
+  --surface-sunken: oklch(0.14 0.008 285);
+  --surface-pressed: oklch(0.18 0.01 285);
+  --ink: oklch(0.94 0.005 285);
+  --muted: oklch(0.72 0.012 285);
+  --faint: oklch(0.64 0.01 285);
+  --border: oklch(0.32 0.012 285);
+  --border-strong: oklch(0.42 0.014 285);
+  --border-control: oklch(0.52 0.012 285);
+  --primary: oklch(0.52 0.18 15);
+  --primary-hover: oklch(0.57 0.17 15);
+  --primary-active: oklch(0.47 0.17 15);
+  --primary-ink: oklch(0.99 0 0);
+  --primary-soft: oklch(0.52 0.18 15 / 0.16);
+  --primary-soft-strong: oklch(0.52 0.18 15 / 0.26);
+  --accent: oklch(0.72 0.09 220);
+  --accent-text: oklch(0.78 0.08 220);
+  --accent-soft: oklch(0.72 0.09 220 / 0.16);
+  --info: oklch(0.7 0.1 220);
+  --info-soft: oklch(0.7 0.1 220 / 0.14);
+  --focus-ring: oklch(0.75 0.12 220);
+  --selection-bg: oklch(0.62 0.18 15 / 0.22);
+  --chart-1: oklch(0.66 0.16 15);
+  --chart-2: oklch(0.7 0.1 220);
+  --shadow-1: 0 1px 2px oklch(0 0 0 / 0.35);
+  --shadow-2: 0 8px 24px oklch(0 0 0 / 0.4);
+  --shadow-3: 0 16px 40px oklch(0 0 0 / 0.5);
+  color-scheme: dark;
+}
+
+/* ---------------- High Contrast — accessibility, not decoration ------------ */
+[data-theme="highContrast"][data-mode="light"] {
+  --bg: oklch(1 0 0);
+  --surface: oklch(1 0 0);
+  --surface-raised: oklch(0.97 0 0);
+  --surface-sunken: oklch(0.94 0 0);
+  --surface-pressed: oklch(0.9 0 0);
+  --ink: oklch(0 0 0);
+  --muted: oklch(0.25 0 0);
+  --faint: oklch(0.35 0 0);
+  --border: oklch(0.15 0 0);
+  --border-strong: oklch(0 0 0);
+  --border-control: oklch(0 0 0);
+  --primary: oklch(0.35 0.18 265);
+  --primary-hover: oklch(0.3 0.18 265);
+  --primary-active: oklch(0.26 0.16 265);
+  --primary-ink: oklch(1 0 0);
+  --primary-soft: oklch(0.35 0.18 265 / 0.14);
+  --primary-soft-strong: oklch(0.35 0.18 265 / 0.22);
+  --accent: oklch(0.4 0.14 200);
+  --accent-text: oklch(0.28 0.12 200);
+  --accent-soft: oklch(0.4 0.14 200 / 0.16);
+  --success: oklch(0.35 0.12 145);
+  --success-soft: oklch(0.35 0.12 145 / 0.16);
+  --warning: oklch(0.45 0.14 75);
+  --warning-soft: oklch(0.55 0.14 75 / 0.2);
+  --danger: oklch(0.42 0.2 25);
+  --danger-soft: oklch(0.42 0.2 25 / 0.16);
+  --info: oklch(0.4 0.14 250);
+  --info-soft: oklch(0.4 0.14 250 / 0.14);
+  --focus-ring: oklch(0.35 0.2 265);
+  --selection-bg: oklch(0.35 0.18 265 / 0.2);
+  --shadow-1: 0 0 0 2px oklch(0 0 0);
+  --shadow-2: 0 0 0 2px oklch(0 0 0);
+  --shadow-3: 0 0 0 3px oklch(0 0 0);
+  color-scheme: light;
+}
+
+[data-theme="highContrast"][data-mode="dark"] {
+  --bg: oklch(0 0 0);
+  --surface: oklch(0.08 0 0);
+  --surface-raised: oklch(0.14 0 0);
+  --surface-sunken: oklch(0.04 0 0);
+  --surface-pressed: oklch(0.18 0 0);
+  --ink: oklch(1 0 0);
+  --muted: oklch(0.88 0 0);
+  --faint: oklch(0.78 0 0);
+  --border: oklch(0.85 0 0);
+  --border-strong: oklch(1 0 0);
+  --border-control: oklch(1 0 0);
+  --primary: oklch(0.78 0.16 250);
+  --primary-hover: oklch(0.84 0.14 250);
+  --primary-active: oklch(0.72 0.15 250);
+  --primary-ink: oklch(0 0 0);
+  --primary-soft: oklch(0.78 0.16 250 / 0.22);
+  --primary-soft-strong: oklch(0.78 0.16 250 / 0.32);
+  --accent: oklch(0.82 0.12 200);
+  --accent-text: oklch(0.88 0.1 200);
+  --accent-soft: oklch(0.82 0.12 200 / 0.2);
+  --success: oklch(0.8 0.14 145);
+  --success-soft: oklch(0.8 0.14 145 / 0.2);
+  --warning: oklch(0.82 0.14 85);
+  --warning-soft: oklch(0.82 0.14 85 / 0.22);
+  --danger: oklch(0.75 0.18 25);
+  --danger-soft: oklch(0.75 0.18 25 / 0.22);
+  --danger-ink: oklch(0 0 0);
+  --info: oklch(0.8 0.12 250);
+  --info-soft: oklch(0.8 0.12 250 / 0.2);
+  --focus-ring: oklch(0.9 0.12 100);
+  --selection-bg: oklch(0.78 0.16 250 / 0.35);
+  --shadow-1: 0 0 0 2px oklch(1 0 0);
+  --shadow-2: 0 0 0 2px oklch(1 0 0);
+  --shadow-3: 0 0 0 3px oklch(1 0 0);
+  color-scheme: dark;
+}
+
+[data-theme="highContrast"] :focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Forced / OS contrast — reinforce High Contrast tokens when asked. */
+@media (forced-colors: active) {
+  :root {
+    --border: CanvasText;
+    --border-strong: CanvasText;
+    --focus-ring: Highlight;
+  }
+}
+
+/* ============================================================
+   Catppuccin Mocha / Latte — offline mapped semantic tokens.
+   DECISION: one pack id; Latte = light, Mocha = dark flavor default.
+   Palette values adapted from Catppuccin (MIT); pinned for local use.
+   ============================================================ */
+
+[data-theme="catppuccin"][data-mode="light"],
+[data-pack="catppuccin"][data-mode="light"] {
+  --bg: oklch(0.96 0.01 90);
+  --surface: oklch(0.98 0.008 90);
+  --surface-raised: oklch(1 0.005 90);
+  --surface-sunken: oklch(0.93 0.012 90);
+  --surface-pressed: oklch(0.91 0.012 90);
+  --ink: oklch(0.35 0.04 260);
+  --muted: oklch(0.5 0.03 260);
+  --faint: oklch(0.52 0.02 260);
+  --border: oklch(0.86 0.02 260);
+  --border-strong: oklch(0.72 0.03 260);
+  --border-control: oklch(0.6 0.03 260);
+  --primary: oklch(0.55 0.14 300);
+  --primary-hover: oklch(0.5 0.15 300);
+  --primary-active: oklch(0.45 0.14 300);
+  --primary-ink: oklch(0.98 0.01 90);
+  --primary-soft: oklch(0.55 0.14 300 / 0.14);
+  --primary-soft-strong: oklch(0.55 0.14 300 / 0.24);
+  --accent: oklch(0.6 0.12 220);
+  --accent-text: oklch(0.45 0.1 220);
+  --accent-soft: oklch(0.6 0.12 220 / 0.14);
+  --info: oklch(0.6 0.12 230);
+  --info-soft: oklch(0.6 0.12 230 / 0.14);
+  --success: oklch(0.62 0.14 150);
+  --success-soft: oklch(0.62 0.14 150 / 0.14);
+  --warning: oklch(0.72 0.12 80);
+  --warning-soft: oklch(0.72 0.12 80 / 0.16);
+  --danger: oklch(0.58 0.16 25);
+  --danger-soft: oklch(0.58 0.16 25 / 0.14);
+  --focus-ring: oklch(0.6 0.14 300);
+  --selection-bg: oklch(0.55 0.14 300 / 0.22);
+  color-scheme: light;
+}
+
+[data-theme="catppuccin"][data-mode="dark"],
+[data-pack="catppuccin"][data-mode="dark"] {
+  --bg: oklch(0.22 0.03 270);
+  --surface: oklch(0.26 0.03 270);
+  --surface-raised: oklch(0.3 0.03 270);
+  --surface-sunken: oklch(0.19 0.025 270);
+  --surface-pressed: oklch(0.24 0.03 270);
+  --ink: oklch(0.9 0.02 270);
+  --muted: oklch(0.7 0.025 270);
+  --faint: oklch(0.66 0.02 270);
+  --border: oklch(0.36 0.03 270);
+  --border-strong: oklch(0.46 0.04 270);
+  --border-control: oklch(0.56 0.03 270);
+  --primary: oklch(0.72 0.12 300);
+  --primary-hover: oklch(0.76 0.11 300);
+  --primary-active: oklch(0.66 0.12 300);
+  --primary-ink: oklch(0.2 0.03 270);
+  --primary-soft: oklch(0.72 0.12 300 / 0.16);
+  --primary-soft-strong: oklch(0.72 0.12 300 / 0.26);
+  --accent: oklch(0.75 0.1 220);
+  --accent-text: oklch(0.8 0.09 220);
+  --accent-soft: oklch(0.75 0.1 220 / 0.16);
+  --info: oklch(0.74 0.1 230);
+  --info-soft: oklch(0.74 0.1 230 / 0.14);
+  --success: oklch(0.75 0.12 150);
+  --success-soft: oklch(0.75 0.12 150 / 0.16);
+  --warning: oklch(0.8 0.12 80);
+  --warning-soft: oklch(0.8 0.12 80 / 0.16);
+  --danger: oklch(0.7 0.14 25);
+  --danger-soft: oklch(0.7 0.14 25 / 0.16);
+  --danger-ink: oklch(0.2 0.03 270);
+  --focus-ring: oklch(0.78 0.1 300);
+  --selection-bg: oklch(0.72 0.12 300 / 0.28);
+  color-scheme: dark;
+}

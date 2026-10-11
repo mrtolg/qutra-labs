@@ -1,0 +1,6 @@
+-- Lockstep marker with app migration v6 (findings / evidence / reports).
+-- Findings, evidence, remediations, risk acceptances and reports are stored as
+-- collections in the generic `records(collection, id, data)` table, so no
+-- structural change is required. This marker keeps the native migration version
+-- aligned with the application schema version.
+UPDATE kv SET value = value WHERE key = 'meta';

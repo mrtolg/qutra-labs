@@ -1,0 +1,339 @@
+/* ============================================================
+   Local engine strip (ADR 0016). One rail -- engine, model, answer --
+   then the one step that stands between the user and a local answer,
+   then the models. Tokens only; motion only on the station that is
+   working, and none under reduced motion.
+   ============================================================ */
+
+.le {
+  display: grid;
+  gap: var(--sp-4);
+  padding: var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-3);
+  background: var(--surface-sunken);
+}
+
+.le--compact {
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+}
+
+.le-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.le-head__title {
+  font-size: var(--fs-11);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+.le-head__build {
+  font-size: var(--fs-11);
+  color: var(--faint);
+}
+
+/* --- The rail ------------------------------------------------ */
+
+.le-rail {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.le-station {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding-top: 22px;
+  min-width: 0;
+}
+
+/* The line from this station to the next: filled once this one is done. */
+.le-station:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 20px;
+  right: 8px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--border-strong);
+}
+
+.le-station--done:not(:last-child)::after {
+  background: var(--accent);
+}
+
+.le-dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  background: var(--surface-sunken);
+}
+
+.le-dot--done {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.le-dot--active {
+  border-color: var(--accent);
+  background: var(--surface-sunken);
+}
+
+.le-dot--attention {
+  border-color: var(--warning);
+  background: var(--warning-soft);
+}
+
+.le-dot--error {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.le-dot__ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  animation: le-ring 1.4s var(--ease-out) infinite;
+}
+
+@keyframes le-ring {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+.le-station__name {
+  font-size: var(--fs-11);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.le-station--done .le-station__name,
+.le-station--active .le-station__name {
+  color: var(--muted);
+}
+
+.le-station__value {
+  overflow: hidden;
+  font-size: var(--fs-13);
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- The one step ------------------------------------------- */
+
+.le-step {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+
+.le-step__text {
+  display: grid;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+
+.le-step__action {
+  flex: none;
+}
+
+.le-line {
+  margin: 0;
+  font-size: var(--fs-14);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.le-hint {
+  margin: 0;
+  max-width: 72ch;
+  font-size: var(--fs-12);
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.le-error {
+  margin: 0;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid color-mix(in oklch, var(--danger) 45%, transparent);
+  border-radius: var(--r-2);
+  background: var(--danger-soft);
+  font-size: var(--fs-12);
+  color: var(--ink);
+}
+
+.le-progress {
+  overflow: hidden;
+  height: 4px;
+  margin-top: var(--sp-2);
+  border-radius: 2px;
+  background: var(--surface-raised);
+}
+
+.le-progress__bar {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transform-origin: left center;
+  transition: transform 200ms linear;
+}
+
+/* --- The models ---------------------------------------------- */
+
+.le-manifest {
+  display: grid;
+  gap: var(--sp-2);
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--border);
+}
+
+.le-manifest__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.le-manifest__title {
+  margin: 0;
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.le-models {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.le-model {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: var(--row-h);
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--r-1);
+}
+
+.le-model + .le-model {
+  border-top: 1px solid var(--border);
+}
+
+.le-model--chosen {
+  background: var(--accent-soft);
+}
+
+.le-model__name {
+  overflow: hidden;
+  font-size: var(--fs-13);
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.le-model__meta {
+  font-size: var(--fs-12);
+  color: var(--faint);
+  white-space: nowrap;
+}
+
+.le-model__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--sp-1);
+  min-width: 72px;
+}
+
+.le-model__chosen {
+  padding: 0 var(--sp-2);
+  font-size: var(--fs-12);
+  font-weight: 600;
+  color: var(--accent-text);
+}
+
+.le-chip {
+  padding: 1px var(--sp-2);
+  border-radius: 999px;
+  font-size: var(--fs-11);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.le-chip--ready {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.le-chip--needs_prepare {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.le-chip--unsupported,
+.le-chip--unreadable {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+/* Chat surface: activity under the transcript while the engine works. */
+.le-activity {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0;
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .le-dot__ring {
+    animation: none;
+    opacity: 0.5;
+  }
+  .le-progress__bar {
+    transition: none;
+  }
+}
+
+[data-reduce-motion="true"] .le-dot__ring {
+  animation: none;
+  opacity: 0.5;
+}
+
+@media (max-width: 720px) {
+  .le-model {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .le-model__meta {
+    grid-column: 1;
+  }
+}

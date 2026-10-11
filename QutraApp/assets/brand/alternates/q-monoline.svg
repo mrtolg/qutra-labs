@@ -1,0 +1,33 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Qutra Labs monoline">
+  <!-- Alternate C: thinner monoline Q - marketing / large only -->
+  <defs>
+    <linearGradient id="qRed" gradientUnits="userSpaceOnUse" x1="240" y1="780" x2="820" y2="220">
+      <stop offset="0" stop-color="#5A0A10"/>
+      <stop offset="0.5" stop-color="#E11D26"/>
+      <stop offset="1" stop-color="#FF6A6E"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="#000000"/>
+
+  <path
+    fill="url(#qRed)"
+    d="
+      M 600 620
+      A 160 160 0 1 1 640 580
+      L 700 630
+      A 230 230 0 1 0 655 700
+      Z
+    "
+  />
+  <path
+    fill="url(#qRed)"
+    d="
+      M 560 560
+      L 610 515
+      L 780 695
+      L 730 740
+      Z
+    "
+  />
+</svg>

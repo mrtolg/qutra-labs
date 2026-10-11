@@ -1,0 +1,104 @@
+/* ============================================================
+   Purposeful motion. State + continuity only, never decoration.
+   Every animation here is neutralized by base.css under
+   prefers-reduced-motion and [data-reduce-motion="true"].
+   Curves: ease-out only (no bounce/elastic). Exits < entrances.
+   ============================================================ */
+
+/* Dialogs (not the command palette): scale/opacity enter via the top layer.
+   Palette, tabs, rail and the surface switcher are used hundreds of times
+   a day — they stay instant. */
+dialog.dialog[open] {
+  animation: dialog-in 180ms var(--ease-out);
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+dialog.dialog[open]::backdrop {
+  animation: backdrop-in 180ms var(--ease-out);
+}
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Menus (portal popovers): quick fade+lift. */
+.menu {
+  animation: menu-in 120ms var(--ease-out);
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Toasts: slide in from the right, non-blocking. */
+.toast {
+  animation: toast-in 200ms var(--ease-out);
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Tabs & segmented selection: colour only, never movement. */
+.tabs [role="tab"] {
+  transition:
+    color var(--dur-1) var(--ease-out),
+    border-color var(--dur-2) var(--ease-out);
+}
+.segmented button {
+  transition:
+    background-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out),
+    box-shadow var(--dur-1) var(--ease-out);
+}
+
+/* Row list insertion: gentle fade so a newly added item is trackable. */
+.row {
+  transition: background-color var(--dur-1) var(--ease-out);
+}
+
+/* Press feedback: the feedback people feel most. */
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.btn--icon:active:not(:disabled) {
+  transform: scale(0.95);
+}
+.btn {
+  transition:
+    background-color var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out),
+    color var(--dur-1) var(--ease-out),
+    box-shadow var(--dur-1) var(--ease-out),
+    transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Sidebar collapse already transitions width in app.css; ensure nav labels
+   fade rather than pop. */
+.nav-label {
+  transition: opacity var(--dur-1) var(--ease-out);
+}

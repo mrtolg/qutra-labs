@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "github",
+  "description": "GitHub read-only API broker. Two commands — GET allowlist and fixed GraphQL contributions. Token stays in the OS secure store; the renderer never receives a free-form URL or host.",
+  "windows": ["main"],
+  "permissions": []
+}

@@ -1,0 +1,45 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Qutra Labs">
+  <!--
+    Qutra Labs mark - vector master (faithful recreate).
+    Nearly-closed thick ring; geometric tail starts inside the bowl and
+    exits through a small gap at ~4-5 o'clock. Red gradient lit from top-right.
+  -->
+  <defs>
+    <linearGradient id="qRed" gradientUnits="userSpaceOnUse" x1="240" y1="780" x2="820" y2="220">
+      <stop offset="0" stop-color="#2A0408"/>
+      <stop offset="0.25" stop-color="#7A0E16"/>
+      <stop offset="0.58" stop-color="#D41C26"/>
+      <stop offset="0.85" stop-color="#F03238"/>
+      <stop offset="1" stop-color="#FF5258"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="#000000"/>
+
+  <!--
+    Open annulus. Center (500, 470). Outer R=300, inner R=204.
+    Gap only between ~38deg and ~58deg from +x (SVG y-down) = ~4-5 o'clock.
+  -->
+  <path
+    fill="url(#qRed)"
+    d="
+      M 617.1 637.1
+      A 204 204 0 1 1 667.1 587.1
+      L 745.6 642.1
+      A 300 300 0 1 0 672.1 715.6
+      Z
+    "
+  />
+
+  <!-- Tail: starts inside the bowl, exits through the gap -->
+  <path
+    fill="url(#qRed)"
+    d="
+      M 555 555
+      L 625 495
+      L 825 705
+      L 755 765
+      Z
+    "
+  />
+</svg>

@@ -1,0 +1,282 @@
+﻿/* Settings › Shortcuts: a ledger of actions and keycaps, grouped by area. */
+
+.settings-section.shortcuts {
+  max-width: 760px;
+}
+
+.shortcuts-tools {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.shortcuts-search-field {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+.shortcuts-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--muted);
+}
+.shortcuts-search:focus-within {
+  border-color: var(--primary);
+  color: var(--ink);
+}
+.shortcuts-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-13);
+  outline: none;
+}
+.shortcuts-intro {
+  margin: 10px 0 4px;
+  max-width: 68ch;
+  color: var(--muted);
+  font-size: var(--fs-12);
+  line-height: 1.5;
+}
+.shortcuts-empty {
+  margin: 24px 0;
+  color: var(--muted);
+  font-size: var(--fs-13);
+}
+
+.shortcuts-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface-raised);
+  font-size: var(--fs-13);
+}
+.shortcuts-confirm span {
+  flex: 1;
+}
+
+.shortcuts-group {
+  margin-top: 22px;
+}
+.shortcuts-group__title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 6px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--border);
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.shortcuts-group__count {
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.shortcuts-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.shortcut-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 16px;
+  padding: 5px 0 5px 10px;
+  border-bottom: 1px solid color-mix(in oklch, var(--border) 55%, transparent);
+  position: relative;
+}
+.shortcut-row:last-child {
+  border-bottom: 0;
+}
+/* A binding the user changed carries a thin accent edge. */
+.shortcut-row[data-changed]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 9px;
+  bottom: 9px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.shortcut-row__name {
+  min-width: 0;
+  font-size: var(--fs-13);
+  font-weight: 500;
+  color: var(--ink);
+}
+.shortcut-row__area {
+  color: var(--muted);
+  font-weight: 400;
+}
+.shortcut-row__binding {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.shortcut-row__actions {
+  display: inline-flex;
+  width: 60px;
+  justify-content: flex-end;
+  gap: 2px;
+}
+/* Remove and reset show on the row in hand, so the list is not a column of ✕. */
+@media (hover: hover) and (pointer: fine) {
+  .shortcut-row__actions {
+    opacity: 0;
+    transition: opacity 120ms var(--ease-out);
+  }
+  .shortcut-row:hover .shortcut-row__actions,
+  .shortcut-row:focus-within .shortcut-row__actions {
+    opacity: 1;
+  }
+}
+.shortcut-row__hint,
+.shortcut-row__error {
+  grid-column: 1 / -1;
+  margin: 4px 0 2px;
+  font-size: var(--fs-12);
+}
+.shortcut-row__hint {
+  color: var(--muted);
+}
+.shortcut-row__error {
+  color: var(--danger);
+}
+
+/* The binding is its own button: click, then press the new keys. */
+.shortcut-keys {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 132px;
+  min-height: 32px;
+  padding: 3px 6px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 140ms var(--ease-out),
+    border-color 140ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .shortcut-keys:hover {
+    border-color: var(--border);
+    background: var(--surface-raised);
+  }
+}
+.shortcut-keys:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+.shortcut-keys[data-recording] {
+  justify-content: center;
+  border: 1px dashed var(--accent);
+  background: var(--accent-soft);
+  animation: shortcut-listen 1.4s ease-in-out infinite;
+}
+.shortcut-keys__prompt {
+  color: var(--accent-text);
+  font-size: var(--fs-12);
+  font-weight: 600;
+}
+.shortcut-keys__none {
+  color: var(--faint);
+  font-size: var(--fs-12);
+}
+
+.keycaps {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.keycap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--surface-raised);
+  color: var(--ink);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1;
+}
+.keycaps__more {
+  color: var(--accent-text);
+  font-size: var(--fs-12);
+}
+
+.shortcut-conflict {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 6px 0 8px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in oklch, var(--warning) 70%, transparent);
+  border-radius: 8px;
+  background: var(--warning-soft);
+}
+.shortcut-conflict__icon {
+  flex: none;
+  margin-top: 2px;
+  color: var(--warning);
+}
+.shortcut-conflict__text {
+  flex: 1;
+  font-size: var(--fs-13);
+  line-height: 1.45;
+}
+.shortcut-conflict__text p {
+  margin: 0;
+}
+.shortcut-conflict__text p + p {
+  margin-top: 4px;
+}
+.shortcut-conflict__actions {
+  display: flex;
+  flex: none;
+  gap: 6px;
+}
+
+@keyframes shortcut-listen {
+  50% {
+    border-color: color-mix(in oklch, var(--accent) 45%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shortcut-keys[data-recording] {
+    animation: none;
+  }
+}
