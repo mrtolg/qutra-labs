@@ -650,6 +650,7 @@ export const deferredTr: Record<DeferredKey, string> = {
   "jarvis.error.modelUnreadable": "Bu model dosyası okunamadı. Başka bir model seçin.",
   "jarvis.error.engineStartFailed": "Yerel motor başlamadı. Yeniden deneyin.",
   "jarvis.error.engineLoadFailed": "Yerel motor bu modeli yükleyemedi. Yeniden deneyin ya da başka bir model seçin.",
+  "jarvis.error.engineModelMetadata": "Bu modelin dosyasında yerel motorun okuyamadığı ayarlar var. Başka bir model ya da bu modelin başka bir sürümünü seçin.",
   "jarvis.error.engineOutOfMemory": "Model belleğe sığmadı. Diğer uygulamaları kapatıp yeniden deneyin ya da daha küçük bir model seçin.",
   "jarvis.error.engineLoadTimeout": "Modelin yüklenmesi çok uzun sürdü. Yeniden deneyin.",
   "jarvis.error.contextExceeded": "Bu konuşma modelin bağlam boyutunu aştı. Yeni bir sohbet başlatın ya da Ayarlar'dan bağlam boyutunu büyütün.",

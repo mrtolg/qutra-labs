@@ -127,6 +127,9 @@ async function settle(page: Page) {
   await page.locator(".skeleton").first().waitFor({ state: "detached", timeout: 15_000 }).catch(() => undefined);
   const close = page.locator(".toast-region .toast .btn--icon");
   while ((await close.count()) > 0) await close.first().click();
+  // The launch greeting floats over the page by design; close it before measuring text.
+  const greeting = page.getByTestId("assistant-greeting").getByRole("button");
+  if ((await greeting.count()) > 0) await greeting.first().click();
   await page.waitForTimeout(450);
 }
 

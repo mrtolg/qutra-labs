@@ -12,6 +12,7 @@
 
 pub mod binary;
 pub mod commands;
+pub mod compat;
 pub mod error;
 pub mod gguf;
 #[cfg(test)]
@@ -201,10 +202,11 @@ impl LocalEngine {
         }
     }
 
-    /// Write a text-only copy of an Ollama model into the app's models
-    /// folder: to a `.partial` name first, renamed only once complete, with
-    /// a sidecar that names the Ollama model and digest it came from.
-    /// Ollama's store is only read.
+    /// Write a copy of an Ollama model into the app's models folder, without
+    /// its vision layers and with the `compat` rules applied: to a
+    /// `.partial` name first, renamed only once complete, with a sidecar that
+    /// names the Ollama model and digest it came from. Ollama's store is
+    /// only read.
     pub fn prepare_copy(
         &self,
         model: &LocalModel,
@@ -225,7 +227,12 @@ impl LocalEngine {
         if free < needed {
             return Err(LocalEngineError::NotEnoughDisk { needed, free });
         }
-        let target = unique_name(&self.models_dir, &models::prepared_file_name(&model.id));
+        // A copy this app wrote earlier, out of date, is replaced in place:
+        // the new one is renamed over it only once it is complete.
+        let target = match &model.prepared_path {
+            Some(old) if old.parent() == Some(self.models_dir.as_path()) => old.clone(),
+            _ => unique_name(&self.models_dir, &models::prepared_file_name(&model.id)),
+        };
         let partial = PathBuf::from(format!("{}{}", target.display(), models::PARTIAL_SUFFIX));
         let written = gguf::write_plan(&source, &partial, &plan, progress, cancel);
         if let Err(err) = written {
@@ -246,10 +253,13 @@ impl LocalEngine {
         };
         let sidecar = PathBuf::from(format!("{}{}", target.display(), models::PREPARED_SUFFIX));
         let record = serde_json::to_vec_pretty(&record).map_err(|_| LocalEngineError::Io)?;
+        let replacing = target.exists();
         if std::fs::write(&sidecar, record).is_err() || std::fs::rename(&partial, &target).is_err()
         {
             let _ = std::fs::remove_file(&partial);
-            let _ = std::fs::remove_file(&sidecar);
+            if !replacing {
+                let _ = std::fs::remove_file(&sidecar);
+            }
             return Err(LocalEngineError::Io);
         }
         Ok(target)
@@ -439,6 +449,121 @@ mod tests {
         let done = local.finish(&Err(LocalEngineError::Cancelled)).unwrap();
         assert_eq!(done.phase, "cancelled");
         assert!(local.begin(TaskKind::Prepare, None, 10).is_ok());
+    }
+
+    const HUIHUI: &str = "huihui_ai/Qwen3.6-abliterated:27b";
+    const HUIHUI_DIGEST: &str =
+        "sha256:9ea43be17d50a027501aa6adb51086291f1911eebca7e3761974440349b4c168";
+
+    /// What Ollama's file for a Qwen 3.5 holds that this build reads
+    /// differently: three rope sections and a multi-token-prediction layer.
+    /// No vision layers share the file.
+    fn qwen35_file(path: &Path) {
+        use super::gguf::fixture::{write, Value};
+        write(
+            path,
+            &[
+                ("general.architecture", Value::Str("qwen35")),
+                (
+                    "qwen35.rope.dimension_sections",
+                    Value::I32s(vec![11, 11, 10]),
+                ),
+            ],
+            &[("token_embd.weight", 64), ("mtp.fc.weight", 32)],
+        );
+    }
+
+    fn huihui_engine() -> (LocalEngine, tempfile::TempDir, tempfile::TempDir) {
+        let app = tempfile::tempdir().unwrap();
+        let store = tempfile::tempdir().unwrap();
+        let root = store.path();
+        let dir = root.join("manifests/registry.ollama.ai/huihui_ai/Qwen3.6-abliterated");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::create_dir_all(root.join("blobs")).unwrap();
+        std::fs::write(dir.join("27b"), models::tests::manifest(HUIHUI_DIGEST, 0)).unwrap();
+        qwen35_file(&root.join(format!("blobs/sha256-{}", &HUIHUI_DIGEST[7..])));
+        let mut local = LocalEngine::new(app.path());
+        local.ollama_root = Some(root.to_path_buf());
+        (local, app, store)
+    }
+
+    #[test]
+    fn an_ollama_model_with_settings_the_engine_cannot_read_is_prepared_like_one_with_vision_layers(
+    ) {
+        let (local, app, store) = huihui_engine();
+        let before = walk(store.path());
+        let model = local.find(HUIHUI).unwrap();
+        assert_eq!(model.state, ModelState::NeedsPrepare { write_bytes: 64 });
+
+        let path = local
+            .prepare_copy(&model, &|_| {}, &AtomicBool::new(false))
+            .unwrap();
+        assert_eq!(walk(store.path()), before, "Ollama's store is only read");
+        assert_eq!(
+            path,
+            app.path()
+                .join("models")
+                .join("huihui_ai-Qwen3.6-abliterated-27b.gguf")
+        );
+        let ready = local.find(HUIHUI).unwrap();
+        assert_eq!(ready.state, ModelState::Ready);
+        assert!(ready.prepared);
+        let copy = gguf::read_header(&path).unwrap();
+        assert!(copy.summary().unwrap().compat.is_empty());
+        assert_eq!(copy.tensors.len(), 1);
+    }
+
+    #[test]
+    fn a_copy_made_before_the_rules_existed_is_written_again_in_place() {
+        let (local, app, store) = huihui_engine();
+        let models_dir = app.path().join("models");
+        std::fs::create_dir_all(&models_dir).unwrap();
+        // What an older version wrote: the copy with Ollama's settings as they were.
+        let old = models_dir.join("huihui_ai-Qwen3.6-abliterated-27b.gguf");
+        qwen35_file(&old);
+        let record = PreparedRecord {
+            ollama_name: HUIHUI.into(),
+            source_digest: HUIHUI_DIGEST.into(),
+            prepared_at_ms: 1,
+        };
+        std::fs::write(
+            format!("{}{}", old.display(), models::PREPARED_SUFFIX),
+            serde_json::to_string(&record).unwrap(),
+        )
+        .unwrap();
+        let before = walk(store.path());
+
+        let stale = local.find(HUIHUI).unwrap();
+        assert!(stale.prepared, "a copy exists");
+        assert!(
+            matches!(stale.state, ModelState::NeedsPrepare { .. }),
+            "{:?}",
+            stale.state
+        );
+        assert_eq!(
+            local.models().iter().filter(|m| m.id == HUIHUI).count(),
+            1,
+            "listed once"
+        );
+
+        let path = local
+            .prepare_copy(&stale, &|_| {}, &AtomicBool::new(false))
+            .unwrap();
+        assert_eq!(path, old, "no second copy beside it");
+        assert_eq!(walk(&models_dir).len(), 2, "the file and its record");
+        assert_eq!(walk(store.path()), before);
+        assert_eq!(local.find(HUIHUI).unwrap().state, ModelState::Ready);
+    }
+
+    #[test]
+    fn a_file_the_user_put_in_the_models_folder_is_never_offered_for_rewriting() {
+        let (local, app, _store) = huihui_engine();
+        let models_dir = app.path().join("models");
+        std::fs::create_dir_all(&models_dir).unwrap();
+        qwen35_file(&models_dir.join("mine.gguf"));
+        // There is no Ollama file to write it from; if it fails to load the
+        // engine's own reason is shown.
+        assert_eq!(local.find("mine").unwrap().state, ModelState::Ready);
     }
 
     #[test]

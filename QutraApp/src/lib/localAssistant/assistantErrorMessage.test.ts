@@ -56,6 +56,7 @@ describe("assistantErrorMessage (ADR 0012)", () => {
       engine_start_failed: "jarvis.error.engineStartFailed",
       engine_load_failed: "jarvis.error.engineLoadFailed",
       engine_out_of_memory: "jarvis.error.engineOutOfMemory",
+      engine_model_metadata: "jarvis.error.engineModelMetadata",
       engine_load_timeout: "jarvis.error.engineLoadTimeout",
       context_exceeded: "jarvis.error.contextExceeded",
       engine_restarted: "jarvis.error.engineRestarted",

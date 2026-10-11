@@ -173,6 +173,7 @@ pub fn local_engine_code(err: &crate::local_engine::LocalEngineError) -> &'stati
         E::ModelUnsupported { .. } => "model_unsupported",
         E::ModelUnreadable => "model_unreadable",
         E::LoadFailed { reason } if reason == "out_of_memory" => "engine_out_of_memory",
+        E::LoadFailed { reason } if reason == "model_metadata" => "engine_model_metadata",
         E::LoadFailed { .. } => "engine_load_failed",
         E::LoadTimeout => "engine_load_timeout",
         E::Busy => "busy",
@@ -281,6 +282,12 @@ mod tests {
                 reason: "tensor_count".into()
             }),
             "engine_load_failed"
+        );
+        assert_eq!(
+            code(E::LoadFailed {
+                reason: "model_metadata".into()
+            }),
+            "engine_model_metadata"
         );
         assert_eq!(code(E::LoadTimeout), "engine_load_timeout");
         assert_eq!(code(E::Cancelled), "cancelled");

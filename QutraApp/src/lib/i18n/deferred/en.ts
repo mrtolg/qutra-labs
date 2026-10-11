@@ -648,6 +648,7 @@ export const deferredEn = {
   "jarvis.error.modelUnreadable": "This model file couldn't be read. Pick another model.",
   "jarvis.error.engineStartFailed": "The local engine didn't start. Try again.",
   "jarvis.error.engineLoadFailed": "The local engine couldn't load this model. Try again, or pick another model.",
+  "jarvis.error.engineModelMetadata": "This model's file has settings the local engine can't read. Pick another model, or another build of this one.",
   "jarvis.error.engineOutOfMemory": "The model didn't fit in memory. Close other apps and try again, or pick a smaller model.",
   "jarvis.error.engineLoadTimeout": "The model took too long to load. Try again.",
   "jarvis.error.contextExceeded": "This conversation is longer than the model's context. Start a new conversation, or raise the context size in Settings.",

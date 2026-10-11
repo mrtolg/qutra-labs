@@ -112,6 +112,8 @@ export function assistantErrorMessage(
       return t("jarvis.error.engineLoadFailed");
     case "engine_out_of_memory":
       return t("jarvis.error.engineOutOfMemory");
+    case "engine_model_metadata":
+      return t("jarvis.error.engineModelMetadata");
     case "engine_load_timeout":
       return t("jarvis.error.engineLoadTimeout");
     case "context_exceeded":

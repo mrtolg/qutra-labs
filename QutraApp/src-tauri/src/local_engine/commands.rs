@@ -163,7 +163,12 @@ pub async fn local_model_prepare(
             return Err(LocalEngineError::NotEnoughDisk { needed, free });
         }
     }
-    let cancel = local.begin(TaskKind::Prepare, Some(model), write_bytes)?;
+    let cancel = local.begin(TaskKind::Prepare, Some(model.clone()), write_bytes)?;
+    // An out-of-date copy is replaced in place; Windows will not replace a
+    // file the engine has open.
+    if found.prepared && local.engine.running_model().as_deref() == Some(model.as_str()) {
+        local.engine.stop().await;
+    }
     let started = local.task().ok_or(LocalEngineError::Busy)?;
     let worker = app.clone();
     tauri::async_runtime::spawn_blocking(move || {

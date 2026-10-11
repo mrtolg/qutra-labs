@@ -14,7 +14,7 @@ import {
   type TaskEvent,
 } from "@/lib/localEngine/client";
 import { resetAutoEngineForTesting, useAutoEngine } from "@/lib/localEngine/autoEngine";
-import { LocalEnginePanel } from "./LocalEnginePanel";
+import { LocalEnginePanel, engineErrorMessage } from "./LocalEnginePanel";
 
 const GB = 1024 ** 3;
 
@@ -98,6 +98,21 @@ function fakeClient(engine: EngineReport, models: EngineModel[], freeBytes = 90 
   const emit = (event: string, payload: unknown) => act(() => handlers.get(event)?.(payload));
   return { client: client as unknown as LocalEngineClient, mock: client, emit };
 }
+
+describe("engineErrorMessage", () => {
+  const key = (k: string) => k;
+  it("says when the model's own settings are what the engine refused, apart from the generic failure", () => {
+    expect(engineErrorMessage(key as never, { code: "load_failed", reason: "model_metadata" }, "en")).toBe(
+      "jarvis.error.engineModelMetadata",
+    );
+    expect(engineErrorMessage(key as never, { code: "load_failed", reason: "out_of_memory" }, "en")).toBe(
+      "jarvis.error.engineOutOfMemory",
+    );
+    expect(engineErrorMessage(key as never, { code: "load_failed", reason: "tensor_count" }, "en")).toBe(
+      "jarvis.error.engineLoadFailed",
+    );
+  });
+});
 
 describe("LocalEnginePanel", () => {
   it("asks for the one-time engine download and says from where and how big", async () => {

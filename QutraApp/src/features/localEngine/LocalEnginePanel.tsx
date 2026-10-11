@@ -48,11 +48,9 @@ export function engineErrorMessage(
         free: formatBytes(error.free, locale),
       });
     case "load_failed":
-      return t(
-        error.reason === "out_of_memory"
-          ? "jarvis.error.engineOutOfMemory"
-          : "jarvis.error.engineLoadFailed",
-      );
+      if (error.reason === "out_of_memory") return t("jarvis.error.engineOutOfMemory");
+      if (error.reason === "model_metadata") return t("jarvis.error.engineModelMetadata");
+      return t("jarvis.error.engineLoadFailed");
     case "model_unsupported":
       return t("jarvis.error.modelUnsupported");
     case "cancelled":

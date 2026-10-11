@@ -146,6 +146,7 @@ const READINESS_CODES = new Set([
   "engine_start_failed",
   "engine_load_failed",
   "engine_out_of_memory",
+  "engine_model_metadata",
   "engine_load_timeout",
 ]);
 

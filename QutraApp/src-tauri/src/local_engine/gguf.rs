@@ -12,6 +12,8 @@ use std::io::{self, BufReader, BufWriter, Read, Seek, SeekFrom, Write};
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering};
 
+use super::compat;
+
 const MAGIC: &[u8; 4] = b"GGUF";
 const MAX_KV: u64 = 4096;
 const MAX_TENSORS: u64 = 65_536;
@@ -27,8 +29,8 @@ const DEFAULT_ALIGNMENT: u64 = 32;
 const MAX_ALIGNMENT: u64 = 64 << 10;
 
 const T_BOOL: u32 = 7;
-const T_STRING: u32 = 8;
-const T_ARRAY: u32 = 9;
+pub(super) const T_STRING: u32 = 8;
+pub(super) const T_ARRAY: u32 = 9;
 const T_I32: u32 = 5;
 
 /// Token types, as llama.cpp reads them.
@@ -39,7 +41,7 @@ const TOKEN_BYTE: i32 = 6;
 /// the vision tower, its projector, and an audio tower.
 const TOWER_PREFIXES: [&str; 3] = ["v", "mm", "a"];
 
-fn scalar_size(ty: u32) -> Option<u64> {
+pub(super) fn scalar_size(ty: u32) -> Option<u64> {
     match ty {
         0 | 1 | 7 => Some(1),
         2 | 3 => Some(2),
@@ -159,6 +161,9 @@ pub struct Summary {
     pub text_tensors: usize,
     /// Bytes a text-only copy writes.
     pub text_bytes: u64,
+    /// The compatibility rules that would change this file (`compat`).
+    /// Empty once a copy has been written with them applied.
+    pub compat: Vec<&'static str>,
 }
 
 struct Counted<R> {
@@ -372,10 +377,12 @@ impl Header {
         let template = self.str_value("tokenizer.chat_template");
         let mut text_bytes = 0;
         let mut tower = 0;
+        let mut kept = 0;
         for (tensor, span) in self.tensors.iter().zip(&spans) {
             if tensor.is_tower() {
                 tower += 1;
-            } else {
+            } else if compat::dropped_by(&self.kvs, tensor).is_none() {
+                kept += 1;
                 text_bytes += span;
             }
         }
@@ -384,8 +391,9 @@ impl Header {
             has_template: template.is_some(),
             template_tools: template.is_some_and(|t| t.contains("tool")),
             tower_tensors: tower,
-            text_tensors: self.tensors.len() - tower,
+            text_tensors: kept,
             text_bytes,
+            compat: compat::pending(&self.kvs, &self.tensors),
         })
     }
 }
@@ -510,7 +518,7 @@ pub fn is_ollama_gemma4(header: &Header) -> bool {
 }
 
 /// Plan a copy that keeps the language model and drops the vision and
-/// audio layers. `template` fills a missing Gemma 4 chat template.
+/// audio layers, with the `compat` rules applied. `template` fills a missing Gemma 4 chat template.
 pub fn plan_text_only(header: &Header, template: Option<&str>) -> Result<TextOnlyPlan, GgufError> {
     let spans = header.spans()?;
     let arch = header
@@ -524,12 +532,15 @@ pub fn plan_text_only(header: &Header, template: Option<&str>) -> Result<TextOnl
     if is_ollama_gemma4(header) {
         fix_gemma4_tokenizer(&mut kvs, template);
     }
+    compat::fix_kvs(&mut kvs);
 
     let kept: Vec<(&TensorInfo, u64)> = header
         .tensors
         .iter()
         .zip(spans)
-        .filter(|(tensor, _)| !tensor.is_tower())
+        .filter(|(tensor, _)| {
+            !tensor.is_tower() && compat::dropped_by(&header.kvs, tensor).is_none()
+        })
         .collect();
 
     let mut out = Vec::new();
@@ -891,6 +902,86 @@ mod tests {
         assert_eq!(summary.tower_tensors, 0);
         assert!(summary.template_tools);
         assert!(!is_ollama_gemma4(&header));
+    }
+
+    /// Ollama's Qwen 3.5: three rope sections, vision layers and
+    /// multi-token-prediction layers in the same file.
+    fn ollama_qwen35(path: &Path) {
+        write(
+            path,
+            &[
+                ("general.architecture", Value::Str("qwen35")),
+                ("qwen35.block_count", Value::U32(1)),
+                (
+                    "qwen35.rope.dimension_sections",
+                    Value::I32s(vec![11, 11, 10]),
+                ),
+                ("qwen35.vision.block_count", Value::U32(2)),
+            ],
+            &[
+                ("token_embd.weight", 64),
+                ("blk.0.attn_q.weight", 96),
+                ("mtp.fc.weight", 32),
+                ("v.blk.0.w", 32),
+                ("output.weight", 48),
+            ],
+        );
+    }
+
+    #[test]
+    fn a_header_that_the_compat_rules_would_change_says_so() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("m.gguf");
+        ollama_qwen35(&path);
+        let summary = read_header(&path).unwrap().summary().unwrap();
+        assert_eq!(summary.compat, vec!["rope_sections_pad", "mtp_unused"]);
+        assert_eq!(summary.tower_tensors, 1);
+        assert_eq!(summary.text_tensors, 3);
+        assert_eq!(
+            summary.text_bytes,
+            64 + 96 + 64,
+            "the mtp and vision layers are not written"
+        );
+    }
+
+    #[test]
+    fn a_copy_of_a_qwen35_has_four_rope_sections_and_no_mtp_layers() {
+        let dir = tempfile::tempdir().unwrap();
+        let source = dir.path().join("src.gguf");
+        let target = dir.path().join("out.gguf");
+        ollama_qwen35(&source);
+        let header = read_header(&source).unwrap();
+        let plan = plan_text_only(&header, None).unwrap();
+        assert_eq!(plan.total_bytes, plan.header.len() as u64 + 64 + 96 + 64);
+        write_plan(&source, &target, &plan, &|_| {}, &AtomicBool::new(false)).unwrap();
+
+        let copy = read_header(&target).unwrap();
+        let sections = copy.get("qwen35.rope.dimension_sections").unwrap();
+        assert_eq!(sections.ty, T_ARRAY);
+        let mut want = T_I32.to_le_bytes().to_vec();
+        want.extend_from_slice(&4u64.to_le_bytes());
+        for v in [11i32, 11, 10, 0] {
+            want.extend_from_slice(&v.to_le_bytes());
+        }
+        assert_eq!(sections.raw, want);
+        let kept = ["token_embd.weight", "blk.0.attn_q.weight", "output.weight"];
+        let names: Vec<_> = copy.tensors.iter().map(|t| t.name.as_str()).collect();
+        assert_eq!(names, kept);
+        // The tensors that stay are the source's bytes.
+        let src = std::fs::read(&source).unwrap();
+        let out = std::fs::read(&target).unwrap();
+        for name in kept {
+            let old = header.tensors.iter().find(|t| t.name == name).unwrap();
+            let new = copy.tensors.iter().find(|t| t.name == name).unwrap();
+            let size = old.dims[0] as usize;
+            let a = (header.data_start + old.offset) as usize;
+            let b = (copy.data_start + new.offset) as usize;
+            assert_eq!(src[a..a + size], out[b..b + size], "{name}");
+        }
+        // Nothing is left for the rules to do.
+        assert!(copy.summary().unwrap().compat.is_empty());
+        // The source file was only read.
+        assert_eq!(read_header(&source).unwrap().kvs, header.kvs);
     }
 
     #[test]
