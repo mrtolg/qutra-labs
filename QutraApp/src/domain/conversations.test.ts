@@ -3,6 +3,7 @@ import {
   ConversationSchema,
   MAX_CLOUD_CONVERSATION_MESSAGES,
   MAX_CONVERSATION_MESSAGES,
+  AUTO_TITLE_LENGTH,
   MAX_TITLE_LENGTH,
   boundMessages,
   conversationFromLegacyHistory,
@@ -63,9 +64,31 @@ describe("titleFromMessages", () => {
     ).toBe("scan the lab subnet");
   });
 
-  it("caps a long question at the title length", () => {
+  it("cuts a long question at a word, about 40 characters in", () => {
+    const title = titleFromMessages([
+      message({ content: "Explain how the TLS handshake works between a browser and a server in detail" }),
+    ]);
+    expect(title).toBe("Explain how the TLS handshake works…");
+    expect(title.length).toBeLessThanOrEqual(AUTO_TITLE_LENGTH + 1);
+  });
+
+  it("cuts an unbroken string where it stands and never exceeds the stored limit", () => {
     const title = titleFromMessages([message({ content: "a".repeat(500) })]);
-    expect(title).toHaveLength(MAX_TITLE_LENGTH);
+    expect(title).toBe("a".repeat(AUTO_TITLE_LENGTH) + "…");
+    expect(title.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
+  });
+
+  it("drops opening pleasantries and closing punctuation", () => {
+    expect(titleFromMessages([message({ content: "Merhaba, lütfen nmap çıktısını özetle." })])).toBe(
+      "nmap çıktısını özetle",
+    );
+    expect(titleFromMessages([message({ content: "Hey, can you list open ports!" })])).toBe(
+      "list open ports",
+    );
+  });
+
+  it("keeps the question when nothing but a greeting was typed", () => {
+    expect(titleFromMessages([message({ content: "Hello" })])).toBe("Hello");
   });
 
   it("is empty when nothing was asked yet", () => {

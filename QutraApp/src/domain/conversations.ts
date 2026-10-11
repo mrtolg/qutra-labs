@@ -135,12 +135,36 @@ export type JarvisMemory = z.infer<typeof JarvisMemorySchema>;
 
 export type IdFactory = (prefix: string) => string;
 
-/** First line of the first question, as typed, capped. */
+/** The length an automatic title aims for. */
+export const AUTO_TITLE_LENGTH = 40;
+
+/** Opening words that say how a question is asked, not what about. */
+const TITLE_FILLER =
+  /^(?:(?:hey|hi|hello|please|so|ok|okay|could you|can you|would you|i want to|i need to|i'd like to|help me|merhaba|selam|lütfen|bana|rica etsem|hallo|bitte|kannst du|könntest du|hola|por favor|puedes|bonjour|salut|s'il vous plaît|peux-tu|ciao|per favore|puoi)[\s,:;!-]+)+/iu;
+
+const TITLE_TAIL = /[\s.,;:!-]+$/u;
+
+/**
+ * A short topic for a conversation, made from its first question alone:
+ * the first line, without the pleasantries it opens with, cut at a word
+ * about `AUTO_TITLE_LENGTH` characters in.
+ */
 export function titleFromMessages(messages: readonly SavedMessage[]): string {
   const first = messages.find((m) => m.role === "user" && m.content.trim());
   if (!first) return "";
-  const line = first.content.trim().split(/\r?\n/, 1)[0] ?? "";
-  return line.trim().slice(0, MAX_TITLE_LENGTH);
+  const line = (first.content.trim().split(/\r?\n/, 1)[0] ?? "")
+    .replace(/^[#>*\s-]+/u, "")
+    .replace(/\s+/gu, " ")
+    .trim();
+  const stripped = line.replace(TITLE_FILLER, "").trim();
+  const topic = (stripped || line).replace(TITLE_TAIL, "");
+  if (topic.length <= AUTO_TITLE_LENGTH) return topic;
+  const cut = topic.slice(0, AUTO_TITLE_LENGTH + 1);
+  const space = cut.lastIndexOf(" ");
+  // A first word longer than the title is cut where it stands.
+  const head =
+    space >= AUTO_TITLE_LENGTH / 2 ? cut.slice(0, space) : topic.slice(0, AUTO_TITLE_LENGTH);
+  return `${head.replace(TITLE_TAIL, "")}…`;
 }
 
 export function boundMessages(messages: readonly SavedMessage[]): SavedMessage[] {
