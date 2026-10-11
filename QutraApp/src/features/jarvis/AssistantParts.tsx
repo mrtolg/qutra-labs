@@ -4,6 +4,7 @@ import { AlertTriangle, ArrowUp, Cloud, Cpu, Loader2, Lock, Square, Trash2 } fro
 import type { Engagement } from "@/domain/lab";
 import type { TurnBinding } from "@/lib/localAssistant/client";
 import { useT } from "@/lib/i18n";
+import { friendlyModelName } from "@/lib/modelNames";
 
 /* The pieces of the Assistant surface: header,
    turns, starter prompts and composer. The turn logic stays in
@@ -68,10 +69,12 @@ export function AssistantHeader({
           <span
             className={ready ? "asst-chip asst-chip--ok" : "asst-chip"}
             data-testid="assistant-live-endpoint"
-            title={endpoint ?? undefined}
+            title={[endpoint, cloud.model].filter(Boolean).join(" · ") || undefined}
           >
             <Cloud size={12} aria-hidden />
-            {cloud.model ? `${cloud.name} · ${cloud.model}` : cloud.name}
+            {cloud.model
+              ? (friendlyModelName(cloud.model) ?? `${cloud.name} · ${cloud.model}`)
+              : cloud.name}
           </span>
         ) : (
           <>
