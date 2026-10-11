@@ -10,7 +10,15 @@ export interface Toast {
   params?: Record<string, string | number>;
   actionKey?: MessageKey;
   onAction?: () => void;
+  /** How many identical messages this one stands for. */
+  count?: number;
 }
+
+/** How long a toast stays; errors stay until dismissed. */
+const PASSIVE_MS = 4_000;
+const ACTIONABLE_MS = 7_000;
+/** The most toasts on screen at once; the oldest give way. */
+export const MAX_TOASTS = 3;
 
 interface UiState {
   paletteOpen: boolean;
@@ -29,10 +37,36 @@ interface UiState {
   setActiveWorkspace(id: string | null): void;
   toast(t: Omit<Toast, "id">): void;
   dismissToast(id: number): void;
+  /** Holds a toast's countdown while it is hovered or focused. */
+  pauseToast(id: number): void;
+  resumeToast(id: number): void;
   announce(message: string): void;
 }
 
 let toastId = 0;
+
+interface Countdown {
+  timer: ReturnType<typeof setTimeout> | null;
+  remaining: number;
+  startedAt: number;
+}
+const countdowns = new Map<number, Countdown>();
+
+function clearCountdown(id: number) {
+  const c = countdowns.get(id);
+  if (c?.timer) clearTimeout(c.timer);
+  countdowns.delete(id);
+}
+
+function sameMessage(a: Omit<Toast, "id">, b: Toast): boolean {
+  return (
+    a.kind === b.kind &&
+    a.messageKey === b.messageKey &&
+    a.message === b.message &&
+    a.actionKey === b.actionKey &&
+    JSON.stringify(a.params ?? null) === JSON.stringify(b.params ?? null)
+  );
+}
 
 export const useUi = create<UiState>((set, get) => ({
   paletteOpen: false,
@@ -51,13 +85,49 @@ export const useUi = create<UiState>((set, get) => ({
   setActiveWorkspace: (id) => set({ activeWorkspaceId: id }),
   toast: (t) => {
     const id = ++toastId;
-    set({ toasts: [...get().toasts, { ...t, id }] });
-    // Actionable and error messages stay until the user dismisses them.
-    if (!t.onAction && t.kind !== "danger") {
-      setTimeout(() => get().dismissToast(id), 4000);
+    const current = get().toasts;
+    // A repeat of a message already showing replaces it and counts up.
+    const twin = current.find((x) => sameMessage(t, x));
+    let next = current;
+    let count = 1;
+    if (twin) {
+      count = (twin.count ?? 1) + 1;
+      clearCountdown(twin.id);
+      next = current.filter((x) => x.id !== twin.id);
+    }
+    next = [...next, { ...t, id, count }];
+    while (next.length > MAX_TOASTS) {
+      const [oldest, ...rest] = next;
+      if (oldest) clearCountdown(oldest.id);
+      next = rest;
+    }
+    set({ toasts: next });
+    // Errors stay until the user dismisses them.
+    if (t.kind !== "danger") {
+      const ms = t.onAction ? ACTIONABLE_MS : PASSIVE_MS;
+      countdowns.set(id, {
+        remaining: ms,
+        startedAt: Date.now(),
+        timer: setTimeout(() => get().dismissToast(id), ms),
+      });
     }
   },
-  dismissToast: (id) =>
-    set({ toasts: get().toasts.filter((t) => t.id !== id) }),
+  dismissToast: (id) => {
+    clearCountdown(id);
+    set({ toasts: get().toasts.filter((t) => t.id !== id) });
+  },
+  pauseToast: (id) => {
+    const c = countdowns.get(id);
+    if (!c?.timer) return;
+    clearTimeout(c.timer);
+    c.timer = null;
+    c.remaining = Math.max(0, c.remaining - (Date.now() - c.startedAt));
+  },
+  resumeToast: (id) => {
+    const c = countdowns.get(id);
+    if (!c || c.timer) return;
+    c.startedAt = Date.now();
+    c.timer = setTimeout(() => get().dismissToast(id), c.remaining);
+  },
   announce: (message) => set({ liveMessage: message }),
 }));
