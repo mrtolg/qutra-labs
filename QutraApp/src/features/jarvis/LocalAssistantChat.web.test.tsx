@@ -110,7 +110,7 @@ const conversation = () => getDb().collection("conversations").getAll()[0];
 
 async function ask(text: string) {
   const user = userEvent.setup();
-  await user.type(screen.getByLabelText("Message to Jarvis"), text);
+  await user.type(screen.getByLabelText("Message to Qutra"), text);
   await user.click(screen.getByRole("button", { name: "Send" }));
 }
 
