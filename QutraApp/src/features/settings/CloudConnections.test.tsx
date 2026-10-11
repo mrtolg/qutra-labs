@@ -21,7 +21,7 @@ import { CloudConnections } from "./CloudConnections";
 
 interface Row {
   id: number;
-  provider: "anthropic" | "openai";
+  provider: "anthropic" | "openai" | "brave";
   last4: string;
 }
 
@@ -45,7 +45,11 @@ function rust(
         const key = String(args?.key);
         const entry: Row = {
           id: next++,
-          provider: key.startsWith("sk-ant-") ? "anthropic" : "openai",
+          provider: key.startsWith("sk-ant-")
+            ? "anthropic"
+            : key.startsWith("BSA")
+              ? "brave"
+              : "openai",
           last4: key.slice(-4),
         };
         rows.unshift(entry);
@@ -141,10 +145,45 @@ describe("the list of cloud API keys", () => {
     await userEvent.type(await field(), "AIzaSyExample-1234567");
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Anthropic keys start with sk-ant-; OpenAI keys start with sk- or sk-proj-.",
+      "Anthropic keys start with sk-ant-; OpenAI keys start with sk- or sk-proj-. Brave Search keys start with BSA.",
     );
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     expect(invoke).not.toHaveBeenCalledWith("ai_keys_add", expect.anything());
+  });
+
+  it("lists a Brave Search key by name and last four, with no model card or chat route", async () => {
+    rust({ rows: [{ id: 0, provider: "anthropic", last4: "AAAA" }] });
+    render(<CloudConnections />);
+
+    await userEvent.type(await field(), "BSAexampleBraveKey-9Q7z");
+    expect(await screen.findByText("Brave Search key recognised")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(invoke).toHaveBeenCalledWith("ai_keys_add", { key: "BSAexampleBraveKey-9Q7z" });
+    await screen.findByText("••••9Q7z");
+    const rows = screen.getAllByRole("listitem");
+    expect(rows[0]).toHaveTextContent("Brave Search");
+    expect(rows[0]).toHaveTextContent("••••9Q7z");
+    expect(screen.queryByText(/BSAexample/)).not.toBeInTheDocument();
+    // It searches the internet; it is not a model Qutra can talk through.
+    expect(screen.queryByRole("region", { name: "Brave Search" })).not.toBeInTheDocument();
+    expect(invoke).not.toHaveBeenCalledWith("ai_list_models", expect.anything());
+    expect(getDb().prefs.get().aiProvider).not.toBe("brave");
+    expect(getDb().prefs.get().aiOpenAiPreset).not.toBe("brave");
+  });
+
+  it("removing a Brave Search key never warns that Qutra's chat loses its key", async () => {
+    rust({ rows: [{ id: 3, provider: "brave", last4: "9Q7z" }] });
+    getDb().prefs.set({ aiProvider: "openai_compat" });
+    render(<CloudConnections />);
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Remove the Brave Search key ••••9Q7z" }),
+    );
+    const dialog = await screen.findByRole("dialog");
+    expect(dialog).not.toHaveTextContent(/uses this connection right now/);
+    await userEvent.click(within(dialog).getByRole("button", { name: "Remove key" }));
+    await waitFor(() => expect(invoke).toHaveBeenCalledWith("ai_keys_remove", { id: 3 }));
   });
 
   it("explains a key Rust refuses without repeating it", async () => {

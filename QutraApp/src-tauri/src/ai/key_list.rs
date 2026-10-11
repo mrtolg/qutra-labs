@@ -15,13 +15,22 @@ use super::providers::{Preset, Target};
 
 pub const MAX_KEYS: usize = 10;
 
-/// The services a pasted key can be recognised as.
+/// The services a pasted key can be recognised as. Brave Search is not a
+/// chat model: its key is the one the internet switch searches with.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum KeyProvider {
     Anthropic,
     Openai,
+    Brave,
 }
+
+/// Every service the list holds, for the loops that treat them alike.
+const PROVIDERS: [KeyProvider; 3] = [
+    KeyProvider::Anthropic,
+    KeyProvider::Openai,
+    KeyProvider::Brave,
+];
 
 impl KeyProvider {
     fn target(self) -> Target {
@@ -30,16 +39,21 @@ impl KeyProvider {
             KeyProvider::Openai => Target::OpenaiCompat {
                 preset: Preset::Openai,
             },
+            // Where the web search code reads its key.
+            KeyProvider::Brave => Target::Brave,
         }
     }
 
-    /// Anthropic keys start `sk-ant-`; OpenAI's are `sk-` (`sk-proj-` too).
+    /// Anthropic keys start `sk-ant-`; OpenAI's are `sk-` (`sk-proj-` too);
+    /// Brave Search's start `BSA`.
     pub fn detect(key: &str) -> Option<KeyProvider> {
         let key = key.trim();
         if key.starts_with("sk-ant-") {
             Some(KeyProvider::Anthropic)
         } else if key.starts_with("sk-") {
             Some(KeyProvider::Openai)
+        } else if key.starts_with("BSA") {
+            Some(KeyProvider::Brave)
         } else {
             None
         }
@@ -104,7 +118,7 @@ fn free_id(store: &dyn SecretStore, used: &[(usize, Slot)]) -> Result<usize, Str
 /// Bring keys saved one per service (before the list) into the list.
 fn adopt_legacy(store: &dyn SecretStore) -> Result<(), String> {
     let mut slots = read_slots(store)?;
-    for provider in [KeyProvider::Anthropic, KeyProvider::Openai] {
+    for provider in PROVIDERS {
         // Unreadable or absent: nothing to adopt.
         let Ok(Some(credential)) = keys::credential(store, provider.target()) else {
             continue;
@@ -134,7 +148,7 @@ fn adopt_legacy(store: &dyn SecretStore) -> Result<(), String> {
 /// account when the service has no key left in the list.
 fn mirror(store: &dyn SecretStore) -> Result<(), String> {
     let slots = read_slots(store)?;
-    for provider in [KeyProvider::Anthropic, KeyProvider::Openai] {
+    for provider in PROVIDERS {
         match slots.iter().find(|(_, slot)| slot.provider == provider) {
             Some((_, slot)) => keys::set_key(store, provider.target(), &slot.key, None)?,
             None => keys::delete_key(store, provider.target())?,
@@ -236,6 +250,8 @@ mod tests {
     const ANTHROPIC: &str = "sk-ant-api03-example-key-AAAA";
     const ANTHROPIC_2: &str = "sk-ant-api03-another-key-BBBB";
     const OPENAI: &str = "sk-proj-example-openai-key-CCCC";
+    const BRAVE: &str = "BSAexample-brave-search-key-DDDD";
+    const BRAVE_2: &str = "BSAexample-brave-search-key-EEEE";
 
     fn chat_key(store: &MemoryStore, target: Target) -> Option<String> {
         keys::credential(store, target).unwrap().map(|c| c.key)
@@ -249,7 +265,19 @@ mod tests {
             KeyProvider::detect("  sk-abcdefghijkl "),
             Some(KeyProvider::Openai)
         );
-        for other in ["AIzaSyExample", "gsk_example", "key-12345678", ""] {
+        assert_eq!(KeyProvider::detect(BRAVE), Some(KeyProvider::Brave));
+        assert_eq!(
+            KeyProvider::detect("  BSAabcdefgh "),
+            Some(KeyProvider::Brave)
+        );
+        for other in [
+            "AIzaSyExample",
+            "gsk_example",
+            "key-12345678",
+            "bsa-lowercase-key",
+            "xBSAexample",
+            "",
+        ] {
             assert_eq!(KeyProvider::detect(other), None, "{other}");
         }
     }
@@ -389,6 +417,74 @@ mod tests {
         let entry = add_key(&store, OPENAI, 10).unwrap();
         remove_key(&store, entry.id).unwrap();
         assert!(chat_key(&store, groq).is_some());
+        assert!(list_keys(&store).unwrap().is_empty());
+    }
+
+    #[test]
+    fn a_brave_key_goes_where_web_search_reads_it() {
+        let store = MemoryStore::default();
+        let entry = add_key(&store, BRAVE, 10).unwrap();
+        assert_eq!(entry.provider, KeyProvider::Brave);
+        assert_eq!(entry.last4.as_deref(), Some("DDDD"));
+        assert_eq!(chat_key(&store, Target::Brave).as_deref(), Some(BRAVE));
+        // The search key is not a chat key.
+        assert_eq!(chat_key(&store, Target::Anthropic), None);
+        assert_eq!(
+            chat_key(
+                &store,
+                Target::OpenaiCompat {
+                    preset: Preset::Openai
+                }
+            ),
+            None
+        );
+
+        // The newest one wins, and removing it brings the older one back.
+        let newer = add_key(&store, BRAVE_2, 20).unwrap();
+        assert_eq!(chat_key(&store, Target::Brave).as_deref(), Some(BRAVE_2));
+        remove_key(&store, newer.id).unwrap();
+        assert_eq!(chat_key(&store, Target::Brave).as_deref(), Some(BRAVE));
+        remove_key(&store, entry.id).unwrap();
+        assert_eq!(chat_key(&store, Target::Brave), None);
+        assert!(list_keys(&store).unwrap().is_empty());
+    }
+
+    #[test]
+    fn a_brave_key_does_not_disturb_the_chat_keys() {
+        let store = MemoryStore::default();
+        add_key(&store, ANTHROPIC, 10).unwrap();
+        let brave = add_key(&store, BRAVE, 20).unwrap();
+        assert_eq!(chat_key(&store, Target::Anthropic).as_deref(), Some(ANTHROPIC));
+        remove_key(&store, brave.id).unwrap();
+        assert_eq!(chat_key(&store, Target::Anthropic).as_deref(), Some(ANTHROPIC));
+        assert_eq!(chat_key(&store, Target::Brave), None);
+    }
+
+    #[test]
+    fn a_brave_key_saved_on_its_own_joins_the_list() {
+        let store = MemoryStore::default();
+        keys::set_key(&store, Target::Brave, BRAVE, None).unwrap();
+        let listed = list_keys(&store).unwrap();
+        assert_eq!(listed.len(), 1);
+        assert_eq!(listed[0].provider, KeyProvider::Brave);
+        assert_eq!(listed[0].last4.as_deref(), Some("DDDD"));
+        assert_eq!(list_keys(&store).unwrap().len(), 1);
+    }
+
+    #[test]
+    fn a_brave_key_has_the_page_wire_name_brave() {
+        let store = MemoryStore::default();
+        let entry = add_key(&store, BRAVE, 10).unwrap();
+        let wire = serde_json::to_string(&entry).unwrap();
+        assert!(wire.contains(r#""provider":"brave""#), "{wire}");
+        assert!(!wire.contains("example"), "{wire}");
+    }
+
+    #[test]
+    fn a_bad_brave_key_is_refused() {
+        let store = MemoryStore::default();
+        assert_eq!(add_key(&store, "BSA short", 1), Err("invalid_key".into()));
+        assert_eq!(add_key(&store, "BSA", 1), Err("invalid_key".into()));
         assert!(list_keys(&store).unwrap().is_empty());
     }
 

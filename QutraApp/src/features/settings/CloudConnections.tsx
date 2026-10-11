@@ -11,6 +11,7 @@ import {
   targetOfKeyProvider,
   type AiError,
   type KeyEntry,
+  type ChatKeyProvider,
   type KeyProvider,
   type ModelInfo,
 } from "@/lib/aiConnections";
@@ -48,6 +49,7 @@ export function CloudConnections() {
 const PROVIDER_NAME: Record<KeyProvider, MessageKey> = {
   anthropic: "settings.cloud.anthropicName",
   openai: "settings.cloud.preset.openai",
+  brave: "settings.cloud.braveName",
 };
 
 /** The Claude models offered before the service has been asked for its list. */
@@ -143,6 +145,7 @@ function Keys() {
   // Removing a service's only key leaves Jarvis without one for it.
   const removingInUse =
     removing !== null &&
+    removing.provider !== "brave" &&
     prefs.aiProvider === (removing.provider === "anthropic" ? "anthropic" : "openai_compat") &&
     entries?.filter((e) => e.provider === removing.provider).length === 1;
 
@@ -271,7 +274,7 @@ type TestState =
   | { kind: "error"; error: AiError };
 
 /** One service that has a key: its test, the model Jarvis uses through it. */
-function ModelCard({ provider }: { provider: KeyProvider }) {
+function ModelCard({ provider }: { provider: ChatKeyProvider }) {
   const { t } = useT();
   const prefs = usePreferences();
   const toast = useUi((s) => s.toast);

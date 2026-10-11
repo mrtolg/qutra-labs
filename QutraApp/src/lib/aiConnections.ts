@@ -71,8 +71,12 @@ export function isAiError(value: unknown): value is AiError {
   );
 }
 
-/** The services a pasted key can be recognised as. */
-export type KeyProvider = "anthropic" | "openai";
+/** The services a pasted key can be recognised as. Brave Search is not a
+    chat model: its key is what the internet switch searches with. */
+export type KeyProvider = "anthropic" | "openai" | "brave";
+
+/** The listed services a chat can go through. */
+export type ChatKeyProvider = Exclude<KeyProvider, "brave">;
 
 /** How many keys the list holds. */
 export const MAX_KEYS = 10;
@@ -86,17 +90,22 @@ export interface KeyEntry {
 }
 
 /** The service a key belongs to, from how it starts (Rust checks again):
-    `sk-ant-` is Anthropic, `sk-` and `sk-proj-` are OpenAI. null for
-    anything else. */
+    `sk-ant-` is Anthropic, `sk-` and `sk-proj-` are OpenAI, `BSA` is Brave
+    Search. null for anything else. */
 export function detectKeyProvider(key: string): KeyProvider | null {
   const trimmed = key.trim();
   if (trimmed.startsWith("sk-ant-")) return "anthropic";
   if (trimmed.startsWith("sk-")) return "openai";
+  if (trimmed.startsWith("BSA")) return "brave";
   return null;
 }
 
-/** The connection a listed key is used through. */
-export function targetOfKeyProvider(provider: KeyProvider): AiTarget {
+/** The chat connection a listed key is used through. Brave Search has none:
+    it is never a model to talk to, so it gets null. */
+export function targetOfKeyProvider(provider: ChatKeyProvider): AiTarget;
+export function targetOfKeyProvider(provider: KeyProvider): AiTarget | null;
+export function targetOfKeyProvider(provider: KeyProvider): AiTarget | null {
+  if (provider === "brave") return null;
   return provider === "anthropic"
     ? { provider: "anthropic" }
     : { provider: "openai_compat", preset: "openai" };

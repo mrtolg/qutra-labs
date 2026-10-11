@@ -86,6 +86,7 @@ const SAME_ON_PURPOSE = new Set([
   "lab.files.bytes",
   "lab.report.md.title",
   "settings.cloud.anthropicName",
+  "settings.cloud.braveName",
   "jarvis.cloud.cost",
   "jarvis.header.localAt",
   "jarvis.history.folderCount",
