@@ -71,6 +71,37 @@ export function isAiError(value: unknown): value is AiError {
   );
 }
 
+/** The services a pasted key can be recognised as. */
+export type KeyProvider = "anthropic" | "openai";
+
+/** How many keys the list holds. */
+export const MAX_KEYS = 10;
+
+/** One key in the list, as Rust describes it: never the key itself. */
+export interface KeyEntry {
+  /** Which place in the list; what "remove" names. */
+  id: number;
+  provider: KeyProvider;
+  last4: string | null;
+}
+
+/** The service a key belongs to, from how it starts (Rust checks again):
+    `sk-ant-` is Anthropic, `sk-` and `sk-proj-` are OpenAI. null for
+    anything else. */
+export function detectKeyProvider(key: string): KeyProvider | null {
+  const trimmed = key.trim();
+  if (trimmed.startsWith("sk-ant-")) return "anthropic";
+  if (trimmed.startsWith("sk-")) return "openai";
+  return null;
+}
+
+/** The connection a listed key is used through. */
+export function targetOfKeyProvider(provider: KeyProvider): AiTarget {
+  return provider === "anthropic"
+    ? { provider: "anthropic" }
+    : { provider: "openai_compat", preset: "openai" };
+}
+
 export const aiConnections = {
   /** The browser build has no Credential Manager and no way to call out. */
   available: (): boolean => getBridge().mode === "tauri",
@@ -79,6 +110,12 @@ export const aiConnections = {
     invoke<void>("ai_key_set", { target, key, baseUrl }),
   keyStatus: (target: AiTarget): Promise<KeyStatus> => invoke<KeyStatus>("ai_key_has", { target }),
   deleteKey: (target: AiTarget): Promise<void> => invoke<void>("ai_key_delete", { target }),
+  /** The saved keys, newest first. */
+  listKeys: (): Promise<KeyEntry[]> => invoke<KeyEntry[]>("ai_keys_list"),
+  /** Rejects with a code: `unknown_key_prefix`, `invalid_key`, `too_many_keys`,
+      or a store error. */
+  addKey: (key: string): Promise<KeyEntry> => invoke<KeyEntry>("ai_keys_add", { key }),
+  removeKey: (id: number): Promise<void> => invoke<void>("ai_keys_remove", { id }),
   /** The connection test. Rejects with an `AiError`. */
   listModels: (target: AiTarget): Promise<ModelInfo[]> =>
     invoke<ModelInfo[]>("ai_list_models", { target }),

@@ -22,12 +22,15 @@ const NONE: Status = { present: false, last4: null, baseUrl: null };
 
 function rust(keys: Record<string, Status>) {
   invoke.mockImplementation(async (command: string, args: Record<string, unknown>) => {
-    const target = args.target as { provider: string; preset?: string };
+    const target = (args?.target ?? { provider: "anthropic" }) as { provider: string; preset?: string };
     const name =
       target.provider === "anthropic" ? "anthropic" : `openai_compat:${target.preset}`;
     if (command === "ai_key_has") return keys[name] ?? NONE;
-    if (command === "ai_key_delete") {
-      delete keys[name];
+    if (command === "ai_keys_list") {
+      return keys.anthropic ? [{ id: 0, provider: "anthropic", last4: keys.anthropic.last4 }] : [];
+    }
+    if (command === "ai_keys_remove") {
+      delete keys.anthropic;
       return undefined;
     }
     throw new Error(`unexpected ${command}`);
@@ -96,7 +99,7 @@ describe("Jarvis route picker", () => {
     ).toBeInTheDocument();
   });
 
-  it("updates at once when a card removes the key in use", async () => {
+  it("updates at once when the key list removes the key in use", async () => {
     const keys = { anthropic: { present: true, last4: "WXYZ", baseUrl: "https://api.anthropic.com" } };
     rust(keys);
     getDb().prefs.set({ aiProvider: "anthropic" });
@@ -106,8 +109,9 @@ describe("Jarvis route picker", () => {
         <CloudConnections />
       </>,
     );
-    const card = await screen.findByRole("region", { name: "Claude (Anthropic)" });
-    await userEvent.click(await within(card).findByRole("button", { name: "Remove key" }));
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Remove the Claude (Anthropic) key ••••WXYZ" }),
+    );
     const dialog = await screen.findByRole("dialog");
     expect(dialog).toHaveTextContent("Jarvis uses this connection right now");
     await userEvent.click(within(dialog).getByRole("button", { name: "Remove key" }));

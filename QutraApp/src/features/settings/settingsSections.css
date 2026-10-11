@@ -1176,3 +1176,55 @@
     text-align: left;
   }
 }
+
+/* The list of cloud API keys. */
+.cloud-keys__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cloud-keys__row {
+  display: flex;
+  align-items: center;
+  gap: 8px 10px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+.cloud-keys__name {
+  color: var(--ink);
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
+.cloud-keys__mask {
+  color: var(--muted);
+  font-size: var(--fs-12);
+}
+.cloud-keys__form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 520px;
+}
+.cloud-keys__line {
+  display: flex;
+  gap: 8px;
+}
+.cloud-keys__input {
+  flex: 1;
+  min-width: 0;
+}
+.cloud-keys__detected {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  font-size: var(--fs-12);
+}
+.cloud-card__id {
+  font-size: var(--fs-11);
+}

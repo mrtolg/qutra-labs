@@ -89,6 +89,7 @@ const SAME_ON_PURPOSE = new Set([
   "jarvis.cloud.cost",
   "jarvis.header.localAt",
   "jarvis.history.folderCount",
+  "assistant.greet.withName",
 ]);
 
 describe("no sentence is left in English", () => {
