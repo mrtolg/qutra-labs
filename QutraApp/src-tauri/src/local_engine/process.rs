@@ -299,6 +299,12 @@ pub fn classify_exit(log: &str) -> LocalEngineError {
         "tensor_count"
     } else if lower.contains("unknown model architecture") {
         "unknown_architecture"
+    } else if lower.contains("error loading model hyperparameters")
+        || lower.contains("wrong array length")
+        || lower.contains("key not found in model")
+    {
+        // The file's own settings are missing or not what this build reads.
+        "model_metadata"
     } else if lower.contains("out of memory")
         || lower.contains("outofdevicememory")
         || lower.contains("failed to allocate")
@@ -882,6 +888,18 @@ mod tests {
         assert_eq!(
             code("error: unknown model architecture: 'x'"),
             "unknown_architecture"
+        );
+        assert_eq!(
+            code(
+                "llama_model_load: error loading model: error loading model hyperparameters:                  key qwen35.rope.dimension_sections has wrong array length; expected 4, got 3
+                 srv load_model: failed to load model, 'C:/x'"
+            ),
+            "model_metadata",
+            "the settings error wins over the generic failed-to-load line after it"
+        );
+        assert_eq!(
+            code("llama_model_loader: key not found in model: qwen35.block_count"),
+            "model_metadata"
         );
         assert_eq!(code("ggml_vulkan: ErrorOutOfDeviceMemory"), "out_of_memory");
         assert_eq!(code("couldn't bind HTTP server socket"), "port_in_use");

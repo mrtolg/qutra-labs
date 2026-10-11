@@ -629,6 +629,7 @@ export const deferredEs: Record<DeferredKey, string> = {
   "jarvis.error.modelUnreadable": "No se pudo leer este archivo de modelo. Elija otro modelo.",
   "jarvis.error.engineStartFailed": "El motor local no se inició. Inténtelo de nuevo.",
   "jarvis.error.engineLoadFailed": "El motor local no pudo cargar este modelo. Inténtelo de nuevo o elija otro modelo.",
+  "jarvis.error.engineModelMetadata": "El archivo de este modelo tiene ajustes que el motor local no puede leer. Elija otro modelo u otra versión de este.",
   "jarvis.error.engineOutOfMemory": "El modelo no cupo en la memoria. Cierre otras aplicaciones e inténtelo de nuevo, o elija un modelo más pequeño.",
   "jarvis.error.engineLoadTimeout": "El modelo tardó demasiado en cargarse. Inténtelo de nuevo.",
   "jarvis.error.contextExceeded": "Esta conversación supera el contexto del modelo. Inicie una conversación nueva o aumente el tamaño del contexto en Ajustes.",
