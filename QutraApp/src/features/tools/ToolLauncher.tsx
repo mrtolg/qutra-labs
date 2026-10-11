@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
@@ -10,9 +10,11 @@ import {
   ImageDown,
   Link2,
   Play,
+  RefreshCw,
   ShieldAlert,
   ShieldCheck,
   TerminalSquare,
+  Trash2,
 } from "lucide-react";
 import { Dialog } from "@/components/ui/Dialog";
 import { Field } from "@/components/ui/Field";
@@ -39,6 +41,7 @@ import {
 } from "@/domain/tools/launcherGrid";
 import { useFetchedLogos } from "./logos/fetchedLogos";
 import { ToolLogo } from "./logos/ToolLogo";
+import { autolinkDetected } from "./autolink";
 import { ToolGuideDialog } from "./ToolGuideDialog";
 import "./launcher.css";
 
@@ -63,6 +66,7 @@ function readinessOf(tile: LauncherTile): Readiness {
       return "ready";
     case "changed":
     case "disabled":
+    case "file_missing":
       return "attention";
     case "not_registered":
       return tile.candidates.length > 0 ? "unlinked" : "missing";
@@ -114,7 +118,22 @@ export function ToolLauncher({
   const [guide, setGuide] = useState<LauncherTile | null>(null);
   const [linkAllOpen, setLinkAllOpen] = useState(false);
   const [findingLogos, setFindingLogos] = useState(false);
-  const locator = useLocateTool({ onError: setError });
+  /* The stale registration a "Locate again" is replacing. Once the new file
+     is registered and linked to the same program, the old one goes. */
+  const replacing = useRef<{ installationId: string; catalogId: string } | null>(null);
+  const [scanning, setScanning] = useState(false);
+  const scanningNow = useRef(false);
+  const scanned = useRef(false);
+  const locator = useLocateTool({
+    onError: setError,
+    onRegistered: (saved) => {
+      const old = replacing.current;
+      replacing.current = null;
+      if (!old) return;
+      const link = getDb().collection("installationBindings").get(saved.id);
+      if (link?.catalogId === old.catalogId) void dropRegistration(old.installationId);
+    },
+  });
 
   const native = runtime.available;
   // Until a good read, an empty installation list proves nothing.
@@ -223,13 +242,79 @@ export function ToolLauncher({
     }
   };
 
-  const locate = (tile: LauncherTile) =>
+  /* Take a registration whose file is gone out of the toolbox: the native
+     record and the link to it. The program's file is not touched. */
+  const dropRegistration = async (installationId: string) => {
+    try {
+      await getBridge().toolSupervisor.remove(installationId);
+      setInstallationBinding(getDb(), installationId, "");
+      await runtime.refresh();
+    } catch (caught) {
+      setError(String(caught));
+    }
+  };
+
+  const removeStale = async (tile: LauncherTile, installation: NativeToolInstallation) => {
+    await dropRegistration(installation.id);
+    announce(t("launcher.linkRemoved", { name: tile.name }));
+  };
+
+  /* Look for the programs on this computer and link what is found. It runs
+     once when the toolbox opens and again on request; a link that already
+     works is never replaced. */
+  const scan = async (manual: boolean) => {
+    if (scanningNow.current) return;
+    scanningNow.current = true;
+    setScanning(true);
+    if (manual) setError("");
+    try {
+      const summary = await autolinkDetected({
+        supervisor: getBridge().toolSupervisor,
+        db: getDb(),
+        installations: useLabRuntime.getState().installations,
+        labels: {
+          profileName: (name) => t("lab.tools.defaultProfileName", { name }),
+          targetArgName: t("lab.tools.run.targetArgName"),
+        },
+      });
+      const count = summary.registered.length + summary.linked.length;
+      if (count > 0) {
+        await useLabRuntime.getState().refresh();
+        toast({ kind: "success", messageKey: "launcher.autolinked", params: { count } });
+      } else if (manual) {
+        toast({ kind: "info", messageKey: "launcher.rescanNothing" });
+      }
+      if (manual && summary.failed > 0) {
+        setError(t("launcher.autolinkFailed", { count: summary.failed }));
+      }
+    } catch (caught) {
+      if (manual) setError(String(caught));
+    } finally {
+      scanningNow.current = false;
+      setScanning(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!native || !known || !prefs.privateToolsEnabled || scanned.current) return;
+    scanned.current = true;
+    void scan(false);
+    // Once per visit, as soon as the registrations have been read.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [native, known, prefs.privateToolsEnabled]);
+
+  const locate = (tile: LauncherTile) => {
+    replacing.current =
+      tile.status.kind === "file_missing"
+        ? { installationId: tile.status.installation.id, catalogId: tile.catalogId }
+        : null;
     void locator.locate({
       catalogId: tile.catalogId,
       name: tile.name,
       category: registerCategoryFor(tile),
       docUrl: tile.downloadUrl,
     });
+  };
 
   const link = (tile: LauncherTile, installation: NativeToolInstallation) => {
     setInstallationBinding(getDb(), installation.id, tile.catalogId);
@@ -274,6 +359,8 @@ export function ToolLauncher({
         return t("launcher.next.changed");
       case "disabled":
         return t("launcher.next.disabled");
+      case "file_missing":
+        return t("launcher.next.fileMissing");
       case "not_registered":
         return tile.candidates.length > 0
           ? t("launcher.next.unlinked", { name: tile.candidates[0]!.displayName })
@@ -300,6 +387,17 @@ export function ToolLauncher({
               ) : (
                 !runtime.readFailed && <span>{t("launcher.reading")}</span>
               ))}
+            {native && known && (
+              <button
+                type="button"
+                className="btn btn--ghost btn--sm"
+                disabled={scanning}
+                onClick={() => void scan(true)}
+              >
+                <RefreshCw size={13} aria-hidden />
+                {t(scanning ? "launcher.rescanning" : "launcher.rescan")}
+              </button>
+            )}
             <Link to={registeredToolsHref()}>{t("launcher.libraryLink")}</Link>
             {actions}
           </div>
@@ -556,9 +654,11 @@ export function ToolLauncher({
                           {/* The browser build cannot know what is on this computer. */}
                           {native && (
                             <span className={`tbx-status is-${known ? state : "checking"}`}>
-                              {known
-                                ? t(`launcher.readiness.${state}` as MessageKey)
-                                : t("launcher.status.checking")}
+                              {!known
+                                ? t("launcher.status.checking")
+                                : status.kind === "file_missing"
+                                  ? t("launcher.status.fileMissing")
+                                  : t(`launcher.readiness.${state}` as MessageKey)}
                             </span>
                           )}
                         </div>
@@ -594,6 +694,30 @@ export function ToolLauncher({
                             {t("launcher.locate")}
                           </button>
                         )}
+                        {status.kind === "file_missing" && native && known && (
+                          <>
+                            <button
+                              type="button"
+                              className="btn btn--primary btn--sm"
+                              aria-describedby={headingId}
+                              disabled={locator.busy !== ""}
+                              onClick={() => locate(tile)}
+                            >
+                              <FileSearch size={13} aria-hidden />
+                              {t("launcher.relink")}
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn--ghost btn--icon btn--sm"
+                              title={t("launcher.removeLink")}
+                              aria-label={t("launcher.removeLink")}
+                              aria-describedby={headingId}
+                              onClick={() => void removeStale(tile, status.installation)}
+                            >
+                              <Trash2 size={14} aria-hidden />
+                            </button>
+                          </>
+                        )}
                         {(status.kind === "changed" || status.kind === "disabled") && (
                           <Link
                             className="btn btn--secondary btn--sm"
@@ -603,7 +727,8 @@ export function ToolLauncher({
                             {t("launcher.reviewInLab")}
                           </Link>
                         )}
-                        {status.kind === "not_registered" && tile.candidates.length === 0 && tile.downloadUrl && (
+                        {(status.kind === "not_registered" || status.kind === "file_missing") &&
+                          tile.candidates.length === 0 && tile.downloadUrl && (
                           <button
                             type="button"
                             className="btn btn--ghost btn--icon btn--sm"
@@ -657,7 +782,8 @@ export function ToolLauncher({
           <ul className="tbx-waiting">
             {others.map((installation) => {
               const headingId = `tool-other-${installation.id}`;
-              const ok = installation.enabled && !installation.changedSinceVerify;
+              const ok =
+                installation.enabled && !installation.changedSinceVerify && !installation.fileMissing;
               return (
                 <li
                   key={installation.id}

@@ -756,6 +756,16 @@ export const deferredEn = {
   "assistant.greet.line": "I'm here whenever you need me.",
   "engine.auto.failed": "The local assistant could not start. Settings › AI providers says why.",
   "engine.auto.working": "Getting the local assistant ready…",
+  "launcher.rescan": "Scan again",
+  "launcher.rescanning": "Scanning…",
+  "launcher.rescanNothing": "No new programs found on this computer.",
+  "launcher.autolinked": "{count} programs found on this computer and linked.",
+  "launcher.autolinkFailed": "{count} programs found but could not be registered.",
+  "launcher.status.fileMissing": "Not found",
+  "launcher.next.fileMissing": "The registered file is no longer where it was. Locate it again or remove the link.",
+  "launcher.relink": "Locate again…",
+  "launcher.removeLink": "Remove the link",
+  "launcher.linkRemoved": "The link to {name} was removed.",
 } as const;
 
 export type DeferredKey = keyof typeof deferredEn;

@@ -6,7 +6,9 @@ import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { Database, getDb, setDbForTesting } from "@/lib/db/database";
 import { MemoryStorageAdapter } from "@/lib/db/storage";
 import { resetBridgeForTesting, setBridgeForTesting, type DesktopBridge } from "@/lib/bridge";
-import type { NativeToolInstallation } from "@/lib/bridge/types";
+import type { NativeDetectedTool, NativeToolInstallation } from "@/lib/bridge/types";
+import { registerDeferredCopy } from "@/lib/i18n";
+import { deferredEn } from "@/lib/i18n/deferred/en";
 import { useLabRuntime } from "@/state/labRuntime";
 import { useTerminalTabs } from "@/features/terminal/terminalTabs";
 import { useUi } from "@/state/ui";
@@ -19,6 +21,8 @@ import { ToolLauncher } from "./ToolLauncher";
    investigation, a changed or disabled one is reviewed, a suggested
    registration is linked, and one that is not registered can be located or
    fetched from its download page. */
+
+registerDeferredCopy("en", deferredEn);
 
 const NMAP = "tool-6c0d2f9a-1e7b-4c35-8a92-d4b1f03e7c58";
 const ZAP = "tool-f47e2b90-58c1-4d6a-a3e7-1c9d05b8f2aa";
@@ -72,6 +76,10 @@ interface MountOptions {
   available?: boolean;
   ready?: boolean;
   launchDetached?: ReturnType<typeof vi.fn>;
+  /** What the scan of the computer finds. */
+  detected?: NativeDetectedTool[];
+  /** The registrations a refresh reads, once the scan registered something. */
+  refreshTo?: NativeToolInstallation[];
 }
 
 function mount({
@@ -81,6 +89,8 @@ function mount({
   available = true,
   ready = true,
   launchDetached = vi.fn().mockResolvedValue({ ok: true }),
+  detected = [],
+  refreshTo,
 }: MountOptions = {}) {
   const db = new Database(new MemoryStorageAdapter());
   db.prefs.set({ privateToolsEnabled: true });
@@ -106,6 +116,8 @@ function mount({
     launchDetached,
     locateCandidate: vi.fn().mockResolvedValue(null),
     register: vi.fn(),
+    remove: vi.fn().mockResolvedValue(undefined),
+    detectInstallations: vi.fn().mockResolvedValue(detected),
   };
   const openUrl = vi.fn().mockResolvedValue(undefined);
   setBridgeForTesting({
@@ -114,7 +126,9 @@ function mount({
     terminal: { available: () => available },
     openUrl,
   } as unknown as DesktopBridge);
-  const refresh = vi.fn().mockResolvedValue(undefined);
+  const refresh = vi.fn().mockImplementation(async () => {
+    if (refreshTo) useLabRuntime.setState({ installations: refreshTo });
+  });
   useLabRuntime.setState({
     available,
     ready,
@@ -251,6 +265,103 @@ describe("Tool launcher", () => {
       expect.objectContaining({ installationId: GHIDRA, catalogId: "ghidra" }),
     ]);
     expect(await within(tile("Ghidra")).findByText("Ready", spoken)).toBeInTheDocument();
+  });
+
+  it("looks for the programs when the toolbox opens, skipping those already linked", async () => {
+    const { supervisor } = mount({
+      installations: [installation(NMAP, "Nmap")],
+      bound: [["nmap", NMAP]],
+    });
+    await waitFor(() => expect(supervisor.detectInstallations).toHaveBeenCalledTimes(1));
+    const skipped = supervisor.detectInstallations.mock.calls[0]![0] as string[];
+    expect(skipped).toEqual(["nmap"]);
+  });
+
+  it("registers and links a program the scan found, with the same register call as a picked file", async () => {
+    const zap = installation(ZAP, "ZAP");
+    const { supervisor } = mount({
+      refreshTo: [zap],
+      detected: [
+        {
+          catalogId: "zap",
+          source: "program_files",
+          fileName: "ZAP.exe",
+          canonicalPath: "C:\\Program Files\\ZAP\\Zed Attack Proxy\\ZAP.exe",
+          registeredId: null,
+          located: {
+            token: "cand-1",
+            workingDir: "C:\\Program Files\\ZAP",
+            candidate: {
+              canonicalPath: "C:\\Program Files\\ZAP\\Zed Attack Proxy\\ZAP.exe",
+              fileName: "ZAP.exe",
+              sha256: "9f2c4d1be07a53c8f6e1d20b4a7c95e3f18d6b20ac4e97f35d0b1c8e62a9f471",
+              sizeBytes: 1,
+              version: "",
+              publisher: "",
+              signatureState: "valid",
+            },
+          },
+        },
+      ],
+    });
+    supervisor.register.mockResolvedValue(zap);
+
+    // The program moves from the waiting list to the ready one: ask again.
+    await waitFor(() =>
+      expect(within(tile("OWASP ZAP")).getByText("Ready", spoken)).toBeInTheDocument(),
+    );
+    expect(supervisor.register).toHaveBeenCalledWith(
+      expect.objectContaining({ candidateToken: "cand-1", confirmed: true, category: "web" }),
+    );
+    expect(getDb().collection("installationBindings").getAll()).toEqual([
+      expect.objectContaining({ catalogId: "zap", installationId: ZAP, source: "detected" }),
+    ]);
+    expect(useUi.getState().toasts.map((t) => t.messageKey)).toContain("launcher.autolinked");
+  });
+
+  it("scans again on request and says when nothing is new", async () => {
+    const { supervisor } = mount();
+    await waitFor(() => expect(supervisor.detectInstallations).toHaveBeenCalledTimes(1));
+
+    await userEvent.click(screen.getByRole("button", { name: "Scan again" }));
+
+    await waitFor(() => expect(supervisor.detectInstallations).toHaveBeenCalledTimes(2));
+    await waitFor(() =>
+      expect(useUi.getState().toasts.map((t) => t.messageKey)).toContain("launcher.rescanNothing"),
+    );
+  });
+
+  it("shows a link whose file is gone as Not found, not ready, with Locate again and Remove", async () => {
+    const { supervisor } = mount({
+      installations: [installation(NMAP, "Burp fixture", { fileMissing: true })],
+      bound: [["burp", NMAP]],
+    });
+    const burp = tile("Burp Suite");
+
+    expect(within(burp).getByText("Not found", spoken)).toBeInTheDocument();
+    expect(within(burp).queryByRole("button", { name: "Open" })).toBeNull();
+    expect(within(burp).getByRole("button", { name: "Locate again…" })).toBeInTheDocument();
+    const legend = screen.getByRole("group", { name: "Filter by status" });
+    expect(within(legend).getByRole("button", { name: /^Ready\s*0$/ })).toBeInTheDocument();
+    expect(within(legend).getByRole("button", { name: /^Needs a look\s*1$/ })).toBeInTheDocument();
+
+    await userEvent.click(within(burp).getByRole("button", { name: "Remove the link" }));
+
+    expect(supervisor.remove).toHaveBeenCalledWith(NMAP);
+    expect(getDb().collection("installationBindings").getAll()).toEqual([]);
+  });
+
+  it("locating a gone program again starts the picker for that program", async () => {
+    const { supervisor } = mount({
+      installations: [installation(NMAP, "Burp fixture", { fileMissing: true })],
+      bound: [["burp", NMAP]],
+    });
+
+    await userEvent.click(
+      within(tile("Burp Suite")).getByRole("button", { name: "Locate again…" }),
+    );
+
+    expect(supervisor.locateCandidate).toHaveBeenCalled();
   });
 
   it("explains running elevated as a manual step with the registered file", async () => {
