@@ -42,6 +42,12 @@ describe("assistantErrorMessage (ADR 0012)", () => {
       unsolicited_tool: "jarvis.error.unsolicitedTool",
       tool_failed: "jarvis.error.toolFailed",
       too_many_steps: "jarvis.error.tooManySteps",
+      // The internet step of a local turn.
+      web_search_key_missing: "jarvis.error.webSearchKeyMissing",
+      web_search_key_rejected: "jarvis.error.webSearchKeyRejected",
+      web_search_rate_limited: "jarvis.error.webSearchRateLimited",
+      web_search_failed: "jarvis.error.webSearchFailed",
+      web_pages_unreachable: "jarvis.error.webPagesUnreachable",
       // Added alongside the Rust agent's new "this model can't take tools"
       // wire code -- see FIX list, "Also add copy" section.
       model_tools_unsupported: "jarvis.error.modelToolsUnsupported",

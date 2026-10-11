@@ -15,7 +15,7 @@ import type { Database } from "./database";
 
 export type NewMessage = Pick<
   SavedMessage,
-  "role" | "content" | "answeredBy" | "blocks" | "cloud" | "context" | "personal"
+  "role" | "content" | "answeredBy" | "blocks" | "cloud" | "context" | "personal" | "sources"
 >;
 
 export type AppendResult =
@@ -30,6 +30,7 @@ export async function createConversation(
     engagementId = null,
     folderId = null,
     model,
+    webAccess,
     now = Date.now(),
   }: {
     workspaceId?: string | null;
@@ -37,6 +38,8 @@ export async function createConversation(
     /** The folder it starts in (the history panel's "new in this folder"). */
     folderId?: string | null;
     model?: ModelChoice;
+    /** Start with the "İnternet" switch on. */
+    webAccess?: boolean;
     now?: number;
   } = {},
 ): Promise<Conversation> {
@@ -53,6 +56,7 @@ export async function createConversation(
     messages: [],
     ...(folderId ? { folderId } : {}),
     ...(model ? { model } : {}),
+    ...(webAccess ? { webAccess: true as const } : {}),
   });
 }
 
@@ -92,6 +96,7 @@ export async function appendTurn(
         ...(m.cloud ? { cloud: m.cloud } : {}),
         ...(m.context ? { context: m.context } : {}),
         ...(m.personal ? { personal: m.personal } : {}),
+        ...(m.sources?.length ? { sources: m.sources } : {}),
       }));
       const all = boundMessages([...existing.messages, ...added]);
       return {
@@ -230,6 +235,16 @@ export function setConversationModel(db: Database, id: string, model: ModelChoic
   return update(db, id, (c) => {
     const { model: _old, ...rest } = c;
     return model ? { ...rest, model } : rest;
+  });
+}
+
+/** The "İnternet" switch of this conversation. Off removes the field, so a
+    conversation that never used it is the same as one that turned it off. */
+export function setConversationWebAccess(db: Database, id: string, on: boolean) {
+  return update(db, id, (c) => {
+    if (on === (c.webAccess === true)) return undefined;
+    const { webAccess: _was, ...rest } = c;
+    return on ? { ...rest, webAccess: true as const } : rest;
   });
 }
 

@@ -11,6 +11,7 @@ import {
   renameConversation,
   setArchived,
   setConversationModel,
+  setConversationWebAccess,
   setPinned,
 } from "./conversations";
 import {
@@ -146,5 +147,49 @@ describe("memory", () => {
     expect(db.collection("jarvisMemories").getAll()).toHaveLength(1);
     await clearMemories(db);
     expect(db.collection("jarvisMemories").getAll()).toEqual([]);
+  });
+});
+
+describe("the internet switch", () => {
+  it("is off until set, kept on the conversation, and gone again when turned off", async () => {
+    const db = fresh();
+    const c = await createConversation(db, { now: 1 });
+    expect(db.collection("conversations").get(c.id)?.webAccess).toBeUndefined();
+    await setConversationWebAccess(db, c.id, true);
+    expect(db.collection("conversations").get(c.id)?.webAccess).toBe(true);
+    await setConversationWebAccess(db, c.id, false);
+    expect("webAccess" in db.collection("conversations").get(c.id)!).toBe(false);
+    const started = await createConversation(db, { webAccess: true, now: 2 });
+    expect(started.webAccess).toBe(true);
+  });
+
+  it("keeps the pages an answer drew on, only web addresses of them, and reads older documents as they were", async () => {
+    const db = fresh();
+    const c = await createConversation(db, { now: 1 });
+    await appendTurn(db, {
+      conversationId: c.id,
+      expectedEraseRevision: 0,
+      requestId: "r1",
+      messages: [
+        {
+          role: "assistant",
+          content: "Answer",
+          sources: [
+            { url: "https://a.example/x", title: "A" },
+            { url: "javascript:alert(1)", title: "bad" },
+            { url: "file:///C:/Windows/win.ini", title: "worse" },
+          ],
+        },
+      ],
+    });
+    const saved = db.collection("conversations").get(c.id)!;
+    expect(saved.messages[0]?.sources).toEqual([{ url: "https://a.example/x", title: "A" }]);
+    const parsed = ConversationSchema.parse({
+      ...saved,
+      webAccess: "yes",
+      messages: [{ ...saved.messages[0], sources: "nope" }],
+    });
+    expect(parsed.webAccess).toBeUndefined();
+    expect(parsed.messages[0]?.sources).toBeUndefined();
   });
 });

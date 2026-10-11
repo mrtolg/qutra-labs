@@ -201,6 +201,8 @@ export interface AssistantMessage {
   cloudContent?: string;
   /** On a question about an investigation: the summary that went with it. */
   context?: string;
+  /** On a web-enabled answer: the pages it drew on, cited ones first. */
+  sources?: import("./conversations").WebSource[];
   /** On the first cloud question: Jarvis's memory and instructions. */
   personal?: string;
 }

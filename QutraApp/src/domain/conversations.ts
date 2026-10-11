@@ -19,6 +19,15 @@ export const MAX_CONVERSATION_MESSAGES = 50;
 export const MAX_CLOUD_CONVERSATION_MESSAGES = 200;
 export const MAX_TITLE_LENGTH = 80;
 
+/** A page an answer drew on, listed under it. Only web addresses are kept:
+    an entry that is not one is dropped, and an unreadable list with it,
+    rather than setting the message aside. */
+export const WebSourceSchema = z.object({
+  url: z.string().url().max(2000).regex(/^https?:\/\//i),
+  title: z.string().max(200),
+});
+export type WebSource = z.infer<typeof WebSourceSchema>;
+
 export const SavedMessageSchema = z.object({
   id: z.string().min(1),
   /* No "system": the context block is derived per turn and never stored,
@@ -44,6 +53,17 @@ export const SavedMessageSchema = z.object({
       question of a conversation that goes to the cloud; masked with it and
       counted in its sent line. Goes before the summary and the question. */
   personal: z.string().optional(),
+  /** The pages a web-enabled answer drew on, cited ones first. */
+  sources: z
+    .array(z.unknown())
+    .transform((items) =>
+      items.flatMap((item) => {
+        const page = WebSourceSchema.safeParse(item);
+        return page.success ? [page.data] : [];
+      }).slice(0, 20),
+    )
+    .optional()
+    .catch(undefined),
   /** A cloud answer's facts: where it went, who answered, what it cost. */
   cloud: z
     .object({
@@ -106,6 +126,8 @@ export const ConversationSchema = z.object({
   archivedAt: ts.optional().catch(undefined),
   /** The model chosen for this conversation; absent means the default. */
   model: ModelChoiceSchema.optional().catch(undefined),
+  /** The "İnternet" switch: on only when present and true; absent is off. */
+  webAccess: z.literal(true).optional().catch(undefined),
 });
 export type Conversation = z.infer<typeof ConversationSchema>;
 

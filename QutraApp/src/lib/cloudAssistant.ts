@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import type { AssistantMessage } from "@/domain/localAssistant";
+import type { WebSource } from "@/domain/conversations";
 import type { AiError, AiTarget } from "@/lib/aiConnections";
 
 /* Jarvis through a cloud connection. Rust reads the key, masks
@@ -34,6 +35,9 @@ export interface CloudTurnResult {
   /** The model that declined, when another one answered. */
   fallbackFrom: string | null;
   usage: CloudUsage | null;
+  /** On a web-enabled turn: the pages the answer cites, or else the pages
+      the search found. Absent when the internet was off. */
+  sources?: WebSource[];
 }
 
 /** A message as it goes to Rust: user and assistant only. */
@@ -110,7 +114,7 @@ export function historyHoldsSummary(messages: readonly AssistantMessage[]): bool
 
 interface CloudEvent {
   requestId: string;
-  kind: "bound" | "token" | "thinking" | "retrying" | "fallback" | "done" | "error";
+  kind: "bound" | "token" | "thinking" | "searching" | "retrying" | "fallback" | "done" | "error";
   text?: string;
   endpoint?: string;
   model?: string;
@@ -153,6 +157,11 @@ export interface CloudStreamOptions {
   onBound?: (bound: CloudBound) => void;
   onToken?: (text: string) => void;
   onThinking?: () => void;
+  /** Claude began a web search or page fetch of its own. */
+  onSearching?: () => void;
+  /** The conversation's "İnternet" switch: Claude may search and read pages.
+      Rust refuses it for any connection but Claude's. */
+  webAccess?: boolean;
   onRetrying?: (seconds: number) => void;
   onFallback?: (from: string, to: string) => void;
 }
@@ -207,6 +216,9 @@ export async function streamCloudChat(
         case "thinking":
           options.onThinking?.();
           break;
+        case "searching":
+          options.onSearching?.();
+          break;
         case "retrying":
           options.onRetrying?.(payload.seconds ?? 0);
           break;
@@ -225,7 +237,13 @@ export async function streamCloudChat(
     // Stopped while subscribing: the turn never starts.
     if (signal?.aborted) throw { code: "cancelled" } satisfies AiError;
     const start = await invoke<{ accepted: boolean; reason?: string }>("ai_chat_start", {
-      request: { requestId, target, model, messages },
+      request: {
+        requestId,
+        target,
+        model,
+        messages,
+        ...(options.webAccess ? { webAccess: true } : {}),
+      },
     });
     if (!start.accepted) throw new CloudTurnRefused(start.reason ?? "refused");
     // Stopped while starting: the first cancel may have reached Rust before
