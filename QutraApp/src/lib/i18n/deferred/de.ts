@@ -641,7 +641,6 @@ export const deferredDe: Record<DeferredKey, string> = {
   "jarvis.error.toolFailed": "Die genehmigte Aktion ist fehlgeschlagen.",
   "jarvis.error.elevationRequired": "Die genehmigte Aktion benötigt Administratorrechte, die diese App nicht hat. Starten Sie sie selbst, wenn Sie sie mit erhöhten Rechten ausführen möchten.",
   "jarvis.error.tooManySteps": "Qutra hat zu viele Schritte hintereinander versucht, daher wurde die Anfrage gestoppt.",
-  "jarvis.error.tooManySteps": "Qutra hat zu viele Schritte hintereinander versucht, daher wurde die Anfrage gestoppt.",
   "jarvis.web.toggle": "Internet",
   "jarvis.web.toggleHint": "Qutra darf in diesem Gespräch im Internet suchen. Standardmäßig aus.",
   "jarvis.web.unavailable": "Das Internet ist mit Claude und mit Modellen auf diesem Computer verfügbar, nicht mit dieser Verbindung.",

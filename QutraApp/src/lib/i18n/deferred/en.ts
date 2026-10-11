@@ -639,7 +639,6 @@ export const deferredEn = {
   "jarvis.error.toolFailed": "The approved action failed to run.",
   "jarvis.error.elevationRequired": "The approved action needs administrator privileges this app doesn't have. Launch it yourself if you want to run it elevated.",
   "jarvis.error.tooManySteps": "Qutra tried too many steps in a row, so the request was stopped.",
-  "jarvis.error.tooManySteps": "Qutra tried too many steps in a row, so the request was stopped.",
   "jarvis.web.toggle": "Internet",
   "jarvis.web.toggleHint": "Let Qutra search the internet in this conversation. Off by default.",
   "jarvis.web.unavailable": "The internet is available with Claude and with models on this computer, not with this connection.",

@@ -641,7 +641,6 @@ export const deferredTr: Record<DeferredKey, string> = {
   "jarvis.error.toolFailed": "Onaylanan eylem çalıştırılamadı.",
   "jarvis.error.elevationRequired": "Onaylanan eylem için yönetici yetkisi gerekiyor; bu uygulamada yönetici yetkisi yok. Yönetici olarak çalıştırmak isterseniz kendiniz başlatın.",
   "jarvis.error.tooManySteps": "Qutra art arda çok fazla adım denediği için işlem durduruldu.",
-  "jarvis.error.tooManySteps": "Qutra art arda çok fazla adım denediği için işlem durduruldu.",
   "jarvis.web.toggle": "İnternet",
   "jarvis.web.toggleHint": "Qutra'yın bu sohbette internette arama yapmasına izin verin. Varsayılan olarak kapalıdır.",
   "jarvis.web.unavailable": "İnternet, Claude ile ve bu bilgisayardaki modellerle kullanılabilir; bu bağlantıyla kullanılamaz.",

@@ -641,7 +641,6 @@ export const deferredIt: Record<DeferredKey, string> = {
   "jarvis.error.toolFailed": "L'azione approvata non è riuscita.",
   "jarvis.error.elevationRequired": "L'azione approvata richiede privilegi di amministratore che questa app non ha. Avviala tu stesso se vuoi eseguirla con privilegi elevati.",
   "jarvis.error.tooManySteps": "Qutra ha tentato troppi passaggi di fila, quindi la richiesta è stata interrotta.",
-  "jarvis.error.tooManySteps": "Qutra ha tentato troppi passaggi di fila, quindi la richiesta è stata interrotta.",
   "jarvis.web.toggle": "Internet",
   "jarvis.web.toggleHint": "Consenti a Qutra di cercare su internet in questa conversazione. Disattivato per impostazione predefinita.",
   "jarvis.web.unavailable": "Internet è disponibile con Claude e con i modelli su questo computer, non con questa connessione.",
