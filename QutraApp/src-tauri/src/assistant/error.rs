@@ -108,6 +108,10 @@ pub enum AssistantError {
     /// failed to start or load, or the conversation outgrew its context.
     /// Carries a fixed code from `local_engine_code`, never free text.
     LocalEngine(String),
+    /// The internet step of a local turn stopped it: no search key, a key
+    /// Brave refused, a pause it asked for, a search that failed, or pages
+    /// that could not be read. A fixed code from `ai::web::WebError`.
+    Web(&'static str),
     /// Upstream returned a non-success status.
     Http(u16),
     /// Anything unexpected. The detail is deliberately coarse: it is shown to
@@ -149,6 +153,7 @@ impl AssistantError {
             Self::ResponseTooLarge => "response_too_large".into(),
             Self::RequestTooLarge => "request_too_large".into(),
             Self::LocalEngine(code) => code.clone(),
+            Self::Web(code) => (*code).into(),
             Self::Http(status) => format!("http_{status}"),
             Self::Internal(_) => "internal".into(),
         }
@@ -256,6 +261,11 @@ mod tests {
             "response_too_large"
         );
         assert_eq!(AssistantError::RequestTooLarge.code(), "request_too_large");
+        // The internet step's codes are the keys of the localized copy.
+        assert_eq!(
+            AssistantError::Web("web_search_key_missing").code(),
+            "web_search_key_missing"
+        );
     }
 
     #[test]

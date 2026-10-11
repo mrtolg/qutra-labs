@@ -61,6 +61,7 @@ ADR 0004 said there is no provider by default and that what leaves is stated bef
 - **Masking is a safety net, not a guarantee.** A secret in a form the patterns do not know can still leave. The chip and Settings say what goes, and the user decides what to type.
 - **Older conversations.** A question asked before masking was not kept as sent. If it holds a secret, its next turn sends it masked. For Claude this changes the conversation's prefix once and may invalidate the thinking bound to it. The service then returns an error, and the way on is a new conversation. After that turn, the question is kept as it went out.
 - **The local connection.** The Ollama connection (ADRs 0010 and 0012) is unchanged.
+- **Internet access.** A conversation may turn on the web for Claude or a local model; what that adds is in ADR 0018.
 
 ## What requires another ADR
 

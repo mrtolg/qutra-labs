@@ -247,3 +247,31 @@ describe("the conversation a cloud turn sends", () => {
     expect(historyHoldsSummary(history)).toBe(false);
   });
 });
+
+describe("the internet in a cloud turn", () => {
+  it("asks for it only when the switch is on, and hears a search begin", async () => {
+    invoke.mockResolvedValue({ accepted: true });
+    const off = streamCloudChat({ provider: "anthropic" }, "claude-opus-5-5", [], {
+      requestId: "req-1",
+    });
+    await vi.waitFor(() => expect(invoke).toHaveBeenCalledTimes(1));
+    emit({ kind: "done", result });
+    await off;
+    expect(invoke.mock.calls[0]![1]).toEqual({
+      request: { requestId: "req-1", target: { provider: "anthropic" }, model: "claude-opus-5-5", messages: [] },
+    });
+
+    const searching = vi.fn();
+    const on = streamCloudChat({ provider: "anthropic" }, "claude-opus-5-5", [], {
+      requestId: "req-1",
+      webAccess: true,
+      onSearching: searching,
+    });
+    await vi.waitFor(() => expect(invoke).toHaveBeenCalledTimes(2));
+    expect(invoke.mock.calls[1]![1]).toMatchObject({ request: { webAccess: true } });
+    emit({ kind: "searching" });
+    emit({ kind: "done", result: { ...result, sources: [{ url: "https://a.example/", title: "A" }] } });
+    await expect(on).resolves.toMatchObject({ sources: [{ url: "https://a.example/", title: "A" }] });
+    expect(searching).toHaveBeenCalledTimes(1);
+  });
+});

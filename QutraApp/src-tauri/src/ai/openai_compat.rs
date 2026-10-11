@@ -194,6 +194,7 @@ fn finish(
         served_by: Some(served.unwrap_or_else(|| requested.to_string())),
         fallback_from: None,
         usage,
+        sources: Vec::new(),
     }
 }
 

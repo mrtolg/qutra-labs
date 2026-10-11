@@ -51,7 +51,7 @@ export async function ensureLocaleLoaded(locale: Locale): Promise<void> {
 
 /* ---------- Deferred words (./deferred)
 
-   Words that only lazily loaded pages read (Jarvis, Settings and its
+   Words that only lazily loaded pages read (Qutra, Settings and its
    sections) stay out of the first paint. They load right after it, English
    with the user's language, and every lazy page waits for them through
    withDeferredCopy, so such a page never paints a key. A first paint that

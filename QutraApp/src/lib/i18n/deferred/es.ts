@@ -1,4 +1,4 @@
-/* Words read only by lazily loaded pages and dialogs (Jarvis, Settings and
+/* Words read only by lazily loaded pages and dialogs (Qutra, Settings and
    its sections), kept out of the first-paint catalog. They load right after
    the first paint, and every lazy page waits for them (withDeferredCopy in
    ../index.ts). A key a first-paint module reads stays in the catalog. */
@@ -641,6 +641,20 @@ export const deferredEs: Record<DeferredKey, string> = {
   "jarvis.error.toolFailed": "La acción aprobada no se pudo ejecutar.",
   "jarvis.error.elevationRequired": "La acción aprobada necesita privilegios de administrador que esta aplicación no tiene. Iníciala tú mismo si quieres ejecutarla con permisos elevados.",
   "jarvis.error.tooManySteps": "Qutra intentó demasiados pasos seguidos, así que la solicitud se detuvo.",
+  "jarvis.error.tooManySteps": "Qutra intentó demasiados pasos seguidos, así que la solicitud se detuvo.",
+  "jarvis.web.toggle": "Internet",
+  "jarvis.web.toggleHint": "Permite que Qutra busque en internet en esta conversación. Desactivado por defecto.",
+  "jarvis.web.unavailable": "Internet está disponible con Claude y con los modelos de este equipo, no con esta conexión.",
+  "jarvis.web.chipCloud": "Internet activado · {name} hace la búsqueda",
+  "jarvis.web.chipLocal": "Internet activado · modelo local, búsquedas con Brave Search",
+  "jarvis.web.sources": "Fuentes",
+  "jarvis.web.sourceOpen": "Abrir {title} en el navegador",
+  "jarvis.web.searching": "Buscando en internet…",
+  "jarvis.error.webSearchKeyMissing": "Buscar en internet con un modelo local requiere una clave de búsqueda. Añada una clave de Brave Search en Ajustes o pegue la dirección de la página en su pregunta.",
+  "jarvis.error.webSearchKeyRejected": "Brave Search no aceptó la clave de búsqueda. Compúébela en Ajustes.",
+  "jarvis.error.webSearchRateLimited": "Brave Search ha pedido una pausa breve. Inténtelo de nuevo en un momento.",
+  "jarvis.error.webSearchFailed": "No se pudo completar la búsqueda en internet. Compruebe su conexión e inténtelo de nuevo.",
+  "jarvis.error.webPagesUnreachable": "No se pudieron leer las páginas de su pregunta. Pueden ser privadas, demasiado grandes o no ser texto.",
   "jarvis.error.modelToolsUnsupported": "El modelo que has seleccionado no se puede usar con propuestas de herramientas. Elige otro modelo que admita herramientas o desactiva las propuestas de herramientas en Ajustes.",
   "jarvis.error.modelCloudBacked": "Este modelo se ejecuta en la nube a través del Ollama local. Qutra no le enviará un turno hasta que aceptes la escalada a la nube. Elige un modelo que se quede en este equipo.",
   "jarvis.error.engineMissing": "El motor local aún no está instalado. Descárguelo una vez desde la tarjeta de arriba y vuelva a enviar su mensaje.",

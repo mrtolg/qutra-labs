@@ -1,4 +1,4 @@
-/* Words read only by lazily loaded pages and dialogs (Jarvis, Settings and
+/* Words read only by lazily loaded pages and dialogs (Qutra, Settings and
    its sections), kept out of the first-paint catalog. They load right after
    the first paint, and every lazy page waits for them (withDeferredCopy in
    ../index.ts). A key a first-paint module reads stays in the catalog. */
@@ -639,6 +639,20 @@ export const deferredEn = {
   "jarvis.error.toolFailed": "The approved action failed to run.",
   "jarvis.error.elevationRequired": "The approved action needs administrator privileges this app doesn't have. Launch it yourself if you want to run it elevated.",
   "jarvis.error.tooManySteps": "Qutra tried too many steps in a row, so the request was stopped.",
+  "jarvis.error.tooManySteps": "Qutra tried too many steps in a row, so the request was stopped.",
+  "jarvis.web.toggle": "Internet",
+  "jarvis.web.toggleHint": "Let Qutra search the internet in this conversation. Off by default.",
+  "jarvis.web.unavailable": "The internet is available with Claude and with models on this computer, not with this connection.",
+  "jarvis.web.chipCloud": "Internet on · {name} does the searching",
+  "jarvis.web.chipLocal": "Internet on · local model, searches via Brave Search",
+  "jarvis.web.sources": "Sources",
+  "jarvis.web.sourceOpen": "Open {title} in your browser",
+  "jarvis.web.searching": "Searching the internet…",
+  "jarvis.error.webSearchKeyMissing": "Searching the internet with a local model needs a search key. Add a Brave Search key in Settings, or paste the page address into your question.",
+  "jarvis.error.webSearchKeyRejected": "Brave Search did not accept the search key. Check it in Settings.",
+  "jarvis.error.webSearchRateLimited": "Brave Search asked for a short pause. Try again in a moment.",
+  "jarvis.error.webSearchFailed": "The internet search could not be completed. Check your connection and try again.",
+  "jarvis.error.webPagesUnreachable": "The pages in your question could not be read. They may be private, too large or not text.",
   "jarvis.error.modelToolsUnsupported": "Your selected model can't be used with tool proposals. Pick a different, tool-capable model, or turn tool proposals off in Settings.",
   "jarvis.error.modelCloudBacked": "This model runs in the cloud through the local Ollama. Qutra will not send a turn to it until you opt in to cloud escalation. Pick a model that stays on this computer.",
   "jarvis.error.engineMissing": "The local engine isn't installed yet. Download it once from the readiness card above, then send your message again.",

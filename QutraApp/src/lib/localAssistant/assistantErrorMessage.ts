@@ -132,6 +132,18 @@ export function assistantErrorMessage(
       return t("jarvis.error.sessionNotOwned");
     case "too_many_steps":
       return t("jarvis.error.tooManySteps");
+    // The internet step of a local turn (`ai::web::WebError`). The first
+    // one is the expected one: a local model searches through a Brave key.
+    case "web_search_key_missing":
+      return t("jarvis.error.webSearchKeyMissing");
+    case "web_search_key_rejected":
+      return t("jarvis.error.webSearchKeyRejected");
+    case "web_search_rate_limited":
+      return t("jarvis.error.webSearchRateLimited");
+    case "web_search_failed":
+      return t("jarvis.error.webSearchFailed");
+    case "web_pages_unreachable":
+      return t("jarvis.error.webPagesUnreachable");
     default:
       // Covers `internal`, every `http_<status>`, and anything unrecognized.
       // Never the raw code itself -- a user must not see a wire identifier.

@@ -6,6 +6,7 @@
 use serde::{Deserialize, Serialize};
 
 pub const ANTHROPIC_BASE_URL: &str = "https://api.anthropic.com";
+pub use super::web::BRAVE_BASE_URL;
 
 /// An OpenAI-compatible service.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -47,7 +48,12 @@ impl Preset {
 #[serde(tag = "provider", rename_all = "snake_case")]
 pub enum Target {
     Anthropic,
-    OpenaiCompat { preset: Preset },
+    OpenaiCompat {
+        preset: Preset,
+    },
+    /// The Brave Search API: not a chat connection. It holds the key that
+    /// lets a local model search the web (`web.rs`), and has no models.
+    Brave,
 }
 
 impl Target {
@@ -55,6 +61,7 @@ impl Target {
     pub fn account(self) -> String {
         match self {
             Target::Anthropic => "ai.anthropic.key".into(),
+            Target::Brave => "ai.brave.key".into(),
             Target::OpenaiCompat { preset } => format!("ai.openai_compat.{}.key", preset.slug()),
         }
     }
@@ -63,6 +70,7 @@ impl Target {
     pub fn fixed_base_url(self) -> Option<&'static str> {
         match self {
             Target::Anthropic => Some(ANTHROPIC_BASE_URL),
+            Target::Brave => Some(BRAVE_BASE_URL),
             Target::OpenaiCompat { preset } => preset.fixed_base_url(),
         }
     }
@@ -85,6 +93,17 @@ mod tests {
             }
         );
         assert!(serde_json::from_str::<Target>(r#"{"provider":"other"}"#).is_err());
+        let brave: Target = serde_json::from_str(r#"{"provider":"brave"}"#).unwrap();
+        assert_eq!(brave, Target::Brave);
+    }
+
+    #[test]
+    fn the_search_key_has_its_own_account_and_a_fixed_address() {
+        assert_eq!(Target::Brave.account(), "ai.brave.key");
+        assert_eq!(
+            Target::Brave.fixed_base_url(),
+            Some("https://api.search.brave.com")
+        );
     }
 
     #[test]

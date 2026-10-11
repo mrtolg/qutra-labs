@@ -1,7 +1,7 @@
 //! One cloud turn at a time. The page starts a turn with
 //! `ai_chat_start`, stops it with `ai_chat_cancel`, and hears it on
 //! `ai://stream`: `bound` (where it goes and how much), `token`, `thinking`,
-//! `retrying`, `fallback`, then exactly one `done` or `error`. No event
+//! `searching`, `retrying`, `fallback`, then exactly one `done` or `error`. No event
 //! carries the key.
 
 use std::sync::{Arc, Mutex};
@@ -27,6 +27,10 @@ pub struct CloudChatRequest {
     pub target: Target,
     pub model: String,
     pub messages: Vec<ChatMessage>,
+    /// The conversation's "İnternet" switch: Claude may search the web and
+    /// read pages on the service's side. Off unless the page says so.
+    #[serde(default)]
+    pub web_access: bool,
 }
 
 #[derive(Debug, Serialize, PartialEq, Eq)]
@@ -57,7 +61,7 @@ impl CloudStart {
 #[serde(rename_all = "camelCase")]
 pub struct CloudEvent {
     pub request_id: String,
-    /// `bound` | `token` | `thinking` | `retrying` | `fallback` | `done` | `error`
+    /// `bound` | `token` | `thinking` | `searching` | `retrying` | `fallback` | `done` | `error`
     pub kind: &'static str,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
@@ -117,6 +121,7 @@ impl CloudEvent {
                 ..Self::new(request_id, "token")
             },
             Progress::Thinking => Self::new(request_id, "thinking"),
+            Progress::Searching => Self::new(request_id, "searching"),
             Progress::Retrying { seconds } => Self {
                 seconds: Some(seconds),
                 ..Self::new(request_id, "retrying")
@@ -217,6 +222,14 @@ pub fn validate(request: &CloudChatRequest) -> Result<(), &'static str> {
     if !model_ok {
         return Err("invalid_model");
     }
+    // The search key is a key, not a chat connection.
+    if request.target == Target::Brave {
+        return Err("invalid_target");
+    }
+    // Only Claude has web tools on the service's side.
+    if request.web_access && request.target != Target::Anthropic {
+        return Err("web_not_available");
+    }
     if request.messages.is_empty() || request.messages.len() > MAX_MESSAGES {
         return Err("request_too_large");
     }
@@ -263,8 +276,11 @@ pub async fn run_turn(
         .map_err(|_| AiError::Unexpected)?;
     let messages = turn.messages;
     let sent_bytes = match request.target {
-        Target::Anthropic => anthropic::request_body(&request.model, &messages),
+        Target::Anthropic => {
+            anthropic::request_body_with(&request.model, &messages, request.web_access)
+        }
         Target::OpenaiCompat { .. } => openai_compat::request_body(&request.model, &messages),
+        Target::Brave => return Err(AiError::Unexpected),
     }
     .to_string()
     .len();
@@ -283,7 +299,7 @@ pub async fn run_turn(
     let progress = |progress: Progress| emit(CloudEvent::progress(&request.request_id, progress));
     match request.target {
         Target::Anthropic => {
-            anthropic::stream_turn(
+            anthropic::stream_turn_with(
                 client,
                 &cred,
                 &request.model,
@@ -291,6 +307,7 @@ pub async fn run_turn(
                 timing,
                 cancel,
                 &progress,
+                request.web_access,
             )
             .await
         }
@@ -307,6 +324,7 @@ pub async fn run_turn(
             )
             .await
         }
+        Target::Brave => Err(AiError::Unexpected),
     }
 }
 
@@ -366,6 +384,7 @@ mod tests {
                 blocks: None,
                 sent: false,
             }],
+            web_access: false,
         }
     }
 
@@ -468,6 +487,23 @@ mod tests {
         let mut bad = request(CUSTOM);
         bad.messages[0].content = "x".repeat(MAX_REQUEST_BYTES + 1);
         assert_eq!(validate(&bad), Err("request_too_large"));
+    }
+
+    #[test]
+    fn the_internet_is_only_for_claude_and_the_search_key_is_not_a_chat() {
+        let mut web = request(Target::Anthropic);
+        web.web_access = true;
+        assert_eq!(validate(&web), Ok(()));
+        let mut other = request(CUSTOM);
+        other.web_access = true;
+        assert_eq!(validate(&other), Err("web_not_available"));
+        assert_eq!(validate(&request(Target::Brave)), Err("invalid_target"));
+        // A page that never says anything about it does not turn it on.
+        let parsed: CloudChatRequest = serde_json::from_str(
+            r#"{"requestId":"r","target":{"provider":"anthropic"},"model":"m","messages":[]}"#,
+        )
+        .unwrap();
+        assert!(!parsed.web_access);
     }
 
     #[tokio::test]

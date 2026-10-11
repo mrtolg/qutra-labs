@@ -47,6 +47,8 @@ pub async fn list_models(
     let url = match target {
         Target::Anthropic => format!("{}/v1/models?limit=100", cred.base_url),
         Target::OpenaiCompat { .. } => format!("{}/models", cred.base_url),
+        // The search key lists no models.
+        Target::Brave => return Err(AiError::Unexpected),
     };
     let response = send(authorized(client.get(url), target, cred)?).await?;
     refused(target, &response)?;
@@ -72,6 +74,7 @@ fn authorized(
         }
         Target::OpenaiCompat { .. } if cred.key.is_empty() => request,
         Target::OpenaiCompat { .. } => request.bearer_auth(&cred.key),
+        Target::Brave => request,
     })
 }
 

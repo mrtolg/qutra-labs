@@ -12,13 +12,14 @@ use serde::{Deserialize, Serialize};
 use tauri::async_runtime::JoinHandle;
 
 use super::{audit::AuditLog, error::AssistantError, tools::ApprovalAction};
+use crate::ai::web::WebSource;
 
 /// Event payload pushed to the renderer on `assistant://stream`.
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StreamEvent {
     pub request_id: String,
-    /// `token` | `status` | `done` | `error` | `tool_call` | `tool_result` | `bound`
+    /// `token` | `status` | `done` | `error` | `tool_call` | `tool_result` | `bound` | `web_sources`
     pub kind: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
@@ -54,9 +55,22 @@ pub struct StreamEvent {
     /// card shows the exact command without parsing `summary`.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub action: Option<ApprovalAction>,
+    /// On `web_sources` only: the pages the internet step read for this
+    /// turn. Addresses Rust fetched, never text from the model.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sources: Option<Vec<WebSource>>,
 }
 
 impl StreamEvent {
+    /// The pages read for a turn that has the internet on.
+    pub fn web_sources(request_id: &str, sources: Vec<WebSource>) -> Self {
+        Self {
+            kind: "web_sources".into(),
+            sources: Some(sources),
+            ..Self::done(request_id)
+        }
+    }
+
     pub fn token(request_id: &str, text: String) -> Self {
         Self {
             request_id: request_id.into(),
@@ -70,6 +84,7 @@ impl StreamEvent {
             endpoint: None,
             model: None,
             action: None,
+            sources: None,
         }
     }
     pub fn status(request_id: &str, status: &str) -> Self {
@@ -85,6 +100,7 @@ impl StreamEvent {
             endpoint: None,
             model: None,
             action: None,
+            sources: None,
         }
     }
     pub fn done(request_id: &str) -> Self {
@@ -100,6 +116,7 @@ impl StreamEvent {
             endpoint: None,
             model: None,
             action: None,
+            sources: None,
         }
     }
     pub fn error(request_id: &str, code: String) -> Self {
@@ -115,6 +132,7 @@ impl StreamEvent {
             endpoint: None,
             model: None,
             action: None,
+            sources: None,
         }
     }
     /// A proposed tool call, awaiting approval. `tool` names which of the
@@ -139,6 +157,7 @@ impl StreamEvent {
             endpoint: None,
             model: None,
             action: Some(action),
+            sources: None,
         }
     }
     /// The outcome of an executed tool call. `session_id` is `Some` only for
@@ -163,6 +182,7 @@ impl StreamEvent {
             endpoint: None,
             model: None,
             action: None,
+            sources: None,
         }
     }
     /// Where this turn's conversation is being sent: the origin and model
@@ -182,6 +202,7 @@ impl StreamEvent {
             endpoint: Some(endpoint.into()),
             model: Some(model.into()),
             action: None,
+            sources: None,
         }
     }
 }
@@ -225,6 +246,11 @@ pub struct StartRequest {
     /// enough.
     #[serde(default)]
     pub agent_tools_enabled: bool,
+    /// The conversation's "İnternet" switch. Off unless the page says so.
+    /// Turns on a search-then-answer step in Rust (`commands::add_web`); the
+    /// model itself still gets no network and no new tool.
+    #[serde(default)]
+    pub web_access: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -647,6 +673,7 @@ mod tests {
             messages: vec![],
             auto_approve_reads: false,
             agent_tools_enabled: false,
+            web_access: false,
         }
     }
 

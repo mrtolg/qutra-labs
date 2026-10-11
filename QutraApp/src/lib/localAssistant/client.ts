@@ -1,5 +1,6 @@
 import { isTauriRuntime } from "@/lib/runtime";
 import type { AssistantGateInput, AssistantMessage } from "@/domain/localAssistant";
+import type { WebSource } from "@/domain/conversations";
 
 /* ============================================================
    Qutra IPC adapter (ADR 0010).
@@ -68,8 +69,18 @@ export interface AssistantModels {
 /** One `assistant://stream` payload. Mirrors the Rust `StreamEvent`. */
 export interface AssistantStreamEvent {
   requestId: string;
-  kind: "token" | "status" | "done" | "error" | "tool_call" | "tool_result" | "bound";
+  kind:
+    | "token"
+    | "status"
+    | "done"
+    | "error"
+    | "tool_call"
+    | "tool_result"
+    | "bound"
+    | "web_sources";
   text?: string;
+  /** Present on `web_sources`: the pages Rust read for this turn. */
+  sources?: WebSource[];
   status?: string;
   message?: string;
   /** Present on `tool_call` and `tool_result`. Synthesized by the broker from
@@ -266,6 +277,10 @@ export class LocalAssistantClient {
           `#[serde(default)]` field matches; the broker also requires Private
           Lab consent, so this alone is never sufficient. */
       agentToolsEnabled?: boolean;
+      /** The conversation's "İnternet" switch. Rust searches the web (or reads
+          the addresses in the question) and gives the model what it found
+          as untrusted text for this turn; the model gets no network. */
+      webAccess?: boolean;
     },
     messages: AssistantMessage[],
     options: {
@@ -274,6 +289,10 @@ export class LocalAssistantClient {
           Correlation only: it grants nothing. */
       requestId?: string;
       onToken?: (text: string) => void;
+      /** The internet step began (`web_searching`). */
+      onStatus?: (status: string) => void;
+      /** The pages the internet step read, before the answer starts. */
+      onWebSources?: (sources: WebSource[]) => void;
       /** Rust bound this turn to an origin and model. Arrives before any
           token, so the recipient can be shown while the answer streams. */
       onBound?: (binding: TurnBinding) => void;
@@ -343,6 +362,14 @@ export class LocalAssistantClient {
           options.onToken?.(event.text);
           return;
         }
+        if (event.kind === "status") {
+          if (event.status) options.onStatus?.(event.status);
+          return;
+        }
+        if (event.kind === "web_sources") {
+          options.onWebSources?.(event.sources ?? []);
+          return;
+        }
         if (event.kind === "bound") {
           if (event.endpoint && event.model) {
             options.onBound?.({ endpoint: event.endpoint, model: event.model });
@@ -403,6 +430,7 @@ export class LocalAssistantClient {
             contextTokens: config.ollamaContextTokens,
             autoApproveReads: config.autoApproveReads ?? false,
             agentToolsEnabled: config.agentToolsEnabled ?? false,
+            ...(config.webAccess ? { webAccess: true } : {}),
             // Role and content only: a stored answer also records where it
             // was sent, which is for the user, never for the model.
             messages: messages.map(({ role, content }) => ({ role, content })),

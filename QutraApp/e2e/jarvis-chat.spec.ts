@@ -174,6 +174,32 @@ test("the composer's model chip switches this conversation's model", async ({ pa
 });
 
 test("Qutra's settings: personalization, memory, model, keys and data", async ({ page }) => {
+test("the composer's İnternet switch starts off, shows a globe chip when on and is kept per conversation", async ({ page }) => {
+  const history = await openJarvis(page, 1440);
+  const toggle = page.getByTestId("assistant-web-toggle");
+  await expect(toggle).toHaveText("İnternet");
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByTestId("assistant-web-chip")).toHaveCount(0);
+  // A local model that is not asked to search is still local only.
+  await expect(page.getByText("Yalnızca yerel · bulut yok")).toBeVisible();
+
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  const chip = page.getByTestId("assistant-web-chip");
+  await expect(chip).toContainText("İnternet açık");
+  await expect(page.getByText("Yalnızca yerel · bulut yok")).toHaveCount(0);
+  await page.screenshot({ animations: "disabled", path: "e2e/screenshots/jarvis-web-switch.png" });
+
+  // It belongs to this conversation: another one starts off, and this one is still on.
+  await history.getByRole("button", { name: "nmap -sV çıktısını yorumla", exact: true }).click();
+  await expect(toggle).toHaveAttribute("aria-pressed", "false");
+  await expect(chip).toHaveCount(0);
+  await history.getByRole("button", { name: "naber", exact: true }).click();
+  await expect(toggle).toHaveAttribute("aria-pressed", "true");
+  await expect(chip).toBeVisible();
+});
+
+test("Jarvis's settings: personalization, memory, model, keys and data", async ({ page }) => {
   await openJarvis(page, 1440);
   await page.getByRole("button", { name: "Qutra ayarları" }).click();
   const sheet = page.getByTestId("jarvis-settings");

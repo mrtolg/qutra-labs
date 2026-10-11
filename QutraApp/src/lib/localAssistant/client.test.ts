@@ -546,3 +546,38 @@ describe("timeout classification (approval and turn timeouts are timeouts, not b
     },
   );
 });
+
+describe("the internet rides the start payload and its pages come back", () => {
+  it("sends webAccess only when asked, and hears the status and the pages read", async () => {
+    const off = harness(accepts);
+    const first = off.client.streamChat(ENABLED, [{ role: "user", content: "hi" }]);
+    await vi.waitFor(() => expect(off.invoke).toHaveBeenCalled());
+    off.emit({ requestId: lastRequestId(off.invoke), kind: "done" });
+    await first;
+    const plain = off.invoke.mock.calls.find(([c]) => c === "assistant_start")?.[1] as {
+      request: Record<string, unknown>;
+    };
+    expect(plain.request).not.toHaveProperty("webAccess");
+
+    const { client, invoke, emit } = harness(accepts);
+    const statuses: string[] = [];
+    const pages: unknown[] = [];
+    const run = client.streamChat({ ...ENABLED, webAccess: true }, [{ role: "user", content: "hi" }], {
+      onStatus: (status) => statuses.push(status),
+      onWebSources: (sources) => pages.push(sources),
+    });
+    await vi.waitFor(() => expect(invoke).toHaveBeenCalled());
+    const requestId = lastRequestId(invoke);
+    emit({ requestId, kind: "status", status: "web_searching" });
+    emit({ requestId, kind: "web_sources", sources: [{ url: "https://a.example/", title: "A" }] });
+    emit({ requestId, kind: "token", text: "ok" });
+    emit({ requestId, kind: "done" });
+    await expect(run).resolves.toBe("ok");
+    const args = invoke.mock.calls.find(([c]) => c === "assistant_start")?.[1] as {
+      request: { webAccess: boolean };
+    };
+    expect(args.request.webAccess).toBe(true);
+    expect(statuses).toEqual(["web_searching"]);
+    expect(pages).toEqual([[{ url: "https://a.example/", title: "A" }]]);
+  });
+});

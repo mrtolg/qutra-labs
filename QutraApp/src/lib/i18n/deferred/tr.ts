@@ -1,4 +1,4 @@
-/* Words read only by lazily loaded pages and dialogs (Jarvis, Settings and
+/* Words read only by lazily loaded pages and dialogs (Qutra, Settings and
    its sections), kept out of the first-paint catalog. They load right after
    the first paint, and every lazy page waits for them (withDeferredCopy in
    ../index.ts). A key a first-paint module reads stays in the catalog. */
@@ -641,6 +641,20 @@ export const deferredTr: Record<DeferredKey, string> = {
   "jarvis.error.toolFailed": "Onaylanan eylem çalıştırılamadı.",
   "jarvis.error.elevationRequired": "Onaylanan eylem için yönetici yetkisi gerekiyor; bu uygulamada yönetici yetkisi yok. Yönetici olarak çalıştırmak isterseniz kendiniz başlatın.",
   "jarvis.error.tooManySteps": "Qutra art arda çok fazla adım denediği için işlem durduruldu.",
+  "jarvis.error.tooManySteps": "Qutra art arda çok fazla adım denediği için işlem durduruldu.",
+  "jarvis.web.toggle": "İnternet",
+  "jarvis.web.toggleHint": "Qutra'yın bu sohbette internette arama yapmasına izin verin. Varsayılan olarak kapalıdır.",
+  "jarvis.web.unavailable": "İnternet, Claude ile ve bu bilgisayardaki modellerle kullanılabilir; bu bağlantıyla kullanılamaz.",
+  "jarvis.web.chipCloud": "İnternet açık · aramayı {name} yapar",
+  "jarvis.web.chipLocal": "İnternet açık · yerel model, aramalar Brave Search ile",
+  "jarvis.web.sources": "Kaynaklar",
+  "jarvis.web.sourceOpen": "{title} sayfasını tarayıcınızda açın",
+  "jarvis.web.searching": "İnternette aranıyor…",
+  "jarvis.error.webSearchKeyMissing": "Yerel modelle internette arama yapmak için bir arama anahtarı gerekir. Ayarlar'dan Brave Search anahtarınızı ekleyin ya da sayfanın adresini sorunuza yapıştırın.",
+  "jarvis.error.webSearchKeyRejected": "Brave Search arama anahtarını kabul etmedi. Ayarlar'dan anahtarı kontrol edin.",
+  "jarvis.error.webSearchRateLimited": "Brave Search kısa bir ara istedi. Biraz sonra yeniden deneyin.",
+  "jarvis.error.webSearchFailed": "İnternet araması tamamlanamadı. Bağlantınızı kontrol edip yeniden deneyin.",
+  "jarvis.error.webPagesUnreachable": "Sorunuzdaki sayfalar okunamadı. Sayfalar özel, çok büyük ya da metin olmayabilir.",
   "jarvis.error.modelToolsUnsupported": "Seçtiğiniz model araç önerileriyle kullanılamaz. Araç desteği olan başka bir model seçin veya Ayarlar'dan araç önerilerini kapatın.",
   "jarvis.error.modelCloudBacked": "Bu model, yerel Ollama üzerinden bulutta çalışır. Bulut yükseltmesine izin verene kadar Qutra ona tur göndermez. Bu bilgisayarda kalan bir model seçin.",
   "jarvis.error.engineMissing": "Yerel motor henüz kurulu değil. Yukarıdaki karttan motoru bir kez indirin, sonra iletinizi yeniden gönderin.",

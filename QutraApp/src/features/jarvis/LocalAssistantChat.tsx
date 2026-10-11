@@ -25,6 +25,7 @@ import {
   latestConversation,
   MAX_CLOUD_CONVERSATION_MESSAGES,
   type SavedMessage,
+  type WebSource,
 } from "@/domain/conversations";
 import {
   aiConnections,
@@ -84,6 +85,7 @@ import { ModelChip } from "./ModelChip";
 import { personalBlock } from "./personal";
 import { SkillPicker } from "./SkillPicker";
 import { skillById, skillInstruction, type SkillId } from "./skills";
+import { WebChip, WebSources, WebToggle, webAvailable } from "./WebAccess";
 import "./assistant.css";
 
 /** A resolved tool call, rendered as a static line once its `tool_result`
@@ -126,6 +128,7 @@ function toAssistantMessage(m: SavedMessage): AssistantMessage {
     ...(m.cloudSent ? { cloudSent: true } : {}),
     ...(m.cloudContent !== undefined ? { cloudContent: m.cloudContent } : {}),
     ...(m.context ? { context: m.context } : {}),
+    ...(m.sources?.length ? { sources: m.sources } : {}),
   };
 }
 
@@ -187,6 +190,11 @@ export function LocalAssistantChat() {
   );
   const cloudModel = cloudTarget ? resolved.model : "";
   const cloudName = cloudTarget ? connectionName(t, cloudTarget) : "";
+  /* The "İnternet" switch counts only where it can work: with a local model,
+     or with Claude. Kept on the conversation, off unless set. */
+  const webCan = webAvailable(cloudTarget);
+  const webOn = shown?.webAccess === true && webCan;
+  const [webSearching, setWebSearching] = useState(false);
   /** Whether the connection has a key, and for which connection Rust said. */
   const [cloudKey, setCloudKey] = useState<{ target: string; status: KeyStatus } | null>(null);
   const keyStatus =
@@ -573,6 +581,7 @@ export function LocalAssistantChat() {
     const turnTarget = cloudTarget;
     const turnModel = cloudModel;
     const turnLocalModel = localModel;
+    const turnWeb = webOn;
     // A card allowed for the cloud never sends its question elsewhere.
     if (allowed && !turnTarget) {
       setConsentCard(null);
@@ -661,7 +670,10 @@ export function LocalAssistantChat() {
     abortRef.current = controller;
     const requestId = globalThis.crypto?.randomUUID?.() ?? createId("req");
     // What Rust bound this turn to, kept with the answer it produces.
-    const turn: { binding: TurnBinding | null } = { binding: null };
+    const turn: { binding: TurnBinding | null; sources: WebSource[] } = {
+      binding: null,
+      sources: [],
+    };
     // A terminal tool-path error (a rejected or
     // unrecognized tool call, a tool that failed, too many steps, ...) does
     // not make `streamChat` reject -- it resolves with whatever prose
@@ -736,6 +748,10 @@ export function LocalAssistantChat() {
             onThinking: () => {
               if (live()) setCloudNote({ kind: "thinking" });
             },
+            onSearching: () => {
+              if (live()) setCloudNote({ kind: "searching" });
+            },
+            ...(turnWeb ? { webAccess: true } : {}),
             onRetrying: (seconds) => {
               if (live()) setCloudNote({ kind: "retrying", seconds });
             },
@@ -773,6 +789,7 @@ export function LocalAssistantChat() {
                   answeredBy,
                   cloud: facts,
                   ...(result.blocks?.length ? { blocks: result.blocks } : {}),
+                  ...(result.sources?.length ? { sources: result.sources } : {}),
                 }
               : null;
           if (reply) {
@@ -856,6 +873,10 @@ export function LocalAssistantChat() {
           // the broker also requires Private Lab consent before it
           // advertises tool schemas for the turn.
           agentToolsEnabled: prefs.assistantAgentToolsEnabled,
+          // The conversation's switch: Rust searches (or reads the addresses
+          // in the question) and hands the model what it found as untrusted
+          // text for this turn only.
+          webAccess: turnWeb,
         },
         outgoing,
         {
@@ -866,8 +887,18 @@ export function LocalAssistantChat() {
             turn.binding = binding;
             setTurnBinding(binding);
           },
+          onStatus: (status) => {
+            if (turnEpochRef.current !== epoch) return;
+            if (status === "web_searching") setWebSearching(true);
+          },
+          onWebSources: (sources) => {
+            if (turnEpochRef.current !== epoch) return;
+            turn.sources = sources;
+            setWebSearching(false);
+          },
           onToken: (chunk) => {
             if (turnEpochRef.current !== epoch) return;
+            setWebSearching(false);
             setPartial((prev) => prev + chunk);
           },
           onToolCall: (event: AssistantStreamEvent) => {
@@ -943,9 +974,12 @@ export function LocalAssistantChat() {
       // Whatever streamed is kept, including a partial answer after Stop --
       // and whatever streamed before a terminal tool-path error
       // (`toolPathErrorCode` above).
-      const reply: NewMessage & AssistantMessage = turn.binding
-        ? { role: "assistant", content: full, answeredBy: turn.binding }
-        : { role: "assistant", content: full };
+      const reply: NewMessage & AssistantMessage = {
+        role: "assistant",
+        content: full,
+        ...(turn.binding ? { answeredBy: turn.binding } : {}),
+        ...(turn.sources.length ? { sources: turn.sources } : {}),
+      };
       if (full.length > 0) {
         if (here()) setMessages([...next, reply]);
         saveTurn(target, requestId, [reply]);
@@ -1002,6 +1036,7 @@ export function LocalAssistantChat() {
         setPendingApproval(null);
         setStreaming(false);
         setPartial("");
+        setWebSearching(false);
         setTurnBinding(null);
         setCloudBound(null);
         setCloudNote(null);
@@ -1187,12 +1222,19 @@ export function LocalAssistantChat() {
       and what it cost -- and why a cloud answer stopped short. */
   const answerFooter = (m: AssistantMessage, i: number) => {
     const previous = earlierRecipient(messages, i);
+    const pages = m.sources?.length ? <WebSources sources={m.sources} /> : null;
     if (!m.cloud) {
-      return m.answeredBy && <TurnRecipient binding={m.answeredBy} previous={previous} />;
+      return (
+        <>
+          {m.answeredBy && <TurnRecipient binding={m.answeredBy} previous={previous} />}
+          {pages}
+        </>
+      );
     }
     const newest = i === messages.length - 1 && !streaming && cloud;
     return (
       <>
+        {pages}
         {m.cloud.stop === "refusal" && (
           <p className="callout callout--warning asst-small" data-testid="assistant-cloud-refusal">
             {refusalText(t, m.cloud.refusalCategory)}
@@ -1341,12 +1383,19 @@ export function LocalAssistantChat() {
                 cloudBound || cloudNote ? (
                   <CloudTurnStatus bound={cloudBound} note={cloudNote} />
                 ) : (
-                  turnBinding && (
-                    <TurnRecipient
-                      binding={turnBinding}
-                      previous={earlierRecipient(messages, messages.length)}
-                    />
-                  )
+                  <>
+                    {webSearching && (
+                      <p className="asst-recipient" data-testid="assistant-web-searching">
+                        {t("jarvis.web.searching")}
+                      </p>
+                    )}
+                    {turnBinding && (
+                      <TurnRecipient
+                        binding={turnBinding}
+                        previous={earlierRecipient(messages, messages.length)}
+                      />
+                    )}
+                  </>
                 )
               }
             />
@@ -1420,6 +1469,7 @@ export function LocalAssistantChat() {
         chips={
           <>
             <SkillPicker value={skillId} onChange={setSkillId} />
+            {webOn && cloud && <WebChip cloudName={cloudName} />}
             {!cloud && (
               <>
                 <AssistantModeChips onAskPrivateLab={setAskPrivateLab} />
@@ -1435,9 +1485,12 @@ export function LocalAssistantChat() {
               linked={linkedEngagement !== undefined}
               personal={personal !== ""}
             />
+          ) : webOn ? (
+            <WebChip cloudName={null} />
           ) : undefined
         }
         model={<ModelChip conversationId={active?.id ?? null} resolved={resolved} />}
+        web={<WebToggle conversationId={active?.id ?? null} on={webOn} available={webCan} />}
       />
       <ConfirmDialog
         open={confirmClear}
