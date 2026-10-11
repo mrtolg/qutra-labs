@@ -579,6 +579,13 @@ export const PreferencesSchema = z.object({
      "efendim"). Free text, kept as typed (a space inside it is the user's);
      whoever reads it trims it. Empty means a greeting without a name. */
   addressAs: z.string().max(40).catch("").default(""),
+  /* Reading answers aloud with the voices Windows has installed. Off until
+     asked for. The voice is kept by name (the list changes between machines);
+     a name that is gone falls back to the best match for the language. The
+     rate is the speech rate multiplier, 0.5 to 2. */
+  voiceReadAloud: z.boolean().catch(false).default(false),
+  voiceName: z.string().max(200).catch("").default(""),
+  voiceRate: z.number().min(0.5).max(2).catch(1).default(1),
 });
 export type Preferences = z.infer<typeof PreferencesSchema>;
 
