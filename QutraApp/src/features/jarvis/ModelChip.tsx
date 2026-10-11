@@ -4,6 +4,7 @@ import type { ModelChoice } from "@/domain/conversations";
 import { getDb, usePreferences } from "@/lib/db/database";
 import { createConversation, setConversationModel } from "@/lib/db/conversations";
 import { useT } from "@/lib/i18n";
+import { ensureLocalEngine } from "@/lib/localEngine/autoEngine";
 import { friendlyModelName } from "@/lib/modelNames";
 import { connectionName } from "./CloudParts";
 import {
@@ -83,6 +84,8 @@ export function ModelChip({
   }, [open]);
 
   const choose = (choice: ModelChoice | null) => {
+    // A local model, even for this conversation only, gets the engine ready now.
+    if (choice?.provider === "local") void ensureLocalEngine(choice.model, { explicit: true });
     const db = getDb();
     const write = conversationId
       ? setConversationModel(db, conversationId, choice)

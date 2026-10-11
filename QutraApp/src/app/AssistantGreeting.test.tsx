@@ -1,28 +1,32 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, render } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { Database, setDbForTesting } from "@/lib/db/database";
 import { MemoryStorageAdapter } from "@/lib/db/storage";
 import { registerDeferredCopy } from "@/lib/i18n";
 import { deferredEn } from "@/lib/i18n/deferred/en";
 import { deferredTr } from "@/lib/i18n/deferred/tr";
-import { useUi } from "@/state/ui";
-import { AssistantGreeting, resetGreetingForTesting } from "./AssistantGreeting";
+import { AssistantGreeting, GREETING_MS, resetGreetingForTesting } from "./AssistantGreeting";
 
-const messages = () => useUi.getState().toasts.map((toast) => toast.message);
+const card = () => screen.queryByTestId("assistant-greeting");
 const at = (hour: number) => vi.setSystemTime(new Date(2026, 9, 11, hour, 30));
+const wait = (ms: number) => act(async () => void (await vi.advanceTimersByTimeAsync(ms)));
 
-async function setup(prefs: Record<string, unknown>) {
+function setup(prefs: Record<string, unknown>) {
   const db = new Database(new MemoryStorageAdapter());
   db.prefs.set(prefs);
   setDbForTesting(db);
-  return db;
+}
+
+async function show(prefs: Record<string, unknown>, hour = 9) {
+  at(hour);
+  setup({ localAssistantEnabled: true, locale: "tr", ...prefs });
+  await act(async () => void render(<AssistantGreeting />));
 }
 
 beforeEach(() => {
-  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.useFakeTimers();
   registerDeferredCopy("en", deferredEn);
   registerDeferredCopy("tr", deferredTr);
-  useUi.setState({ toasts: [] });
   resetGreetingForTesting();
 });
 
@@ -33,45 +37,74 @@ afterEach(() => {
 
 describe("the assistant's greeting", () => {
   it("greets by the time of day and the form of address the user gave", async () => {
-    at(9);
-    await setup({ localAssistantEnabled: true, locale: "tr", addressAs: "  Mert Bey " });
-    await act(async () => void render(<AssistantGreeting />));
+    await show({ addressAs: "  Mert Bey " });
 
-    expect(messages()).toEqual(["Günaydın, Mert Bey. İhtiyacınız olduğunda buradayım."]);
+    expect(card()).toHaveTextContent("Günaydın, Mert Bey. İhtiyacınız olduğunda buradayım.");
   });
 
   it("greets without a name when there is no form of address", async () => {
-    at(20);
-    await setup({ localAssistantEnabled: true, locale: "tr", addressAs: "   " });
-    await act(async () => void render(<AssistantGreeting />));
+    await show({ addressAs: "   " }, 20);
 
-    expect(messages()).toEqual(["İyi akşamlar. İhtiyacınız olduğunda buradayım."]);
+    expect(card()).toHaveTextContent("İyi akşamlar. İhtiyacınız olduğunda buradayım.");
   });
 
   it("follows the part of the day in the user's language", async () => {
-    at(14);
-    await setup({ localAssistantEnabled: true, locale: "en", addressAs: "sir" });
-    await act(async () => void render(<AssistantGreeting />));
+    await show({ locale: "en", addressAs: "sir" }, 14);
 
-    expect(messages()).toEqual(["Good afternoon, sir. I'm here whenever you need me."]);
+    expect(card()).toHaveTextContent("Good afternoon, sir. I'm here whenever you need me.");
+  });
+
+  it("stays about ten seconds, then goes", async () => {
+    await show({});
+
+    await wait(GREETING_MS - 100);
+    expect(card()).toBeInTheDocument();
+    await wait(200);
+    expect(card()).not.toBeInTheDocument();
+  });
+
+  it("waits while the pointer is on it and goes after the rest of its time", async () => {
+    await show({});
+
+    await wait(6_000);
+    fireEvent.mouseEnter(card()!);
+    await wait(60_000);
+    expect(card()).toBeInTheDocument();
+
+    fireEvent.mouseLeave(card()!);
+    await wait(3_800);
+    expect(card()).toBeInTheDocument();
+    await wait(400);
+    expect(card()).not.toBeInTheDocument();
+  });
+
+  it("waits while the keyboard is on it", async () => {
+    await show({});
+
+    fireEvent.focus(screen.getByRole("button"));
+    await wait(30_000);
+    expect(card()).toBeInTheDocument();
+  });
+
+  it("closes when asked", async () => {
+    await show({});
+
+    fireEvent.click(screen.getByRole("button"));
+
+    expect(card()).not.toBeInTheDocument();
   });
 
   it("greets once per launch, however often the shell mounts again", async () => {
-    at(9);
-    await setup({ localAssistantEnabled: true, locale: "tr" });
-    const first = render(<AssistantGreeting />);
-    await act(async () => undefined);
-    first.unmount();
+    await show({});
+    fireEvent.click(screen.getByRole("button"));
     await act(async () => void render(<AssistantGreeting />));
 
-    expect(messages()).toHaveLength(1);
+    expect(card()).not.toBeInTheDocument();
   });
 
   it("says nothing while the assistant is off", async () => {
-    at(9);
-    await setup({ localAssistantEnabled: false, locale: "tr", addressAs: "Mert Bey" });
-    await act(async () => void render(<AssistantGreeting />));
+    await show({ localAssistantEnabled: false, addressAs: "Mert Bey" });
 
-    expect(messages()).toEqual([]);
+    expect(card()).not.toBeInTheDocument();
   });
 });
