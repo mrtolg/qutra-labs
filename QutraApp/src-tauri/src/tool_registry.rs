@@ -17,6 +17,10 @@ pub const CANDIDATE_TOKEN_TTL: Duration = Duration::from_secs(10 * 60);
 /* Locate runs one native picker at a time, so a handful covers a user who
 picks again without registering. The oldest is dropped first. */
 pub const MAX_PENDING_CANDIDATES: usize = 4;
+/* A scan of the computer can find a dozen programs at once, each held for
+review like a picked one. They have a pool of their own so a scan never
+drops the file a user is reviewing. */
+pub const MAX_PENDING_DETECTED: usize = 64;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -72,6 +76,18 @@ struct PendingCandidate {
     candidate: ToolCandidate,
     working_dir: String,
     issued_at: Instant,
+    /// Found by a scan of the computer rather than chosen in the picker.
+    detected: bool,
+}
+
+/// An installation as listed to the page: the stored record plus a fact read
+/// at list time, never stored, that the file is no longer where it was.
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ListedToolInstallation {
+    #[serde(flatten)]
+    pub record: ToolInstallationRecord,
+    pub file_missing: bool,
 }
 
 /// Path-based registration for test fixtures. Compiled into tests only, so no
@@ -236,20 +252,41 @@ impl ToolRegistry {
     /// a fresh opaque token. Callers must pass only a path the user chose in a
     /// native dialog; the renderer never reaches this with a path of its own.
     pub fn locate(&self, picked_path: &str) -> Result<LocatedCandidate, String> {
-        let candidate = inspect_candidate_path(picked_path)?;
+        self.hold_for_review(picked_path, false)
+    }
+
+    /// Hold an executable a scan of the computer found, exactly as a picked
+    /// one is held: inspected now, redeemed by token, hashed again at
+    /// registration.
+    pub(crate) fn locate_detected(&self, found_path: &str) -> Result<LocatedCandidate, String> {
+        self.hold_for_review(found_path, true)
+    }
+
+    fn hold_for_review(&self, path: &str, detected: bool) -> Result<LocatedCandidate, String> {
+        let candidate = inspect_candidate_path(path)?;
         let working_dir = resolve_working_dir("", &candidate.canonical_path)?;
         let token = format!("cand-{}", Uuid::new_v4());
         let mut pending = self.pending.lock().map_err(|_| "registry_lock_failed")?;
         let now = Instant::now();
         pending.retain(|item| now.duration_since(item.issued_at) <= CANDIDATE_TOKEN_TTL);
-        while pending.len() >= MAX_PENDING_CANDIDATES {
-            pending.remove(0);
+        let cap = if detected {
+            MAX_PENDING_DETECTED
+        } else {
+            MAX_PENDING_CANDIDATES
+        };
+        while pending.iter().filter(|item| item.detected == detected).count() >= cap {
+            let oldest = pending
+                .iter()
+                .position(|item| item.detected == detected)
+                .expect("a counted entry exists");
+            pending.remove(oldest);
         }
         pending.push(PendingCandidate {
             token: token.clone(),
             candidate: candidate.clone(),
             working_dir: working_dir.clone(),
             issued_at: now,
+            detected,
         });
         Ok(LocatedCandidate {
             token,
@@ -392,6 +429,32 @@ impl ToolRegistry {
         Ok(data.installations.clone())
     }
 
+    /// The records with whether each file is still on disk. Only a file that
+    /// is plainly gone counts as missing: one that cannot be read for another
+    /// reason (permission, a drive that is busy) is not reported as deleted.
+    pub fn list_with_presence(&self) -> Result<Vec<ListedToolInstallation>, String> {
+        Ok(self
+            .list()?
+            .into_iter()
+            .map(|record| {
+                let file_missing = file_is_gone(Path::new(&record.canonical_path));
+                ListedToolInstallation {
+                    record,
+                    file_missing,
+                }
+            })
+            .collect())
+    }
+
+    /// The id of the installation whose file is this one, if any.
+    pub(crate) fn installation_for_path(&self, canonical: &str) -> Option<String> {
+        let data = self.data.lock().ok()?;
+        data.installations
+            .iter()
+            .find(|item| item.canonical_path.eq_ignore_ascii_case(canonical))
+            .map(|item| item.id.clone())
+    }
+
     pub fn get(&self, id: &str) -> Result<ToolInstallationRecord, String> {
         validate_id(id)?;
         let data = self.data.lock().map_err(|_| "registry_lock_failed")?;
@@ -529,6 +592,21 @@ fn inspect_candidate_path(raw_path: &str) -> Result<ToolCandidate, String> {
         publisher,
         signature_state: inspect_signature(&canonical),
     })
+}
+
+fn file_is_gone(path: &Path) -> bool {
+    match fs::metadata(path) {
+        Ok(metadata) => !metadata.is_file(),
+        Err(error) => error.kind() == io::ErrorKind::NotFound,
+    }
+}
+
+/// The canonical form of a path as the registry stores it, or `None` when
+/// there is no file there.
+pub(crate) fn canonical_text(path: &Path) -> Option<String> {
+    fs::canonicalize(path)
+        .ok()
+        .map(|canonical| canonical.to_string_lossy().to_string())
 }
 
 fn validate_raw_path(value: &str) -> Result<(), String> {

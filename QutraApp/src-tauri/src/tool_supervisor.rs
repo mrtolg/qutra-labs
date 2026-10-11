@@ -8,8 +8,10 @@ use crate::launch_receipts::{Refusal, Resolution};
 use crate::tool_output::OutputDecoder;
 #[cfg(test)]
 use crate::tool_registry::RegisterToolRequest;
+use crate::tool_detect::{DetectRoots, DetectedTool};
 use crate::tool_registry::{
-    now_ms, LocatedCandidate, RegisterLocatedToolRequest, ToolInstallationRecord, ToolRegistry,
+    now_ms, ListedToolInstallation, LocatedCandidate, RegisterLocatedToolRequest,
+    ToolInstallationRecord, ToolRegistry,
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -436,6 +438,15 @@ impl ToolSupervisor {
 
     pub fn list_tools(&self) -> Result<Vec<ToolInstallationRecord>, String> {
         self.inner.registry.list()
+    }
+
+    pub fn list_tools_with_presence(&self) -> Result<Vec<ListedToolInstallation>, String> {
+        self.inner.registry.list_with_presence()
+    }
+
+    /// Scan this computer for the toolbox's programs; see `tool_detect`.
+    pub fn detect_tools(&self, skip: &HashSet<String>) -> Vec<DetectedTool> {
+        crate::tool_detect::scan(&self.inner.registry, &DetectRoots::from_env(), skip)
     }
 
     pub fn get_tool(&self, id: &str) -> Result<ToolInstallationRecord, String> {

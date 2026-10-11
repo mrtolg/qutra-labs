@@ -30,6 +30,7 @@ mod terminal;
 mod tool_forms;
 mod tool_logos;
 mod tool_output;
+mod tool_detect;
 mod tool_registry;
 mod tool_supervisor;
 mod validation;
@@ -52,7 +53,9 @@ use std::{
 use tauri::{Emitter, Manager};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 use tauri_plugin_sql::{Migration, MigrationKind};
-use tool_registry::{LocatedCandidate, RegisterLocatedToolRequest, ToolInstallationRecord};
+use tool_registry::{
+    ListedToolInstallation, LocatedCandidate, RegisterLocatedToolRequest, ToolInstallationRecord,
+};
 use tool_supervisor::{
     EventSink, NativeToolRun, StartToolRunRequest, ToolRunEvent, ToolSupervisor,
 };
@@ -1115,9 +1118,27 @@ fn register_tool_installation(
 fn list_tool_installations(
     consent: tauri::State<'_, PrivateToolsConsent>,
     supervisor: tauri::State<'_, ToolSupervisor>,
-) -> Result<Vec<ToolInstallationRecord>, String> {
+) -> Result<Vec<ListedToolInstallation>, String> {
     consent.require()?;
-    supervisor.list_tools()
+    supervisor.list_tools_with_presence()
+}
+
+/* Look for the toolbox's programs on this computer (read only). The renderer
+names no path; it may only say which toolbox items it already has, so those
+are not looked for again. Each program found that the registry does not hold
+comes back with an opaque token to register by, like a picked file. */
+#[tauri::command]
+async fn detect_tool_installations(
+    consent: tauri::State<'_, PrivateToolsConsent>,
+    supervisor: tauri::State<'_, ToolSupervisor>,
+    skip_catalog_ids: Vec<String>,
+) -> Result<Vec<tool_detect::DetectedTool>, String> {
+    consent.require()?;
+    let skip = tool_detect::check_skipped_ids(&skip_catalog_ids)?;
+    let supervisor = supervisor.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || supervisor.detect_tools(&skip))
+        .await
+        .map_err(|_| "detect_failed".to_string())
 }
 
 #[tauri::command]
@@ -1568,6 +1589,7 @@ pub fn run() {
             private_tools_consent,
             private_tools_consent_status,
             locate_tool_candidate,
+            detect_tool_installations,
             engagement_folder_root,
             engagement_folder_pick_parent,
             engagement_folder_create,
