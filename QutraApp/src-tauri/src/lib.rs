@@ -16,6 +16,7 @@ mod consent;
 mod consent_grant;
 mod durable_file;
 mod engagement_folders;
+mod exit;
 mod external_tools;
 mod github;
 mod investigation_files;
@@ -1491,6 +1492,7 @@ pub fn run() {
         winapi::focus_window_titled("Qutra Labs");
         return;
     }
+    let exit_state = Arc::new(exit::ExitState::default());
     tauri::Builder::default()
         .setup(|app| {
             let app_data = app.path().app_data_dir()?;
@@ -1649,8 +1651,39 @@ pub fn run() {
             secure::secure_has,
             secure::secure_delete
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running Qutra Labs");
+        .build(tauri::generate_context!())
+        .expect("error while building Qutra Labs")
+        .run(move |app, event| on_run_event(app, &event, &exit_state));
+}
+
+/// The app is leaving (the last window closed, or something asked to exit):
+/// stop the engine, with a watchdog behind the whole exit (src/exit.rs).
+fn on_run_event(app: &tauri::AppHandle, event: &tauri::RunEvent, state: &Arc<exit::ExitState>) {
+    match event {
+        tauri::RunEvent::ExitRequested { .. } => {
+            let log = app
+                .path()
+                .app_local_data_dir()
+                .ok()
+                .map(|dir| dir.join("logs").join("exit.log"));
+            exit::begin_exit(
+                state,
+                || {
+                    exit::arm_watchdog(state.clone(), exit::HARD_EXIT_AFTER, move |stage| {
+                        exit::end_process(log, stage)
+                    })
+                },
+                || {
+                    if let Some(local) = app.try_state::<local_engine::LocalEngine>() {
+                        tauri::async_runtime::block_on(local.engine.shutdown(exit::ENGINE_GRACE));
+                    }
+                },
+            );
+        }
+        // Sent after every plugin's exit hook has returned.
+        tauri::RunEvent::Exit => state.finished(),
+        _ => {}
+    }
 }
 
 /* ------------------------------------------------------------------ */
