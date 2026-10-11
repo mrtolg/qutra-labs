@@ -67,9 +67,9 @@ describe("Turkish catalog", () => {
     expect(hits).toEqual([]);
   });
 
-  it("keeps the product names: proje, Jarvis", () => {
+  it("keeps the product names: proje, Qutra (never Jarvis)", () => {
     const hits = Object.entries(tr)
-      .filter(([, value]) => /çalışma alan/i.test(value) || /\bQutra\b(?! Labs)/.test(value))
+      .filter(([, value]) => /çalışma alan/i.test(value) || /Jarvis/i.test(value))
       .map(([key, value]) => `${key}: ${value}`);
     expect(hits).toEqual([]);
   });
