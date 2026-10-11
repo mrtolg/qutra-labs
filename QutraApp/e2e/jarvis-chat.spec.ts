@@ -173,7 +173,6 @@ test("the composer's model chip switches this conversation's model", async ({ pa
   await expect(picker).toHaveCount(0);
 });
 
-test("Qutra's settings: personalization, memory, model, keys and data", async ({ page }) => {
 test("the composer's İnternet switch starts off, shows a globe chip when on and is kept per conversation", async ({ page }) => {
   const history = await openJarvis(page, 1440);
   const toggle = page.getByTestId("assistant-web-toggle");
@@ -199,7 +198,7 @@ test("the composer's İnternet switch starts off, shows a globe chip when on and
   await expect(chip).toBeVisible();
 });
 
-test("Jarvis's settings: personalization, memory, model, keys and data", async ({ page }) => {
+test("Qutra's settings: personalization, memory, model, keys and data", async ({ page }) => {
   await openJarvis(page, 1440);
   await page.getByRole("button", { name: "Qutra ayarları" }).click();
   const sheet = page.getByTestId("jarvis-settings");
