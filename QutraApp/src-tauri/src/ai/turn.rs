@@ -32,6 +32,9 @@ pub enum Progress {
     Token(String),
     /// The model began thinking; said once per turn.
     Thinking,
+    /// The service began a web search or page fetch of its own; said each
+    /// time one starts.
+    Searching,
     /// A refused or busy request is tried again after this wait.
     Retrying {
         seconds: u64,

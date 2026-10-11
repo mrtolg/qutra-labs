@@ -1,7 +1,7 @@
 //! One cloud turn at a time. The page starts a turn with
 //! `ai_chat_start`, stops it with `ai_chat_cancel`, and hears it on
 //! `ai://stream`: `bound` (where it goes and how much), `token`, `thinking`,
-//! `retrying`, `fallback`, then exactly one `done` or `error`. No event
+//! `searching`, `retrying`, `fallback`, then exactly one `done` or `error`. No event
 //! carries the key.
 
 use std::sync::{Arc, Mutex};
@@ -61,7 +61,7 @@ impl CloudStart {
 #[serde(rename_all = "camelCase")]
 pub struct CloudEvent {
     pub request_id: String,
-    /// `bound` | `token` | `thinking` | `retrying` | `fallback` | `done` | `error`
+    /// `bound` | `token` | `thinking` | `searching` | `retrying` | `fallback` | `done` | `error`
     pub kind: &'static str,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub text: Option<String>,
@@ -121,6 +121,7 @@ impl CloudEvent {
                 ..Self::new(request_id, "token")
             },
             Progress::Thinking => Self::new(request_id, "thinking"),
+            Progress::Searching => Self::new(request_id, "searching"),
             Progress::Retrying { seconds } => Self {
                 seconds: Some(seconds),
                 ..Self::new(request_id, "retrying")

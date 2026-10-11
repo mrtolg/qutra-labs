@@ -500,10 +500,13 @@ impl TurnState {
                         progress(Progress::Fallback { from, to });
                         Block::Kept(block.clone())
                     }
-                    "server_tool_use" => Block::ServerToolUse {
-                        block: block.clone(),
-                        input: String::new(),
-                    },
+                    "server_tool_use" => {
+                        progress(Progress::Searching);
+                        Block::ServerToolUse {
+                            block: block.clone(),
+                            input: String::new(),
+                        }
+                    }
                     "web_search_tool_result" | "web_fetch_tool_result" => {
                         for source in result_sources(block) {
                             push_source(&mut self.found, Some(&source.url), Some(&source.title));
@@ -1312,10 +1315,10 @@ mod tests {
         assert_eq!(blocks[1]["content"][0]["encrypted_content"], "abc");
         assert_eq!(blocks[2], json!({ "type": "text", "text": "Merhaba" }));
         assert_eq!(result.text, "Merhaba");
-        // Only the answer's words are tokens; the page hears nothing of the search.
+        // The page hears that a search began, and then the answer's words.
         assert_eq!(
             seen.into_inner().unwrap(),
-            vec![Progress::Token("Merhaba".into())]
+            vec![Progress::Searching, Progress::Token("Merhaba".into())]
         );
         // What the answer cites is what is shown, and only links a page may open.
         assert_eq!(
