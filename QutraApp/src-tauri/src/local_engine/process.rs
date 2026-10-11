@@ -589,20 +589,13 @@ impl Engine {
             }
             match client.get(format!("{origin}/health")).send().await {
                 Ok(response) if response.status().is_success() => {
-                    // Something answers on the port; make sure it is ours:
-                    // it takes our key and refuses a request without one. A
-                    // listener that answers every request would pass the
-                    // first check alone.
-                    let status = |key: Option<&str>| {
-                        let mut request = client.get(format!("{origin}/v1/models"));
-                        if let Some(key) = key {
-                            request = request.bearer_auth(key);
-                        }
-                        async move { request.send().await.map(|r| r.status().as_u16()) }
-                    };
-                    let with_key = status(Some(&running.key)).await.unwrap_or(0);
-                    let without_key = status(None).await.unwrap_or(0);
-                    return if with_key == 200 && without_key == 401 && running.alive() {
+                    // Something answers on the port; make sure it is ours.
+                    // The server lists the model under the alias Rust gave it
+                    // and only for the key made for this start, so a listener
+                    // that is not the server cannot pass. Every request
+                    // carries the key: the server logs a warning for one that
+                    // does not.
+                    return if self.serves_our_model(&client, running).await && running.alive() {
                         Ok(())
                     } else {
                         Err(LocalEngineError::StartFailed)
@@ -616,6 +609,32 @@ impl Engine {
             }
             tokio::time::sleep(POLL).await;
         }
+    }
+
+    /// The server on the port takes this start's key and lists the model
+    /// under its alias.
+    async fn serves_our_model(&self, client: &reqwest::Client, running: &Running) -> bool {
+        let Ok(response) = client
+            .get(format!("{}/v1/models", running.origin()))
+            .bearer_auth(&running.key)
+            .send()
+            .await
+        else {
+            return false;
+        };
+        if response.status().as_u16() != 200 {
+            return false;
+        }
+        let Ok(body) = response.json::<serde_json::Value>().await else {
+            return false;
+        };
+        body.get("data")
+            .and_then(serde_json::Value::as_array)
+            .is_some_and(|models| {
+                models.iter().any(|m| {
+                    m.get("id").and_then(serde_json::Value::as_str) == Some(&running.target.id)
+                })
+            })
     }
 
     /// Stop the engine, or a start in progress.
@@ -684,6 +703,8 @@ mod tests {
 
     const FAKE_PORT: &str = "QUTRA_FAKE_LLAMA_PORT";
     const FAKE_MODE: &str = "QUTRA_FAKE_LLAMA_MODE";
+    const FAKE_ALIAS: &str = "QUTRA_FAKE_LLAMA_ALIAS";
+    const FAKE_UNAUTH_LOG: &str = "QUTRA_FAKE_LLAMA_UNAUTH_LOG";
     const FAKE_TEST: &str = "local_engine::process::tests::fake_llama_server";
 
     /// Not a test: the fake llama-server the lifecycle tests start, by
@@ -696,6 +717,8 @@ mod tests {
         };
         let mode = std::env::var(FAKE_MODE).unwrap_or_default();
         let key = std::env::var("LLAMA_API_KEY").unwrap_or_default();
+        let alias = std::env::var(FAKE_ALIAS).unwrap_or_default();
+        let unauth_log = std::env::var(FAKE_UNAUTH_LOG).ok();
         if mode == "crash" {
             eprintln!("llama_model_load: error loading model: done_getting_tensors: wrong number of tensors; expected 1014, got 658");
             std::process::exit(1);
@@ -715,6 +738,7 @@ mod tests {
                     && request
                         .lines()
                         .any(|l| l.eq_ignore_ascii_case(&format!("authorization: bearer {key}"))));
+            let models_body;
             let (status, body) = if line.starts_with("GET /health") {
                 health_calls += 1;
                 if health_calls < 3 {
@@ -724,8 +748,26 @@ mod tests {
                 }
             } else if line.starts_with("GET /v1/models") {
                 if authorized {
-                    ("200 OK", r#"{"data":[]}"#)
+                    // The real server lists the model under its alias; a
+                    // listener that is not the server does not know it.
+                    let listed = if mode == "anykey" {
+                        "someone-else"
+                    } else {
+                        alias.as_str()
+                    };
+                    models_body = format!(r#"{{"data":[{{"id":"{listed}"}}]}}"#);
+                    ("200 OK", models_body.as_str())
                 } else {
+                    // The real server logs a warning for this; the tests
+                    // count it.
+                    if let Some(path) = &unauth_log {
+                        let mut log = std::fs::OpenOptions::new()
+                            .create(true)
+                            .append(true)
+                            .open(path)
+                            .unwrap();
+                        let _ = writeln!(log, "{line}");
+                    }
                     ("401 Unauthorized", r#"{"error":"Invalid API Key"}"#)
                 }
             } else {
@@ -742,6 +784,7 @@ mod tests {
     struct Fake {
         mode: &'static str,
         starts: AtomicUsize,
+        unauthorized_log: PathBuf,
     }
 
     impl Launcher for Fake {
@@ -752,6 +795,8 @@ mod tests {
                 .args(["--exact", FAKE_TEST, "--nocapture", "--test-threads=1"])
                 .env(FAKE_PORT, spec.port.to_string())
                 .env(FAKE_MODE, self.mode)
+                .env(FAKE_ALIAS, &spec.alias)
+                .env(FAKE_UNAUTH_LOG, &self.unauthorized_log)
                 .env("LLAMA_API_KEY", &spec.api_key);
             Ok(command)
         }
@@ -762,6 +807,7 @@ mod tests {
         let fake = Arc::new(Fake {
             mode,
             starts: AtomicUsize::new(0),
+            unauthorized_log: dir.path().join("unauthorized.log"),
         });
         let engine = Engine::with_timeouts(
             fake.clone(),
@@ -803,6 +849,19 @@ mod tests {
         engine.stop().await;
         assert_eq!(engine.status().phase, Phase::Stopped);
         assert!(engine.run.lock().await.is_none());
+    }
+
+    /// The server logs a warning for every request that carries no key or a
+    /// wrong one. A start must make none: the ownership check uses the key.
+    #[tokio::test]
+    async fn a_start_sends_every_request_with_the_key() {
+        let (_fake, engine, dir) = engine("healthy", DEFAULT_IDLE);
+        let lease = engine.ensure(&target("m"), 4096).await.unwrap();
+        drop(lease);
+        engine.stop().await;
+        let refused =
+            std::fs::read_to_string(dir.path().join("unauthorized.log")).unwrap_or_default();
+        assert_eq!(refused, "", "the engine refused a request during the start");
     }
 
     #[tokio::test]
