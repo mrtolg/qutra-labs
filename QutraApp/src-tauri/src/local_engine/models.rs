@@ -400,7 +400,14 @@ impl SummaryCache {
     }
 }
 
-fn state_for(summary: &Result<Summary, &'static str>, prepared: bool) -> ModelState {
+/// `from_ollama`: a copy can be written from Ollama's file, so a file the
+/// compatibility rules would change is offered for preparing. A copy that
+/// still needs them (made by an older version of the app) is offered again.
+fn state_for(
+    summary: &Result<Summary, &'static str>,
+    prepared: bool,
+    from_ollama: bool,
+) -> ModelState {
     match summary {
         Err(reason) => ModelState::Unreadable {
             reason: (*reason).into(),
@@ -409,7 +416,7 @@ fn state_for(summary: &Result<Summary, &'static str>, prepared: bool) -> ModelSt
             let arch = s.architecture.clone().unwrap_or_default();
             if !SUPPORTED_ARCHITECTURES.contains(&arch.as_str()) {
                 ModelState::Unsupported { architecture: arch }
-            } else if s.tower_tensors > 0 && !prepared {
+            } else if (s.tower_tensors > 0 && !prepared) || (from_ollama && !s.compat.is_empty()) {
                 ModelState::NeedsPrepare {
                     write_bytes: s.text_bytes,
                 }
@@ -488,7 +495,7 @@ pub fn discover(roots: &ModelRoots, cache: &SummaryCache) -> Vec<LocalModel> {
                 size_bytes: entry.size,
                 architecture: summary.as_ref().ok().and_then(|s| s.architecture.clone()),
                 tools: tools_for(&summary),
-                state: state_for(&summary, copy.is_some()),
+                state: state_for(&summary, copy.is_some(), true),
                 prepared: copy.is_some(),
                 path: read_from,
                 source_blob: Some(entry.blob),
@@ -514,7 +521,7 @@ pub fn discover(roots: &ModelRoots, cache: &SummaryCache) -> Vec<LocalModel> {
             size_bytes: std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0),
             architecture: summary.as_ref().ok().and_then(|s| s.architecture.clone()),
             tools: tools_for(&summary),
-            state: state_for(&summary, false),
+            state: state_for(&summary, false, false),
             prepared: false,
             path,
             source_blob: None,
@@ -536,7 +543,7 @@ pub mod tests {
     pub const QWEN_DIGEST: &str =
         "sha256:2bada8a7450677000f678be90653b85d364de7db25eb5ea54136ada5f3933730";
 
-    fn manifest(digest: &str, size: u64) -> String {
+    pub fn manifest(digest: &str, size: u64) -> String {
         format!(
             r#"{{"schemaVersion":2,"config":{{"mediaType":"application/vnd.docker.container.image.v1+json","digest":"sha256:{z}","size":474}},
             "layers":[{{"mediaType":"application/vnd.ollama.image.model","digest":"{digest}","size":{size}}},
