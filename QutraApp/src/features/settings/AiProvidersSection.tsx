@@ -3,13 +3,14 @@ import { useT } from "@/lib/i18n";
 import { useUi } from "@/state/ui";
 import { JarvisRoutePicker } from "./JarvisRoutePicker";
 import { LocalAssistantSettings } from "./LocalAssistantSettings";
+import { VoiceSettings } from "./VoiceSettings";
 import { CloudConnections } from "./CloudConnections";
 import { CloudConsents } from "./CloudConsents";
 import "./settingsSections.css";
 
-/** Settings › AI providers: which way Jarvis talks, the local model, the
-    cloud connections, the investigations allowed to go to the cloud, and
-    the masking that applies to all of it. */
+/** Settings › AI providers: which way Jarvis talks, the local model, the voice
+    answers are read in, the cloud connections, the investigations allowed to
+    go to the cloud, and the masking that applies to all of it. */
 export function AiProvidersSection() {
   const { t } = useT();
   const openSettings = useUi((s) => s.openSettings);
@@ -21,6 +22,10 @@ export function AiProvidersSection() {
         <h4 className="settings-block-heading">{t("settings.ai.localTitle")}</h4>
         {/* Its own component: the on-demand local engine replaces it later. */}
         <LocalAssistantSettings />
+      </div>
+
+      <div className="ai-section__block">
+        <VoiceSettings />
       </div>
 
       <div className="ai-section__block">

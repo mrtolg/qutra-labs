@@ -58,6 +58,27 @@
   flex-direction: column;
 }
 
+.voice-settings__note {
+  max-width: none;
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-12);
+}
+.voice-settings__rate {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.voice-settings__rate input {
+  width: 160px;
+  accent-color: var(--primary);
+}
+.voice-settings__rate output {
+  min-width: 3ch;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-size: var(--fs-12);
+}
+
 .route-picker__lede {
   margin: 0 0 var(--sp-3);
   font-size: var(--fs-12);
