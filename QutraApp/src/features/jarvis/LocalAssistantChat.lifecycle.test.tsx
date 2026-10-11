@@ -11,7 +11,7 @@ import {
 } from "@/lib/localAssistant/client";
 import { LocalAssistantChat } from "./LocalAssistantChat";
 
-/* A turn is unrecoverable once the Jarvis page unmounts, so
+/* A turn is unrecoverable once the Qutra page unmounts, so
    `LocalAssistantChat` has a cleanup effect calling `stop()`: navigating away
    mid-turn would otherwise leave the model generating with nobody reading,
    the abort ref gone with the component, and a pending approval card
@@ -104,7 +104,7 @@ describe("LocalAssistantChat aborts an in-flight turn on unmount",() => {
 
     const { unmount } = render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -126,7 +126,7 @@ describe("LocalAssistantChat aborts an in-flight turn on unmount",() => {
 
     const { unmount } = render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -154,7 +154,7 @@ describe("LocalAssistantChat aborts an in-flight turn on unmount",() => {
 
     const { unmount } = render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -186,7 +186,7 @@ describe("LocalAssistantChat aborts an in-flight turn on unmount",() => {
 
     const { unmount } = render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -211,7 +211,7 @@ describe("revoking agent tool proposals stops the current agent turn", () => {
 
     render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -234,7 +234,7 @@ describe("a preserved partial answer stays distinguishable from a successful one
 
     render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "please help");
+    await user.type(screen.getByLabelText("Message to Qutra"), "please help");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -279,7 +279,7 @@ describe("a preserved partial answer stays distinguishable from a successful one
 
     render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -334,7 +334,7 @@ describe("a transcript erased from Settings stays erased while the chat is kept 
     });
     await waitFor(() => expect(transcript().queryByText("old question")).toBeNull());
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "new question");
+    await user.type(screen.getByLabelText("Message to Qutra"), "new question");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
     await act(async () => {

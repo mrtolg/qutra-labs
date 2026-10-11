@@ -9,8 +9,8 @@ const CORE_ROUTES = [
   ["/lab", "Security Lab"],
   ["/terminal", "Terminal"],
   ["/github", "GitHub"],
-  // The assistant is Jarvis; the route stays /jarvis.
-  ["/jarvis", "Jarvis"],
+  // The assistant is Qutra; the route stays /jarvis.
+  ["/jarvis", "Qutra"],
 ] as const;
 
 const RETIRED_ROUTES = [

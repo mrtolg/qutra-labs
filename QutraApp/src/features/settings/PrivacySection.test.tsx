@@ -44,7 +44,7 @@ describe("Privacy › the data map", () => {
     expect(within(map).getByRole("heading", { name: "What is recorded" })).toBeInTheDocument();
     expect(within(map).getByText("%APPDATA%\\app.contextos.desktop\\contextos.db")).toBeInTheDocument();
     expect(within(map).getByRole("heading", { name: "Never leaves this computer" })).toBeInTheDocument();
-    expect(within(map).getByText("Jarvis right now: Claude (Anthropic)")).toBeInTheDocument();
+    expect(within(map).getByText("Qutra right now: Claude (Anthropic)")).toBeInTheDocument();
     expect(within(map).getByText("On")).toBeInTheDocument();
   });
 });

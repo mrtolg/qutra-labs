@@ -41,7 +41,7 @@ import { LocalAssistantChat } from "./LocalAssistantChat";
 // The words only lazy pages read load after the first paint (src/lib/i18n/deferred).
 const en = { ...enCatalog, ...deferredEn };
 
-/* Jarvis's memory and instructions, and the model a conversation chose.
+/* Qutra's memory and instructions, and the model a conversation chose.
    Rust is mocked at `invoke`; nothing leaves the test. */
 
 Element.prototype.scrollTo = vi.fn();
@@ -86,7 +86,7 @@ async function finish(started: Started[], text = "Tamam.") {
 
 async function ask(text: string) {
   const user = userEvent.setup();
-  await user.type(screen.getByLabelText("Message to Jarvis"), text);
+  await user.type(screen.getByLabelText("Message to Qutra"), text);
   await user.click(screen.getByRole("button", { name: "Send" }));
 }
 
@@ -110,7 +110,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe("Jarvis's memory and instructions", () => {
+describe("Qutra's memory and instructions", () => {
   it("go to the cloud once, inside the first question, and say so under it", async () => {
     const db = seed({ aiProvider: "anthropic", localAssistantEnabled: false, jarvisAboutYou: "I test web apps." });
     await addMemory(db, "Lab network 10.10.0.0/24", 1);

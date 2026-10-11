@@ -71,7 +71,7 @@ test.describe("qutra without a native broker", () => {
     // (security review #2), so a browser build says up front that it cannot answer here.
     await expect(chat.getByTestId("readiness-browser")).toBeVisible();
 
-    await page.getByLabel("Message to Jarvis").fill("are you there?");
+    await page.getByLabel("Message to Qutra").fill("are you there?");
     await page.getByRole("button", { name: "Send" }).click();
 
     // The question is kept — a refusal must not eat what the user typed.

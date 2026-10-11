@@ -18,7 +18,7 @@ import { EngagementSchema } from "@/domain/lab";
 import { PermissionsSection } from "./PermissionsSection";
 
 /* Settings › Permissions reads Private Lab's state from Rust (mocked at
-   `invoke` and at the bridge's supervisor), saves the Jarvis switches as
+   `invoke` and at the bridge's supervisor), saves the Qutra switches as
    preferences, asks before the risky changes and confirms every change. */
 
 const GRANTED_AT = Date.UTC(2026, 9, 9, 12, 30);
@@ -164,15 +164,15 @@ describe("Permissions › Private Lab", () => {
   });
 });
 
-describe("Permissions › Jarvis", () => {
+describe("Permissions › Qutra", () => {
   beforeEach(() => {
     nativeLab({ granted: true });
   });
 
   it("turns the local model on at once and records when", async () => {
     render(<PermissionsSection />);
-    const local = row("Jarvis on the local model");
-    const toggle = within(local).getByRole("checkbox", { name: "Jarvis on the local model" });
+    const local = row("Qutra on the local model");
+    const toggle = within(local).getByRole("checkbox", { name: "Qutra on the local model" });
     expect(within(local).getByText("No date recorded for the last change")).toBeInTheDocument();
 
     await userEvent.click(toggle);
@@ -181,18 +181,18 @@ describe("Permissions › Jarvis", () => {
     expect(getDb().prefs.get().localAssistantEnabled).toBe(true);
     expect(within(local).getByText(/^On since /)).toBeInTheDocument();
     expect(
-      within(local).getByText("Jarvis can now answer with the local model."),
+      within(local).getByText("Qutra can now answer with the local model."),
     ).toBeInTheDocument();
   });
 
-  it("asks before letting Jarvis propose actions, and turns it off plainly", async () => {
+  it("asks before letting Qutra propose actions, and turns it off plainly", async () => {
     getDb().prefs.set({ localAssistantEnabled: true });
     render(<PermissionsSection />);
-    const proposals = row("Jarvis may propose actions");
-    const toggle = within(proposals).getByRole("checkbox", { name: "Jarvis may propose actions" });
+    const proposals = row("Qutra may propose actions");
+    const toggle = within(proposals).getByRole("checkbox", { name: "Qutra may propose actions" });
 
     await userEvent.click(toggle);
-    const dialog = await screen.findByRole("dialog", { name: "Let Jarvis propose actions?" });
+    const dialog = await screen.findByRole("dialog", { name: "Let Qutra propose actions?" });
     expect(getDb().prefs.get().assistantAgentToolsEnabled).toBe(false);
     await userEvent.click(within(dialog).getByRole("button", { name: "Allow proposals" }));
     await waitFor(() => expect(toggle).toBeChecked());
@@ -207,7 +207,7 @@ describe("Permissions › Jarvis", () => {
   it("says when saved proposals are not active", async () => {
     getDb().prefs.set({ localAssistantEnabled: false, assistantAgentToolsEnabled: true });
     render(<PermissionsSection />);
-    const proposals = row("Jarvis may propose actions");
+    const proposals = row("Qutra may propose actions");
 
     expect(
       within(proposals).getByText(
@@ -223,7 +223,7 @@ describe("Permissions › Jarvis", () => {
     const toggle = within(reads).getByRole("checkbox", { name: "Read context without asking" });
     expect(toggle).toBeDisabled();
     expect(
-      within(reads).getByText("Turn on “Jarvis may propose actions” first."),
+      within(reads).getByText("Turn on “Qutra may propose actions” first."),
     ).toBeInTheDocument();
 
     getDb().prefs.set({ localAssistantEnabled: true, assistantAgentToolsEnabled: true });

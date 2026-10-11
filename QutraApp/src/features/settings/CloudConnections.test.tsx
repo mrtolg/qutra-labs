@@ -238,7 +238,7 @@ describe("the list of cloud API keys", () => {
     );
   });
 
-  it("warns that removing the only key of the route in use leaves Jarvis unable to answer", async () => {
+  it("warns that removing the only key of the route in use leaves Qutra unable to answer", async () => {
     rust({ rows: [{ id: 0, provider: "anthropic", last4: "WXYZ" }] });
     getDb().prefs.set({ aiProvider: "anthropic" });
     render(<CloudConnections />);
@@ -246,7 +246,7 @@ describe("the list of cloud API keys", () => {
     await userEvent.click(await screen.findByRole("button", { name: /Remove the Claude/ }));
 
     expect(await screen.findByRole("dialog")).toHaveTextContent(
-      "Jarvis uses this connection right now",
+      "Qutra uses this connection right now",
     );
   });
 
@@ -328,15 +328,15 @@ describe("the models of a service that has a key", () => {
     expect(await within(openai()).findByText(/Try again in 12 seconds/)).toBeInTheDocument();
   });
 
-  it("uses a service for Jarvis from its own card", async () => {
+  it("uses a service for Qutra from its own card", async () => {
     rust({ rows: [{ id: 0, provider: "anthropic", last4: "WXYZ" }] });
     render(<CloudConnections />);
     await screen.findByText("••••WXYZ");
 
-    await userEvent.click(within(claude()).getByRole("button", { name: "Use for Jarvis" }));
+    await userEvent.click(within(claude()).getByRole("button", { name: "Use for Qutra" }));
 
     expect(getDb().prefs.get().aiProvider).toBe("anthropic");
-    expect(within(claude()).getByText("Jarvis uses this")).toBeInTheDocument();
-    expect(within(claude()).queryByRole("button", { name: "Use for Jarvis" })).not.toBeInTheDocument();
+    expect(within(claude()).getByText("Qutra uses this")).toBeInTheDocument();
+    expect(within(claude()).queryByRole("button", { name: "Use for Qutra" })).not.toBeInTheDocument();
   });
 });

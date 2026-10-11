@@ -140,7 +140,7 @@ afterEach(() => {
 });
 
 describe("Home starts an investigation", () => {
-  it("offers the five kinds first, with a terminal and Jarvis beside them, and no greeting", () => {
+  it("offers the five kinds first, with a terminal and Qutra beside them, and no greeting", () => {
     freshDb();
     renderHome();
 
@@ -152,7 +152,7 @@ describe("Home starts an investigation", () => {
       "PCAP",
       "Forensics",
       "New terminal",
-      "Ask Jarvis",
+      "Ask Qutra",
     ]);
     expect(screen.queryByText(/that's the whole home screen/)).toBeNull();
     expect(screen.queryByText(/^Good (morning|afternoon|evening)$/)).toBeNull();
@@ -167,10 +167,10 @@ describe("Home starts an investigation", () => {
     expect(screen.getByTestId("where").textContent).toBe("/lab?new=1&kind=pcap");
   });
 
-  it("Ask Jarvis opens the assistant", () => {
+  it("Ask Qutra opens the assistant", () => {
     freshDb();
     renderHome();
-    fireEvent.click(screen.getByRole("button", { name: "Ask Jarvis" }));
+    fireEvent.click(screen.getByRole("button", { name: "Ask Qutra" }));
     expect(screen.getByTestId("where").textContent).toBe("/jarvis");
   });
 });

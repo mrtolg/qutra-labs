@@ -278,7 +278,7 @@ describe("LocalEnginePanel", () => {
     expect(screen.getByTestId("local-engine-models")).toBeInTheDocument();
   });
 
-  it("asks nothing while Jarvis is off or outside the desktop app", () => {
+  it("asks nothing while Qutra is off or outside the desktop app", () => {
     seedDb({ localAssistantEnabled: false });
     const { client, mock } = fakeClient(report(), [qwen]);
     const { container } = render(<LocalEnginePanel client={client} />);

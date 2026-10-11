@@ -109,7 +109,7 @@ describe("LocalAssistantChat approval card", () => {
 
     render(<LocalAssistantChat />);
 
-    const input = screen.getByLabelText("Message to Jarvis");
+    const input = screen.getByLabelText("Message to Qutra");
     await user.type(input, "please help");
     await user.click(screen.getByRole("button", { name: "Send" }));
 
@@ -152,7 +152,7 @@ describe("LocalAssistantChat approval card", () => {
     const user = userEvent.setup();
 
     render(<LocalAssistantChat />);
-    await user.type(screen.getByLabelText("Message to Jarvis"), "list files");
+    await user.type(screen.getByLabelText("Message to Qutra"), "list files");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -193,7 +193,7 @@ describe("LocalAssistantChat approval card", () => {
 
     render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -237,7 +237,7 @@ describe("LocalAssistantChat approval card", () => {
 
     render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -271,7 +271,7 @@ describe("LocalAssistantChat approval card", () => {
 
     render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -306,7 +306,7 @@ describe("LocalAssistantChat approval card", () => {
 
     render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -355,7 +355,7 @@ describe("LocalAssistantChat approval card", () => {
 
     render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -401,7 +401,7 @@ describe("LocalAssistantChat approval card", () => {
 
     render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -437,7 +437,7 @@ describe("LocalAssistantChat approval card", () => {
 
     render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -471,7 +471,7 @@ describe("LocalAssistantChat approval card", () => {
 
     render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -495,7 +495,7 @@ describe("LocalAssistantChat approval card", () => {
 
     render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 
@@ -515,7 +515,7 @@ describe("LocalAssistantChat approval card", () => {
 
     render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+    await user.type(screen.getByLabelText("Message to Qutra"), "hi");
     await user.click(screen.getByRole("button", { name: "Send" }));
     await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 

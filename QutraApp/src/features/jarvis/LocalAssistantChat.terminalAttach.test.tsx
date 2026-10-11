@@ -95,7 +95,7 @@ async function runOneApprovedTurn(
 
   render(<LocalAssistantChat />);
 
-  await user.type(screen.getByLabelText("Message to Jarvis"), "hi");
+  await user.type(screen.getByLabelText("Message to Qutra"), "hi");
   await user.click(screen.getByRole("button", { name: "Send" }));
   await waitFor(() => expect(streamChat).toHaveBeenCalledTimes(1));
 

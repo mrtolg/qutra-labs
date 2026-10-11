@@ -115,7 +115,7 @@ function seedConversation(db: Database, messages: NewMessage[]) {
 
 async function ask(text: string) {
   const user = userEvent.setup();
-  await user.type(screen.getByLabelText("Message to Jarvis"), text);
+  await user.type(screen.getByLabelText("Message to Qutra"), text);
   await user.click(screen.getByRole("button", { name: "Send" }));
   await waitFor(() => expect(streamChat).toHaveBeenCalled());
 }
@@ -314,7 +314,7 @@ describe("the enabled Assistant view keeps its readiness panel until ready",() =
     await ask("hi");
 
     expect(await screen.findByTestId("local-engine-prepare")).toBeInTheDocument();
-    expect(screen.getByText(/needs a one-time copy before Jarvis can run it/)).toBeInTheDocument();
+    expect(screen.getByText(/needs a one-time copy before Qutra can run it/)).toBeInTheDocument();
     expect(checkHealth).toHaveBeenCalledTimes(2);
   });
 });

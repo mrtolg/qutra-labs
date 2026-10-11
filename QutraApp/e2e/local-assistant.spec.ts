@@ -165,7 +165,7 @@ test.describe("local assistant lab", () => {
    collapsed to 0×0 — invisible and unclickable in the real app. Every test
    missed it because they all set the preference directly and never touched the
    control. This one drives it the way a user does. */
-test("the Jarvis enable switch is visible and toggles", async ({ page }) => {
+test("the Qutra enable switch is visible and toggles", async ({ page }) => {
   await primePreferences(page, { locale: "en", localAssistantEnabled: false });
   await page.goto("/#/overview");
   await openSettings(page, "permissions");
@@ -173,7 +173,7 @@ test("the Jarvis enable switch is visible and toggles", async ({ page }) => {
   const panel = page.getByTestId("permissions-ledger");
   await expect(panel).toBeVisible();
   const label = panel.locator("label.switch", {
-    has: page.getByRole("checkbox", { name: "Jarvis on the local model" }),
+    has: page.getByRole("checkbox", { name: "Qutra on the local model" }),
   });
   const track = label.locator(".switch-track");
 

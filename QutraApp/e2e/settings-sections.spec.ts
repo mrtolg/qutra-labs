@@ -34,7 +34,7 @@ for (const width of [1280, 1920] as const) {
       await waitForAppReady(page);
       const dialog = await openSettings(page, "ai");
 
-      const picker = dialog.getByRole("radiogroup", { name: "Jarvis hangi yoldan konuşsun?" });
+      const picker = dialog.getByRole("radiogroup", { name: "Qutra hangi yoldan konuşsun?" });
       await expect(picker).toBeVisible();
       await expect(picker.getByRole("radio", { name: /Yerel model/ })).toBeChecked();
       // The root bug: a long hint beside a select wrapped one word a line.
@@ -59,16 +59,16 @@ for (const width of [1280, 1920] as const) {
 
       const local = ledger.locator('[data-perm="localAssistant"]');
       await local.locator("label.switch").click();
-      await expect(local.getByText("Jarvis artık yerel modelle yanıt verebilir.")).toBeVisible();
+      await expect(local.getByText("Qutra artık yerel modelle yanıt verebilir.")).toBeVisible();
       await expect(local.getByRole("checkbox")).toBeChecked();
       await expect(local).toContainText("tarihinden beri açık");
 
       await ledger.locator('[data-perm="toolProposals"] label.switch').click();
-      await expect(page.getByRole("dialog", { name: "Jarvis işlem önerebilsin mi?" })).toBeVisible();
+      await expect(page.getByRole("dialog", { name: "Qutra işlem önerebilsin mi?" })).toBeVisible();
       await shot(page, `permissions-tr-${width}-confirm`);
       await page.getByRole("button", { name: "Önerilere izin ver" }).click();
       await expect(ledger.locator('[data-perm="toolProposals"]')).toContainText(
-        "Jarvis artık işlem önerebilir.",
+        "Qutra artık işlem önerebilir.",
       );
       await expectNoSidewaysOverflow(dialog);
       await shot(page, `permissions-tr-${width}-after`);

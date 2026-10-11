@@ -163,8 +163,8 @@ for (const [width, height] of [
       await shot("05-model-chip");
       await page.keyboard.press("Escape");
     }
-    // 3, 4: Jarvis's own settings: personalization, memory, model, keys.
-    await page.getByRole("button", { name: "Jarvis ayarları" }).click();
+    // 3, 4: Qutra's own settings: personalization, memory, model, keys.
+    await page.getByRole("button", { name: "Qutra ayarları" }).click();
     await page.waitForTimeout(400);
     await shot("04-jarvis-settings-personal");
     const sheet = page.getByTestId("jarvis-settings");
@@ -416,7 +416,7 @@ for (const [width, height] of [
     }
     await page.goto("/#/jarvis");
     await settle(page);
-    await page.getByRole("button", { name: "Jarvis ayarları" }).click();
+    await page.getByRole("button", { name: "Qutra ayarları" }).click();
     await page.waitForTimeout(400);
     await check("jarvis-settings");
     await page.keyboard.press("Escape");

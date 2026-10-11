@@ -61,14 +61,14 @@ describe("TopBar", () => {
     const names = within(surfaces())
       .getAllByRole("button")
       .map((b) => b.textContent);
-    expect(names).toEqual(["Home", "Investigations", "Tools", "Jarvis", "Terminal"]);
+    expect(names).toEqual(["Home", "Investigations", "Tools", "Qutra", "Terminal"]);
   });
 
   it.each([
     ["Home", "/overview"],
     ["Investigations", "/lab"],
     ["Tools", "/tools"],
-    ["Jarvis", "/jarvis"],
+    ["Qutra", "/jarvis"],
     ["Terminal", "/terminal"],
   ])("clicking %s opens %s", (name, path) => {
     renderAt("/files");
@@ -84,7 +84,7 @@ describe("TopBar", () => {
     ["/sessions/focus", "Home"],
     ["/lab", "Investigations"],
     ["/tools", "Tools"],
-    ["/jarvis", "Jarvis"],
+    ["/jarvis", "Qutra"],
     ["/terminal", "Terminal"],
   ])("on %s marks %s as the current page", (path, name) => {
     renderAt(path);

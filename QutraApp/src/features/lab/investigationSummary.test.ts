@@ -7,7 +7,7 @@ import { translate, type MessageKey } from "@/lib/i18n";
 import type { InvestigationFile } from "@/lib/investigationFiles";
 import { investigationSummary, SUMMARY_LIMIT, type SummaryInput } from "./investigationSummary";
 
-/* What Jarvis may receive about an investigation, and nothing else. */
+/* What Qutra may receive about an investigation, and nothing else. */
 
 const T = 1_760_000_000_000;
 const t = (key: MessageKey, params?: Record<string, string | number>) => translate("en", key, params);

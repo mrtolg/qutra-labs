@@ -297,7 +297,7 @@ describe("model is a preference, not a pin", () => {
   });
 });
 
-describe("isOllamaModelName — the only names Jarvis turns into a shell command", () => {
+describe("isOllamaModelName — the only names Qutra turns into a shell command", () => {
   // The readiness panel offers `ollama pull <name>` for the user to paste
   // into a shell, and the name can come from any listener's model list.
   it.each([

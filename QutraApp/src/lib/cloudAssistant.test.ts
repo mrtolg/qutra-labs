@@ -230,7 +230,7 @@ describe("the conversation a cloud turn sends", () => {
     expect(historyHoldsSummary([{ role: "user", content: "Q" }])).toBe(false);
   });
 
-  it("puts Jarvis's memory and instructions first, before a summary, and is no summary itself", () => {
+  it("puts Qutra's memory and instructions first, before a summary, and is no summary itself", () => {
     const history = [{ role: "user" as const, content: "Q1", personal: "ME", context: "SUMMARY" }];
     expect(cloudHistory(history)).toEqual([{ role: "user", content: "ME\n\nSUMMARY\n\nQ1" }]);
     const alone = [{ role: "user" as const, content: "Q1", personal: "ME" }];

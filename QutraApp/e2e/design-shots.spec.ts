@@ -64,7 +64,7 @@ for (const [width, height] of [
     await visit("/#/tools?view=playbooks", "playbooks");
     await visit("/#/tools?view=datasets", "datasets");
     await visit("/#/jarvis", "jarvis");
-    await page.getByRole("button", { name: "Jarvis ayarları" }).click();
+    await page.getByRole("button", { name: "Qutra ayarları" }).click();
     await page.waitForTimeout(400);
     await shot("jarvis-settings");
     await page.keyboard.press("Escape");

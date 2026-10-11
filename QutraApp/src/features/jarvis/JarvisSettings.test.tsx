@@ -32,7 +32,7 @@ import { useUi } from "@/state/ui";
 import JarvisSettings from "./JarvisSettings";
 import { useJarvisUi } from "./jarvisUi";
 
-/* Jarvis's own settings on the Jarvis page. The browser
+/* Qutra's own settings on the Qutra page. The browser
    build is what runs here, so the cloud cards say they are desktop-only. */
 
 let db: Database;
@@ -53,26 +53,26 @@ function open(section: Parameters<ReturnType<typeof useJarvisUi.getState>["openS
 }
 
 describe("JarvisSettings", () => {
-  it("saves what Jarvis should know and how to answer, and shows what goes along", async () => {
+  it("saves what Qutra should know and how to answer, and shows what goes along", async () => {
     open("personal");
-    await userEvent.type(screen.getByLabelText("What should Jarvis know about you?"), "I test web apps.");
-    await userEvent.type(screen.getByLabelText("How should Jarvis answer?"), "Commands first.");
+    await userEvent.type(screen.getByLabelText("What should Qutra know about you?"), "I test web apps.");
+    await userEvent.type(screen.getByLabelText("How should Qutra answer?"), "Commands first.");
     await userEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(db.prefs.get()).toMatchObject({ jarvisAboutYou: "I test web apps.", jarvisInstructions: "Commands first." });
 
     await userEvent.click(screen.getByRole("radio", { name: /Concise/ }));
     expect(db.prefs.get().jarvisResponseStyle).toBe("concise");
 
-    await userEvent.click(screen.getByText("Show what goes to Jarvis"));
+    await userEvent.click(screen.getByText("Show what goes to Qutra"));
     expect(screen.getByText(/I test web apps\./, { selector: "pre" })).toBeInTheDocument();
   });
 
   // Much typing: slow when the whole suite runs at once, hence the time.
   it("adds, edits and deletes memories, asks before deleting, and turns memory off", async () => {
     open("memory");
-    expect(screen.getByText(/Jarvis remembers nothing yet/)).toBeInTheDocument();
+    expect(screen.getByText(/Qutra remembers nothing yet/)).toBeInTheDocument();
 
-    await userEvent.type(screen.getByLabelText("Something for Jarvis to remember"), "Lab network 10.10.0.0/24{Enter}");
+    await userEvent.type(screen.getByLabelText("Something for Qutra to remember"), "Lab network 10.10.0.0/24{Enter}");
     expect(await screen.findByText("Lab network 10.10.0.0/24")).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: "Edit: Lab network 10.10.0.0/24" }));

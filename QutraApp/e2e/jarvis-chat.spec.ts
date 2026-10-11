@@ -1,8 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 import { primePreferences, waitForAppReady } from "./helpers";
 
-/* The Jarvis page in Turkish: the history panel with folders, the title row, the
-   composer's model chip and Jarvis's own settings. Each test leaves a
+/* The Qutra page in Turkish: the history panel with folders, the title row, the
+   composer's model chip and Qutra's own settings. Each test leaves a
    screenshot in e2e/screenshots/ to look at. */
 
 const HUD = { theme: "system", packId: "hud", themeMode: "dark", material: "none" };
@@ -33,7 +33,7 @@ function conversation(id: string, title: string, at: number, extra: Record<strin
 }
 
 /** A week of conversations, two folders, a pin, an archived one, and two
-    things Jarvis remembers. The open one is "naber", as in screenshot 1. */
+    things Qutra remembers. The open one is "naber", as in screenshot 1. */
 function seed(page: Page, { longTitle = false }: { longTitle?: boolean } = {}) {
   const now = Date.now();
   const naber = longTitle
@@ -173,18 +173,18 @@ test("the composer's model chip switches this conversation's model", async ({ pa
   await expect(picker).toHaveCount(0);
 });
 
-test("Jarvis's settings: personalization, memory, model, keys and data", async ({ page }) => {
+test("Qutra's settings: personalization, memory, model, keys and data", async ({ page }) => {
   await openJarvis(page, 1440);
-  await page.getByRole("button", { name: "Jarvis ayarları" }).click();
+  await page.getByRole("button", { name: "Qutra ayarları" }).click();
   const sheet = page.getByTestId("jarvis-settings");
   await expect(sheet.getByRole("heading", { name: "Kişiselleştirme" })).toBeVisible();
-  await expect(sheet.getByLabel("Jarvis sizin hakkınızda neyi bilmeli?")).toHaveValue(
+  await expect(sheet.getByLabel("Qutra sizin hakkınızda neyi bilmeli?")).toHaveValue(
     "Küçük şirketler için sızma testi yapıyorum.",
   );
   await page.screenshot({ animations: "disabled", path: "e2e/screenshots/jarvis-settings-personal.png" });
 
   await sheet.getByRole("button", { name: "Hafıza" }).click();
-  await sheet.getByLabel("Jarvis'in hatırlaması gereken bir şey").fill("Hedef kapsamı her zaman yazılı onayla.");
+  await sheet.getByLabel("Qutra'nın hatırlaması gereken bir şey").fill("Hedef kapsamı her zaman yazılı onayla.");
   await sheet.getByRole("button", { name: "Ekle" }).click();
   await expect(sheet.getByText("Hedef kapsamı her zaman yazılı onayla.")).toBeVisible();
   await page.screenshot({ animations: "disabled", path: "e2e/screenshots/jarvis-settings-memory.png" });

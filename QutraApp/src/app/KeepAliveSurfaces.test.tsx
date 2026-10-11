@@ -173,10 +173,10 @@ describe("session and turn ownership", () => {
 
     renderLifecycle("/jarvis");
 
-    // Jarvis is a lazy chunk: its first import can outlast findBy's 1 s
+    // Qutra is a lazy chunk: its first import can outlast findBy's 1 s
     // default when the whole suite runs at once.
     await user.type(
-      await screen.findByLabelText("Message to Jarvis", undefined, { timeout: 10_000 }),
+      await screen.findByLabelText("Message to Qutra", undefined, { timeout: 10_000 }),
       "hi",
     );
     await user.click(screen.getByRole("button", { name: "Send" }));

@@ -8,7 +8,7 @@ import { createFolder } from "@/lib/db/jarvis";
 import { useUi } from "@/state/ui";
 import { JarvisHistory } from "./JarvisHistory";
 
-/* The vertical history on the Jarvis page. */
+/* The vertical history on the Qutra page. */
 
 async function talk(db: Database, content: string, now: number, extra: Parameters<typeof createConversation>[1] = {}) {
   const c = await createConversation(db, { now, ...extra });
@@ -141,7 +141,7 @@ describe("JarvisHistory", () => {
 
   it("says what to do when there is nothing yet", () => {
     render(<JarvisHistory />);
-    expect(screen.getByText("No conversations yet. Ask Jarvis something to start one.")).toBeInTheDocument();
+    expect(screen.getByText("No conversations yet. Ask Qutra something to start one.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Create a folder to group conversations" })).toBeInTheDocument();
   });
 });

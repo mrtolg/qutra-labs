@@ -125,7 +125,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-const composer = () => screen.getByLabelText("Message to Jarvis");
+const composer = () => screen.getByLabelText("Message to Qutra");
 
 async function type(text: string) {
   const user = userEvent.setup();
@@ -140,7 +140,7 @@ const chat = () => render(<MemoryRouter><LocalAssistantChat /></MemoryRouter>);
 // took more than 5 s under that load and under 1 s on its own.
 vi.setConfig({ testTimeout: 20_000 });
 
-describe("asking Jarvis about an investigation", () => {
+describe("asking Qutra about an investigation", () => {
   it(
     "shows the question and the summary before they go, then sends the summary once",
     async () => {

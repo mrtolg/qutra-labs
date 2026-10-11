@@ -126,7 +126,7 @@ test.describe("security laboratory", () => {
 
     // The fixture CTA must name the file that actually exists in the repo.
     await expect(unavailable).toContainText("src-tauri/fixtures/contextos_fixture.rs");
-    await expect(unavailable).not.toContainText("Jarvis");
+    await expect(unavailable).not.toContainText("Qutra");
 
     await page.screenshot({ path: "e2e/screenshots/en-lab-native-boundary.png" });
 

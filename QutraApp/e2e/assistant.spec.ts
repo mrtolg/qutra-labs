@@ -3,7 +3,7 @@ import { primePreferences, waitForAppReady } from "./helpers";
 
 /* The Assistant surface: the conversation
    is the page. A header names it, one centred column holds the turns with
-   Jarvis's answer as Markdown, and the composer sits under it with a
+   Qutra's answer as Markdown, and the composer sits under it with a
    visible label. The conversations are the sections under the top bar. */
 
 const HUD = { theme: "system", packId: "hud", themeMode: "dark", material: "none" };
@@ -66,7 +66,7 @@ test("the Assistant is one conversation: header, centred transcript, composer", 
 
   const chat = page.getByTestId("local-assistant-chat");
   await expect(chat.getByRole("heading", { level: 2, name: "Map what's exposed on the lab host" })).toBeVisible();
-  // Jarvis's answer is Markdown: a list, inline code and a code block with
+  // Qutra's answer is Markdown: a list, inline code and a code block with
   // its language and a Copy button. Nothing in it is a link or an element
   // made from the answer's own markup.
   const log = chat.getByRole("log");
@@ -76,8 +76,8 @@ test("the Assistant is one conversation: header, centred transcript, composer", 
   await expect(log.locator("a")).toHaveCount(0);
 
   // The composer has a label you can see, and the hints under it.
-  await expect(chat.getByText("Message to Jarvis", { exact: true })).toBeVisible();
-  await expect(chat.getByLabel("Message to Jarvis")).toBeVisible();
+  await expect(chat.getByText("Message to Qutra", { exact: true })).toBeVisible();
+  await expect(chat.getByLabel("Message to Qutra")).toBeVisible();
 
   // The conversations are in the history panel beside the chat.
   const sections = page.getByRole("navigation", { name: "Conversations" });
@@ -92,6 +92,6 @@ test("the Assistant is one conversation: header, centred transcript, composer", 
   const prompt = chat.getByRole("button", { name: "How do I read a Gitleaks report?" });
   await expect(prompt).toBeVisible();
   await prompt.click();
-  await expect(chat.getByLabel("Message to Jarvis")).toHaveValue("How do I read a Gitleaks report?");
+  await expect(chat.getByLabel("Message to Qutra")).toHaveValue("How do I read a Gitleaks report?");
   await page.screenshot({ path: "e2e/screenshots/assistant-new-conversation.png" });
 });

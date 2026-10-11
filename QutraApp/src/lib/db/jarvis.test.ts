@@ -24,7 +24,7 @@ import {
   setFolderArchived,
 } from "./jarvis";
 
-/* The history panel's and Jarvis's settings' writes (2026-10-10). */
+/* The history panel's and Qutra's settings' writes (2026-10-10). */
 
 const fresh = () => new Database(new MemoryStorageAdapter());
 
@@ -135,7 +135,7 @@ describe("folders", () => {
 });
 
 describe("memory", () => {
-  it("adds, edits, deletes and clears what Jarvis remembers", async () => {
+  it("adds, edits, deletes and clears what Qutra remembers", async () => {
     const db = fresh();
     expect(await addMemory(db, "  ")).toBeUndefined();
     const m = (await addMemory(db, "Lab ağı 10.10.0.0/24", 1))!;

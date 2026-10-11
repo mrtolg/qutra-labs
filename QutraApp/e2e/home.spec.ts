@@ -4,7 +4,7 @@ import { loadDemo, primePreferences, waitForAppReady } from "./helpers";
 const HUD = { theme: "system", packId: "hud", themeMode: "dark", material: "none" };
 
 /* Spec 2026-10-07 §5.2: Home opens with what to investigate, by kind, with a
-   terminal and Jarvis beside it; the old greeting is gone. */
+   terminal and Qutra beside it; the old greeting is gone. */
 test("Home starts a new investigation by kind", async ({ page }) => {
   await primePreferences(page, HUD);
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -21,7 +21,7 @@ test("Home starts a new investigation by kind", async ({ page }) => {
     "PCAP",
     "Forensics",
     "New terminal",
-    "Ask Jarvis",
+    "Ask Qutra",
   ]);
 
   await start.getByRole("button", { name: "PCAP" }).click();

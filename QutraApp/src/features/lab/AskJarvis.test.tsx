@@ -11,7 +11,7 @@ import { CloudConsents } from "@/features/settings/CloudConsents";
 import { useUi } from "@/state/ui";
 import { AskJarvis, CloudConsentStat } from "./AskJarvis";
 
-/* Asking Jarvis about an investigation, and its cloud allowance. */
+/* Asking Qutra about an investigation, and its cloud allowance. */
 
 const engagement = EngagementSchema.parse({
   id: "eng-1",
@@ -49,8 +49,8 @@ describe("the cloud allowance", () => {
   });
 });
 
-describe("Ask Jarvis", () => {
-  it("opens Jarvis in a conversation linked to the investigation, reusing an empty one", async () => {
+describe("Ask Qutra", () => {
+  it("opens Qutra in a conversation linked to the investigation, reusing an empty one", async () => {
     render(
       <MemoryRouter initialEntries={["/lab"]}>
         <Routes>
@@ -59,12 +59,12 @@ describe("Ask Jarvis", () => {
       </MemoryRouter>,
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "Ask Jarvis" }));
+    await userEvent.click(screen.getByRole("button", { name: "Ask Qutra" }));
     await waitFor(() => expect(screen.getByTestId("where")).toHaveTextContent("/jarvis"));
     const [linked] = getDb().collection("conversations").getAll();
     expect(linked).toMatchObject({ engagementId: "eng-1", messages: [] });
 
-    await userEvent.click(screen.getByRole("button", { name: "Ask Jarvis" }));
+    await userEvent.click(screen.getByRole("button", { name: "Ask Qutra" }));
     await waitFor(() => expect(getDb().collection("conversations").getAll()).toHaveLength(1));
   });
 
@@ -79,7 +79,7 @@ describe("Ask Jarvis", () => {
       </MemoryRouter>,
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "Ask Jarvis" }));
+    await userEvent.click(screen.getByRole("button", { name: "Ask Qutra" }));
 
     await waitFor(() => expect(getDb().collection("conversations").getAll()).toHaveLength(2));
     const open = getDb()

@@ -130,7 +130,7 @@ function seedConversation(db: Database) {
 
 async function ask(text: string) {
   const user = userEvent.setup();
-  await user.type(screen.getByLabelText("Message to Jarvis"), text);
+  await user.type(screen.getByLabelText("Message to Qutra"), text);
   await user.click(screen.getByRole("button", { name: "Send" }));
 }
 
@@ -235,7 +235,7 @@ describe("an erase wins over a turn already under way", () => {
     await clearConversation(user);
     expect(screen.getByText("Clearing the conversation…")).toBeInTheDocument();
     expect(transcript().getByText("old question")).toBeInTheDocument();
-    await user.type(screen.getByLabelText("Message to Jarvis"), "fresh question");
+    await user.type(screen.getByLabelText("Message to Qutra"), "fresh question");
     expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
 
     await act(async () => disk.release());
@@ -437,7 +437,7 @@ describe("opening a conversation selects it",() => {
     // Switching does not end the turn; it says where the work is.
     expect(stream.getOptions().signal?.aborted).toBe(false);
     expect(screen.getByTestId("assistant-busy-elsewhere")).toHaveTextContent(
-      "Jarvis is still answering in “second topic”.",
+      "Qutra is still answering in “second topic”.",
     );
     expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
 
@@ -520,7 +520,7 @@ describe("opening a conversation selects it",() => {
     });
 
     expect(screen.getByTestId("assistant-busy-elsewhere")).toHaveTextContent(
-      "Jarvis is waiting for your approval in \u201csecond topic\u201d.",
+      "Qutra is waiting for your approval in \u201csecond topic\u201d.",
     );
     expect(screen.queryByTestId("assistant-approval-card")).toBeNull();
   });

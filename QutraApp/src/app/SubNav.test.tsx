@@ -94,7 +94,7 @@ describe("SubNav", () => {
     expect(tabs("Terminal views")).toEqual(["Terminal"]);
   });
 
-  it("acts on the Jarvis page: shows or hides its history, opens its settings, starts one empty conversation", async () => {
+  it("acts on the Qutra page: shows or hides its history, opens its settings, starts one empty conversation", async () => {
     const db = new Database(new MemoryStorageAdapter());
     setDbForTesting(db);
     useJarvisUi.setState({ settings: null });
@@ -116,7 +116,7 @@ describe("SubNav", () => {
     expect(db.prefs.get().jarvisHistoryOpen).toBe(false);
     expect(screen.getByRole("button", { name: "History" })).toHaveAttribute("aria-pressed", "false");
 
-    fireEvent.click(screen.getByRole("button", { name: "Jarvis settings" }));
+    fireEvent.click(screen.getByRole("button", { name: "Qutra settings" }));
     expect(useJarvisUi.getState().settings).toBe("personal");
 
     const startNew = () => screen.getAllByRole("button", { name: "New conversation" }).at(-1)!;

@@ -36,7 +36,7 @@ import { createEngagement } from "@/services/appService";
 import { useUi } from "@/state/ui";
 import { LocalAssistantChat } from "./LocalAssistantChat";
 
-/* Jarvis talking through Claude. Rust is mocked at `invoke` and
+/* Qutra talking through Claude. Rust is mocked at `invoke` and
    its `ai://stream` events are played into the listener; no key is read and
    nothing leaves the test. */
 
@@ -125,7 +125,7 @@ function seedDb(prefs: Record<string, unknown> = {}) {
 async function ask(started: Started[], text: string) {
   const count = started.length;
   const user = userEvent.setup();
-  await user.type(screen.getByLabelText("Message to Jarvis"), text);
+  await user.type(screen.getByLabelText("Message to Qutra"), text);
   await user.click(screen.getByRole("button", { name: "Send" }));
   await waitFor(() => expect(started).toHaveLength(count + 1));
 }
@@ -145,7 +145,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe("Jarvis through Claude", () => {
+describe("Qutra through Claude", () => {
   it("sends the conversation only, and keeps the answer with its blocks and facts", async () => {
     seedDb();
     const started = rust();
@@ -189,7 +189,7 @@ describe("Jarvis through Claude", () => {
         },
       }),
     );
-    // Ollama is not asked anything while Jarvis talks through the cloud.
+    // Ollama is not asked anything while Qutra talks through the cloud.
     expect(vi.mocked(localAssistant.checkHealth)).not.toHaveBeenCalled();
     expect(vi.mocked(localAssistant.streamChat)).not.toHaveBeenCalled();
   });
@@ -394,7 +394,7 @@ describe("Jarvis through Claude", () => {
     const notice = await screen.findByTestId("assistant-cloud-setup");
     expect(notice).toHaveTextContent("There is no key for Claude (Anthropic) yet.");
     const user = userEvent.setup();
-    await user.type(screen.getByLabelText("Message to Jarvis"), "Selam{Enter}");
+    await user.type(screen.getByLabelText("Message to Qutra"), "Selam{Enter}");
     expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
     expect(started).toHaveLength(0);
 

@@ -51,20 +51,20 @@ afterEach(() => {
   setDbForTesting(null);
 });
 
-describe("Jarvis route picker", () => {
+describe("Qutra route picker", () => {
   it("offers the local model and each cloud connection, saying where a question goes", async () => {
     rust({ anthropic: { present: true, last4: "WXYZ", baseUrl: "https://api.anthropic.com" } });
     render(<JarvisRoutePicker />);
 
     expect(
-      screen.getByRole("radiogroup", { name: "Which way does Jarvis talk?" }),
+      screen.getByRole("radiogroup", { name: "Which way does Qutra talk?" }),
     ).toBeInTheDocument();
     expect(tile(/Local model/)).toBeChecked();
     expect(await screen.findByText("Key saved · ••••WXYZ")).toBeInTheDocument();
     expect(screen.getByText("→ api.anthropic.com")).toBeInTheDocument();
   });
 
-  it("switches Jarvis to a connection with a key, with a toast and an announcement", async () => {
+  it("switches Qutra to a connection with a key, with a toast and an announcement", async () => {
     rust({ anthropic: { present: true, last4: "WXYZ", baseUrl: "https://api.anthropic.com" } });
     render(<JarvisRoutePicker />);
     await screen.findByText("Key saved · ••••WXYZ");
@@ -74,9 +74,9 @@ describe("Jarvis route picker", () => {
     expect(getDb().prefs.get().aiProvider).toBe("anthropic");
     expect(tile(/Claude \(Anthropic\)/)).toBeChecked();
     expect(useUi.getState().toasts.at(-1)?.message).toBe(
-      "Jarvis now talks through Claude (Anthropic)",
+      "Qutra now talks through Claude (Anthropic)",
     );
-    expect(useUi.getState().liveMessage).toBe("Jarvis now talks through Claude (Anthropic)");
+    expect(useUi.getState().liveMessage).toBe("Qutra now talks through Claude (Anthropic)");
   });
 
   it("cannot pick a cloud connection that has no key", async () => {
@@ -95,7 +95,7 @@ describe("Jarvis route picker", () => {
     render(<JarvisRoutePicker />);
 
     expect(
-      await screen.findByText(/There is no saved key for Claude \(Anthropic\), so Jarvis cannot answer/),
+      await screen.findByText(/There is no saved key for Claude \(Anthropic\), so Qutra cannot answer/),
     ).toBeInTheDocument();
   });
 
@@ -113,7 +113,7 @@ describe("Jarvis route picker", () => {
       await screen.findByRole("button", { name: "Remove the Claude (Anthropic) key ••••WXYZ" }),
     );
     const dialog = await screen.findByRole("dialog");
-    expect(dialog).toHaveTextContent("Jarvis uses this connection right now");
+    expect(dialog).toHaveTextContent("Qutra uses this connection right now");
     await userEvent.click(within(dialog).getByRole("button", { name: "Remove key" }));
 
     expect(

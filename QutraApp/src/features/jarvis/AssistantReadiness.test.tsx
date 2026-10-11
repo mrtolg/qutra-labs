@@ -11,7 +11,7 @@ import {
 } from "@/lib/localEngine/client";
 import { AssistantReadiness } from "./AssistantReadiness";
 
-/* The readiness card on Qutra's own local engine (ADR 0016). Jarvis no longer
+/* The readiness card on Qutra's own local engine (ADR 0016). Qutra no longer
    waits for Ollama: the card names the engine, the model and the answer, and
    offers the one step that stands in the way (download the engine once,
    prepare the model once, pick another). It never hands the user a command
@@ -172,7 +172,7 @@ describe("AssistantReadiness", () => {
     expect(engine.status).not.toHaveBeenCalled();
     expect(engine.models).not.toHaveBeenCalled();
     expect(screen.getByTestId("local-assistant-status")).toHaveTextContent("Off");
-    expect(screen.getByTestId("readiness-start")).toHaveTextContent(/Turn on Jarvis/);
+    expect(screen.getByTestId("readiness-start")).toHaveTextContent(/Turn on Qutra/);
     expect(screen.queryByTestId("local-engine-panel")).toBeNull();
     expectNoCommand(container);
   });

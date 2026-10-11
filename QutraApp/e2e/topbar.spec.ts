@@ -25,7 +25,7 @@ test("each surface opens from the switcher and from Ctrl+1–4", async ({
   for (const [name, hash] of [
     ["Investigations", "#/lab"],
     ["Tools", "#/tools"],
-    ["Jarvis", "#/jarvis"],
+    ["Qutra", "#/jarvis"],
     ["Terminal", "#/terminal"],
   ] as const) {
     const button = surfaces(page).getByRole("button", { name, exact: true });

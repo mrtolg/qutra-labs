@@ -31,7 +31,7 @@ async function record(name: RegExp, init: KeyboardEventInit & { code: string }) 
 describe("Settings › Shortcuts", () => {
   it("lists the shortcuts by group", () => {
     render(<ShortcutsSection />);
-    for (const group of ["Navigation", "Jarvis", "Investigations", "Terminal", "General"]) {
+    for (const group of ["Navigation", "Qutra", "Investigations", "Terminal", "General"]) {
       expect(screen.getByRole("group", { name: new RegExp(`^${group}`) })).toBeInTheDocument();
     }
     expect(screen.getAllByRole("listitem").length).toBeGreaterThan(30);

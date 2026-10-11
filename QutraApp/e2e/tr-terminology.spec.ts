@@ -13,7 +13,7 @@ test("Turkish catalog names the areas, their sections and every destination", as
   await primePreferences(page, { locale: "tr" });
   await page.goto("/#/overview");
   const surfaces = page.getByRole("navigation", { name: "Bölümler", exact: true });
-  for (const label of ["Ana Sayfa", "İncelemeler", "Araçlar", "Jarvis", "Terminal"]) {
+  for (const label of ["Ana Sayfa", "İncelemeler", "Araçlar", "Qutra", "Terminal"]) {
     await expect(surfaces.getByRole("button", { name: label, exact: true })).toBeVisible();
   }
   const sections = page.getByRole("navigation", { name: "Ana Sayfa bölümleri" });
@@ -32,7 +32,7 @@ test("Turkish catalog names the areas, their sections and every destination", as
     "İncelemeler",
     "Terminal",
     "GitHub",
-    "Jarvis",
+    "Qutra",
     "Ayarlar",
   ]) {
     await expect(

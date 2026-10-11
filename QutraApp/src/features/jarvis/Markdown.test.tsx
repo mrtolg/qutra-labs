@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import Markdown, { parseMarkdown } from "./Markdown";
 
-/* Jarvis's answers are Markdown. Rendering stays
+/* Qutra's answers are Markdown. Rendering stays
    inert -- markup, link schemes and images in an answer cannot act -- and
    code is shown and copied exactly as written. */
 

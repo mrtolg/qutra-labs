@@ -72,7 +72,7 @@ test("shortcuts: grouped, rebindable, and a conflict asks first", async ({ page 
   await waitForAppReady(page);
 
   const settings = await openSettings(page, "shortcuts");
-  for (const group of ["Navigation", "Jarvis", "Investigations", "Terminal", "General"]) {
+  for (const group of ["Navigation", "Qutra", "Investigations", "Terminal", "General"]) {
     await expect(settings.getByRole("group", { name: new RegExp(`^${group}`) })).toBeVisible();
   }
   await page.screenshot({ path: "e2e/screenshots/settings-shortcuts-1280.png" });

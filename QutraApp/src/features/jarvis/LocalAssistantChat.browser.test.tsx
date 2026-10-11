@@ -12,7 +12,7 @@ import { LocalAssistantChat } from "./LocalAssistantChat";
    "is unavailable rather than pretending in a browser build" (checkHealth +
    streamChat) and "invokes nothing and reports unavailable rather than
    pretending in a browser build" (approveTool). What no test covered is the
-   surface a user actually looks at: that the Jarvis chat, driven through the
+   surface a user actually looks at: that the Qutra chat, driven through the
    *real* client (deliberately NOT the module mock the approval tests use),
    says so plainly and never renders an approval control there.
 
@@ -49,13 +49,13 @@ describe("LocalAssistantChat in a browser build", () => {
 
     render(<LocalAssistantChat />);
 
-    await user.type(screen.getByLabelText("Message to Jarvis"), "run whoami");
+    await user.type(screen.getByLabelText("Message to Qutra"), "run whoami");
     await user.click(screen.getByRole("button", { name: "Send" }));
 
     // The honest refusal, mapped from the `unavailable` wire code -- not a
     // generic failure, and not silence.
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Jarvis works only in the desktop app. The browser version can't reach it.",
+      "Qutra works only in the desktop app. The browser version can't reach it.",
     );
 
     // Nothing to approve, because nothing was ever proposed: the turn was
