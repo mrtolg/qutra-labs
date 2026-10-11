@@ -29,6 +29,7 @@ const SAME_AS_ENGLISH_ALLOWED = new Set<string>([
   "tools.enableTitle", // Private Lab stays English
   "tools.item.juiceshop.name", // OWASP Juice Shop, a product name
   "settings.cloud.anthropicName", // Claude (Anthropic), a product and company name
+  "settings.cloud.braveName", // Brave Search, a product name
 ]);
 
 // A placeholder, a URL, a path or a command line is data, not copy.
@@ -67,9 +68,9 @@ describe("Turkish catalog", () => {
     expect(hits).toEqual([]);
   });
 
-  it("keeps the product names: proje, Qutra (never Qutra)", () => {
+  it("keeps the product names: proje, Qutra (never çalışma alanı or Jarvis)", () => {
     const hits = Object.entries(tr)
-      .filter(([, value]) => /çalışma alan/i.test(value) || /Qutra/i.test(value))
+      .filter(([, value]) => /çalışma alan/i.test(value) || /Jarvis/i.test(value))
       .map(([key, value]) => `${key}: ${value}`);
     expect(hits).toEqual([]);
   });
