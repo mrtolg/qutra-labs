@@ -1,10 +1,12 @@
 import { lazy, Suspense, type ReactNode, type RefObject } from "react";
 import { Link } from "react-router-dom";
-import { AlertTriangle, ArrowUp, Cloud, Cpu, Loader2, Lock, Square, Trash2 } from "lucide-react";
+import { AlertTriangle, ArrowUp, Cloud, Cpu, Loader2, Lock, Square, Trash2, Volume2 } from "lucide-react";
 import type { Engagement } from "@/domain/lab";
 import type { TurnBinding } from "@/lib/localAssistant/client";
 import { useT } from "@/lib/i18n";
 import { friendlyModelName } from "@/lib/modelNames";
+import { speak, speechAvailable, stopSpeaking } from "@/lib/voice/speech";
+import { useSpeakingId } from "@/lib/voice/useSpeech";
 
 /* The pieces of the Assistant surface: header,
    turns, starter prompts and composer. The turn logic stays in
@@ -156,13 +158,36 @@ export function UserTurn({ text }: { text: string }) {
   );
 }
 
+/** Reads one finished answer aloud, or stops it while it is being read. */
+function SpeakButton({ text, id }: { text: string; id: string }) {
+  const { t } = useT();
+  const reading = useSpeakingId() === id;
+  const label = reading ? t("voice.stop") : t("voice.read");
+  return (
+    <button
+      type="button"
+      className="btn btn--icon btn--sm asst-speak"
+      aria-label={label}
+      title={label}
+      aria-pressed={reading}
+      data-testid="assistant-speak"
+      onClick={() => (reading ? stopSpeaking() : speak(text, { id }))}
+    >
+      {reading ? <Square size={13} aria-hidden /> : <Volume2 size={14} aria-hidden />}
+    </button>
+  );
+}
+
 export function JarvisTurn({
   text,
   streaming = false,
+  speechId,
   footer,
 }: {
   text: string;
   streaming?: boolean;
+  /** Names this answer's speech; without it (or while it streams) there is no speaker button. */
+  speechId?: string;
   footer?: ReactNode;
 }) {
   const { t } = useT();
@@ -171,6 +196,9 @@ export function JarvisTurn({
       <div className="asst-who">
         <JarvisMark />
         <span className="asst-lbl asst-lbl--jarvis">{t("localAssistant.assistant")}</span>
+        {speechId && !streaming && text && speechAvailable() && (
+          <SpeakButton text={text} id={speechId} />
+        )}
       </div>
       <div className="asst-prose">
         {text ? (

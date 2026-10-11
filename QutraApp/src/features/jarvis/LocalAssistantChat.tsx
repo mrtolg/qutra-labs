@@ -78,6 +78,7 @@ import {
   type CloudNote,
 } from "./CloudParts";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { speakIfEnabled, stopSpeaking } from "@/lib/voice/speech";
 import { ContextDisclosure } from "./ContextDisclosure";
 import { resolveModel, targetOf } from "./jarvisModel";
 import { useJarvisUi } from "./jarvisUi";
@@ -162,6 +163,9 @@ const hostOf = (baseUrl: string | null | undefined): string => {
     return "";
   }
 };
+
+/** Names the speech of one answer, so its button knows when it is the one playing. */
+const speechId = (conversationId: string, index: number) => `${conversationId}:${index}`;
 
 export function LocalAssistantChat() {
   const { t, locale } = useT();
@@ -455,6 +459,7 @@ export function LocalAssistantChat() {
   }, [prefs.localAssistantEnabled, localModel, cloud]);
 
   const stop = () => {
+    stopSpeaking();
     abortRef.current?.abort();
     abortRef.current = null;
   };
@@ -646,6 +651,8 @@ export function LocalAssistantChat() {
       ...(skillText ? { skill: skillText } : {}),
     };
     const next: AssistantMessage[] = [...messages, asked];
+    // A new question ends whatever the last answer is still saying.
+    stopSpeaking();
     setMessages(next);
     setConsentCard(null);
     // The draft was the card's question, unless the user changed it meanwhile.
@@ -983,6 +990,11 @@ export function LocalAssistantChat() {
       if (full.length > 0) {
         if (here()) setMessages([...next, reply]);
         saveTurn(target, requestId, [reply]);
+        // Read aloud when the user asked for that; never an answer that was
+        // stopped or that ended in an error.
+        if (here() && !toolPathErrorCode && !controller.signal.aborted) {
+          speakIfEnabled(full, { id: speechId(target.id, next.length) });
+        }
       }
       if (toolPathErrorCode && READINESS_CODES.has(toolPathErrorCode)) {
         void checkReadiness();
@@ -1062,6 +1074,7 @@ export function LocalAssistantChat() {
       without aborting left the broker sitting on an approval whose card the
       UI had already removed, and a late result would write the history back. */
   const cancelTurn = () => {
+    stopSpeaking();
     turnEpochRef.current += 1;
     releaseBrokerSlot(true);
     setToolResults([]);
@@ -1347,7 +1360,12 @@ export function LocalAssistantChat() {
                 )}
               </Fragment>
             ) : (
-              <JarvisTurn key={i} text={m.content} footer={answerFooter(m, i)} />
+              <JarvisTurn
+                key={i}
+                text={m.content}
+                speechId={speechId(active?.id ?? "", i)}
+                footer={answerFooter(m, i)}
+              />
             ),
           )}
 
