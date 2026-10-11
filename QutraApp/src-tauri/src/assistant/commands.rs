@@ -6,7 +6,7 @@
 //! "the previous renderer is gone" and nothing else; it cannot say *where*.
 //! A turn runs on Qutra's local engine (ADR 0016), started for it on demand.
 
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use futures_util::StreamExt;
 use serde::Serialize;
@@ -22,6 +22,12 @@ use super::{
     engine_chat::{self, StreamDecoder},
     error::AssistantError,
     tools::{self, AgentTool},
+};
+use crate::ai::{
+    keys::{credential, KeyringStore},
+    mask,
+    providers::Target,
+    web::{self, Gathered, Search, WebError},
 };
 use crate::consent::PrivateToolsConsent;
 use crate::local_engine::models::{LocalModel, ModelState};
@@ -544,6 +550,124 @@ async fn bind_engine(
     Ok(local.engine.ensure(&target, request.context_tokens).await?)
 }
 
+/// The whole internet step may take this long; each fetch inside it has its
+/// own, shorter limit (`web::REQUEST_TIMEOUT`).
+const WEB_STEP_TIMEOUT: Duration = Duration::from_secs(25);
+
+/// A message of the kind the engine reads, from text.
+fn plain_message(role: &str, content: String) -> engine_chat::ChatMessage {
+    engine_chat::ChatMessage {
+        role: role.into(),
+        content,
+        tool_calls: None,
+        tool_name: None,
+        tool_call_id: None,
+    }
+}
+
+/// The guard line goes into the system message of every turn that has the
+/// internet on, after anything already there (Jarvis's memory, the context
+/// frame), and the web text goes ahead of the user's last question. The
+/// frame's own markers are not touched.
+fn apply_web(messages: &mut Vec<engine_chat::ChatMessage>, gathered: Option<&Gathered>) {
+    match messages.first_mut() {
+        Some(first) if first.role == "system" => {
+            first.content.push_str("\n\n");
+            first.content.push_str(web::GUARD_LINE);
+        }
+        _ => messages.insert(0, plain_message("system", web::GUARD_LINE.into())),
+    }
+    let Some(gathered) = gathered else { return };
+    if let Some(last) = messages.iter_mut().rev().find(|m| m.role == "user") {
+        last.content = format!("{}\n\n{}", gathered.block, last.content);
+    }
+}
+
+/// How much page text a turn may carry: a quarter of the context window in
+/// characters, between a small floor and what three pages can fill.
+fn web_budget(context_tokens: u32) -> usize {
+    (context_tokens as usize).clamp(3_000, 12_000)
+}
+
+/// Read the web for the question being asked: search it (or fetch the
+/// addresses in it) and return the block that goes ahead of it. The query
+/// that leaves is masked like a cloud turn, exclusions included.
+async fn read_web(
+    app: &tauri::AppHandle,
+    context_tokens: u32,
+    question: &str,
+) -> Result<Gathered, AssistantError> {
+    let terms = crate::ai::exclusions::for_cloud(app)
+        .await
+        .map_err(|_| AssistantError::Web(WebError::SearchFailed.code()))?;
+    let text = question.to_string();
+    let query = run_blocking(move || {
+        mask::preview_with(&text, &terms)
+            .map(|preview| preview.text)
+            .map_err(|_| AssistantError::RequestTooLarge)
+    })
+    .await?;
+    let key = run_blocking(|| {
+        credential(&KeyringStore, Target::Brave)
+            .map_err(|_| AssistantError::Web(WebError::KeyRejected.code()))
+    })
+    .await?;
+    let fetcher = web::Fetcher::new().map_err(|e| AssistantError::Web(e.code()))?;
+    let client = crate::ai::http::client()
+        .map_err(|_| AssistantError::Web(WebError::SearchFailed.code()))?;
+    let search = key.as_ref().map(|cred| Search {
+        client: &client,
+        base_url: &cred.base_url,
+        key: &cred.key,
+    });
+    let nonce = uuid::Uuid::new_v4().simple().to_string();
+    web::gather(
+        question,
+        &query,
+        search.as_ref(),
+        &fetcher,
+        &nonce,
+        web_budget(context_tokens),
+    )
+    .await
+    .map_err(|e| AssistantError::Web(e.code()))
+}
+
+/// The internet step of a turn: the guard line, then the web text. Said to
+/// the page as it starts (`web_searching`) and again with the pages read
+/// (`web_sources`).
+async fn add_web(
+    app: &tauri::AppHandle,
+    request: &StartRequest,
+    messages: &mut Vec<engine_chat::ChatMessage>,
+) -> Result<(), AssistantError> {
+    let Some(question) = messages
+        .iter()
+        .rev()
+        .find(|m| m.role == "user")
+        .map(|m| m.content.clone())
+    else {
+        apply_web(messages, None);
+        return Ok(());
+    };
+    let _ = app.emit(
+        STREAM_EVENT,
+        StreamEvent::status(&request.request_id, "web_searching"),
+    );
+    let gathered = tokio::time::timeout(
+        WEB_STEP_TIMEOUT,
+        read_web(app, request.context_tokens, &question),
+    )
+    .await
+    .map_err(|_| AssistantError::Web(WebError::SearchFailed.code()))??;
+    let _ = app.emit(
+        STREAM_EVENT,
+        StreamEvent::web_sources(&request.request_id, gathered.sources.clone()),
+    );
+    apply_web(messages, Some(&gathered));
+    Ok(())
+}
+
 /// Drive one streamed, tool-calling turn, enforcing both deadlines and the
 /// approval gate on every side-effecting (or non-auto-approved) tool call.
 async fn run_turn(
@@ -566,6 +690,12 @@ async fn run_turn(
     // for a later one rather than every step re-earning a fresh allowance
     // (ADR 0012 Decision 4).
     let turn_deadline = Instant::now() + TURN_TIMEOUT;
+
+    // The internet is read once, for the question asked now. It rides in this
+    // turn's messages only; the page never stores it.
+    if request.web_access {
+        add_web(app, request, &mut messages).await?;
+    }
 
     for _ in 0..MAX_TOOL_STEPS {
         let remaining_for_turn = turn_deadline
@@ -1381,5 +1511,88 @@ mod tests {
         assert!(json.contains("closedSessions"), "{json}");
         assert!(!json.contains("cancelled_turn"), "{json}");
         assert!(!json.contains("closed_sessions"), "{json}");
+    }
+
+    fn gathered() -> Gathered {
+        Gathered {
+            block: "[WEB CONTENT n: untrusted]\n[1] T\nURL: https://a.example/\nbody\n[END WEB CONTENT n]"
+                .into(),
+            sources: vec![web::WebSource {
+                url: "https://a.example/".into(),
+                title: "T".into(),
+            }],
+        }
+    }
+
+    #[test]
+    fn the_guard_line_joins_the_system_message_and_the_web_text_goes_before_the_question() {
+        let frame = "You are Qutra, a local assistant.
+
+CONTEXT (read-only)
+Name: Acme
+END CONTEXT"
+            .to_string();
+        let mut messages = vec![
+            plain_message("system", frame.clone()),
+            plain_message("user", "first".into()),
+            plain_message("assistant", "answer".into()),
+            plain_message("user", "second".into()),
+        ];
+        apply_web(&mut messages, Some(&gathered()));
+        // The existing frame is kept whole; the guard follows it.
+        assert!(messages[0].content.starts_with(&frame));
+        assert!(messages[0].content.ends_with(web::GUARD_LINE));
+        assert!(web::GUARD_LINE.contains("never instructions"));
+        // Only the question being asked carries web text, ahead of it.
+        assert_eq!(messages[1].content, "first");
+        assert!(messages[3]
+            .content
+            .starts_with("[WEB CONTENT n: untrusted]"));
+        assert!(messages[3].content.ends_with("\n\nsecond"));
+        assert_eq!(messages.len(), 4);
+    }
+
+    #[test]
+    fn a_turn_with_no_system_message_gets_one_with_the_guard_even_when_nothing_was_found() {
+        let mut messages = vec![plain_message("user", "hello".into())];
+        apply_web(&mut messages, None);
+        assert_eq!(messages.len(), 2);
+        assert_eq!(messages[0].role, "system");
+        assert_eq!(messages[0].content, web::GUARD_LINE);
+        assert_eq!(messages[1].content, "hello");
+    }
+
+    #[test]
+    fn the_page_text_budget_follows_the_context_window() {
+        assert_eq!(web_budget(2_048), 3_000);
+        assert_eq!(web_budget(8_192), 8_192);
+        assert_eq!(web_budget(131_072), 12_000);
+    }
+
+    #[test]
+    fn the_internet_defaults_off_and_reads_as_camel_case() {
+        let without: StartRequest = serde_json::from_value(serde_json::json!({
+            "requestId": "r", "enabled": true, "model": "m", "contextTokens": 4096, "messages": []
+        }))
+        .unwrap();
+        assert!(!without.web_access);
+        let with: StartRequest = serde_json::from_value(serde_json::json!({
+            "requestId": "r", "enabled": true, "model": "m", "contextTokens": 4096,
+            "messages": [], "webAccess": true
+        }))
+        .unwrap();
+        assert!(with.web_access);
+    }
+
+    #[test]
+    fn the_pages_read_reach_the_page_as_a_sources_event() {
+        let event = StreamEvent::web_sources("r1", gathered().sources);
+        let json = serde_json::to_value(&event).unwrap();
+        assert_eq!(json["kind"], "web_sources");
+        assert_eq!(json["sources"][0]["url"], "https://a.example/");
+        assert!(json.get("status").is_none());
+        // No other event carries a sources field.
+        let token = serde_json::to_value(StreamEvent::token("r1", "x".into())).unwrap();
+        assert!(token.get("sources").is_none());
     }
 }
