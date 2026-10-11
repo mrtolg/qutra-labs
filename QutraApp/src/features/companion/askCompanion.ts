@@ -24,7 +24,7 @@ import { MAX_MINI_MESSAGES, useCompanionStore, type MiniFailure, type MiniMessag
    - It sends no investigation summary, so the cloud's consent card never
      applies. A cloud turn also leaves out the investigation's name and the
      tool's id: those are the user's own records and stay on this computer.
-   - It cannot propose tools: the turn is an answerer's, never an agent's.
+   - It cannot propose tools: the turn only answers, so no approval card is ever needed.
    - It is not saved as a conversation. */
 
 type Translate = (key: MessageKey, params?: Record<string, string | number>) => string;
