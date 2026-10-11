@@ -45,6 +45,11 @@ export function ContextDisclosure({
     };
   }, []);
 
+  // With context on and nothing to attach there is nothing to disclose, and no
+  // project exists to choose either: the chip stays away until it says
+  // something. Switched off, it stays so the choice can be undone.
+  if (prefs.assistantContextEnabled && context.summary.length === 0) return null;
+
   return (
     <details ref={ref} className="asst-context" data-testid="qutra-context">
       <summary className="asst-chip asst-chip--btn">
