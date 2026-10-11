@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import {
+  Compass,
   Download,
   File,
   Folder,
@@ -116,6 +117,7 @@ function ToolsRow() {
             key={id}
             type="button"
             className="subnav__tab"
+            data-guide={`tools-view-${id}`}
             aria-current={id === view ? "page" : undefined}
             onClick={() => navigate(toolsHref(id, params.get("e")))}
           >
@@ -147,6 +149,7 @@ function AreaRow({ area }: { area: "home" | "terminal" }) {
             key={s.to}
             type="button"
             className="subnav__tab"
+            data-guide={`${area}-${s.owns[0]}`}
             aria-current={s.owns.includes(segment) ? "page" : undefined}
             onClick={() => navigate(s.to)}
           >
@@ -168,6 +171,7 @@ function AssistantRow() {
   const historyOpen = usePreferences().jarvisHistoryOpen;
   const openJarvisSettings = useJarvisUi((state) => state.openSettings);
   const settingsOpen = useJarvisUi((state) => state.settings !== null);
+  const following = usePreferences().companionEnabled;
 
   const startNew = () => {
     navigate("/jarvis");
@@ -188,6 +192,17 @@ function AssistantRow() {
         {t("subnav.history")}
       </button>
       <div className="subnav__actions">
+        {/* "Beni takip et": the small guide bubble on the other pages. */}
+        <button
+          type="button"
+          className="subnav__action"
+          aria-pressed={following}
+          data-testid="companion-follow"
+          onClick={() => getDb().prefs.set({ companionEnabled: !following })}
+        >
+          <Compass size={14} aria-hidden />
+          {t("companion.follow")}
+        </button>
         <button
           type="button"
           className="subnav__action"
@@ -227,6 +242,7 @@ function AllInvestigations({ current }: { current: boolean }) {
     <button
       type="button"
       className="subnav__tab subnav__all"
+      data-guide="lab-all"
       aria-current={current ? "page" : undefined}
       onClick={() => navigate("/lab?list=1")}
     >
@@ -290,6 +306,7 @@ function LabRowIn({
               key={id}
               type="button"
               className="subnav__tab"
+              data-guide={`lab-view-${id}`}
               aria-current={id === view ? "page" : undefined}
               disabled={!current}
               onClick={() => open(id)}
@@ -317,6 +334,7 @@ function LabActions({ current }: { current: Engagement }) {
       <button
         type="button"
         className="subnav__action"
+        data-guide="lab-import"
         onClick={() =>
           navigate(`/lab?e=${encodeURIComponent(current.id)}&view=findings&focus=import`)
         }

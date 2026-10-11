@@ -272,6 +272,7 @@ export default function TerminalPage() {
           <button
             type="button"
             className="work-tab-new"
+            data-guide="terminal-new"
             aria-label={t("terminal.newTab")}
             title={t("terminal.newTab")}
             onClick={() => openShellTab("pwsh", resolvedProgram || undefined)}

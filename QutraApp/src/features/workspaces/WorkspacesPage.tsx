@@ -171,6 +171,7 @@ export default function WorkspacesPage() {
           <button
             type="button"
             className="btn btn--primary"
+            data-guide="projects-new"
             onClick={() => setNewOpen(true)}
           >
             <Plus size={14} aria-hidden /> {t("ws.new")}

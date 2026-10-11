@@ -8,6 +8,7 @@ import { Toasts } from "@/components/ui/Toasts";
 import { FileDrops } from "@/features/lab/FileDrops";
 import { useT, withDeferredCopy } from "@/lib/i18n";
 import { useSurfaceCovered } from "./context/panelState";
+import { CompanionSlot } from "./CompanionSlot";
 import { useAppliedAppearance } from "./useAppliedAppearance";
 import { useShortcuts } from "./useShortcuts";
 
@@ -74,6 +75,7 @@ export function AppShell() {
       <Suspense fallback={null}>
         <AssistantStartup />
       </Suspense>
+      <CompanionSlot />
       {/* Files dropped on the window go to the open investigation. */}
       <FileDrops />
     </div>

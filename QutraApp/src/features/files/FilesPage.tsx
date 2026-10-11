@@ -121,7 +121,7 @@ export default function FilesPage() {
         </div>
       </div>
       <div className="page-body stack" style={{ gap: "var(--sp-4)" }}>
-        <section className="panel" id="files-add">
+        <section className="panel" id="files-add" data-guide="files-add">
           <div className="panel-header">
             <span className="panel-title">{t("files.addTitle")}</span>
           </div>

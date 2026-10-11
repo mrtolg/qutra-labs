@@ -177,4 +177,22 @@ describe("SubNav", () => {
       expect(view).toBeDisabled();
     }
   });
+
+  it("has the 'Follow me' switch on the Qutra page, off to begin with and saved when pressed", () => {
+    const adapter = new MemoryStorageAdapter();
+    setDbForTesting(new Database(adapter));
+    renderAt("/jarvis");
+    const follow = screen.getByRole("button", { name: "Follow me" });
+    expect(follow).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(follow);
+
+    expect(follow).toHaveAttribute("aria-pressed", "true");
+    expect(getDb().prefs.get().companionEnabled).toBe(true);
+    setDbForTesting(new Database(adapter));
+    expect(getDb().prefs.get().companionEnabled).toBe(true);
+
+    fireEvent.click(follow);
+    expect(getDb().prefs.get().companionEnabled).toBe(false);
+  });
 });

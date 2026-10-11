@@ -166,7 +166,7 @@ export function InvestigationList({ onCreate }: { onCreate: () => void }) {
           title={t("lab.empty")}
           hint={t("lab.emptyHint")}
           action={
-            <button type="button" className="btn btn--primary" onClick={onCreate}>
+            <button type="button" className="btn btn--primary" data-guide="lab-new" onClick={onCreate}>
               <Plus size={15} aria-hidden /> {t("lab.newEngagement")}
             </button>
           }
@@ -239,7 +239,7 @@ export function InvestigationList({ onCreate }: { onCreate: () => void }) {
               </button>
             ))}
           </div>
-          <button type="button" className="btn btn--primary" onClick={onCreate}>
+          <button type="button" className="btn btn--primary" data-guide="lab-new" onClick={onCreate}>
             <Plus size={14} aria-hidden /> {t("lab.newEngagement")}
           </button>
         </div>

@@ -1,0 +1,290 @@
+/* The companion: a small bubble bottom-left (the toasts and the assistant's
+   greeting are bottom-right) and a mini chat above it. Motion is opacity and
+   transform only, short, and every animation here is dropped by base.css
+   under prefers-reduced-motion and [data-reduce-motion="true"]. */
+
+.companion {
+  position: fixed;
+  left: var(--sp-4);
+  bottom: var(--sp-4);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  max-width: calc(100vw - var(--sp-4) * 2);
+  pointer-events: none;
+}
+.companion > * {
+  pointer-events: auto;
+}
+
+.companion__bubble {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  box-shadow: var(--shadow-2);
+  cursor: pointer;
+  /* It arrives once, with a soft ring to say where it is. */
+  animation: companion-in 220ms var(--ease-out);
+  transition:
+    transform 160ms var(--ease-out),
+    border-color var(--dur-1) var(--ease-out);
+}
+.companion__bubble:hover {
+  border-color: var(--accent-text);
+  transform: scale(1.05);
+}
+.companion__bubble:active {
+  transform: scale(0.96);
+}
+.companion__bubble:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 3px;
+}
+.companion__bubble::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  pointer-events: none;
+  animation: companion-ring 1.6s var(--ease-out) 260ms 2;
+}
+/* While an answer is being written the ring keeps going: a state, not decoration. */
+.companion__bubble[data-busy]::after {
+  animation: companion-ring 1.4s var(--ease-out) infinite;
+}
+
+.companion__mark {
+  display: block;
+  width: 22px;
+  height: 22px;
+}
+.companion__mark--cyan {
+  display: none;
+}
+/* The HUD theme owns the cyan mark, as in the top bar. */
+[data-theme="hud"][data-mode="dark"]:not([data-contrast="high"]) .companion__mark--cyan {
+  display: block;
+}
+[data-theme="hud"][data-mode="dark"]:not([data-contrast="high"]) .companion__mark--red {
+  display: none;
+}
+
+@keyframes companion-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes companion-ring {
+  from {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+.companion__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  width: min(360px, calc(100vw - var(--sp-4) * 2));
+  max-height: min(580px, calc(100vh - 140px));
+  overflow-y: auto;
+  padding: var(--sp-3);
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: var(--r-3);
+  box-shadow: var(--shadow-3);
+  font-size: var(--fs-13);
+  animation: companion-panel-in 180ms var(--ease-out);
+}
+.companion__panel:focus {
+  outline: none;
+}
+.companion__panel:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+@keyframes companion-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.companion__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.companion__title {
+  flex: 1;
+  margin: 0;
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+.companion__guide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.companion__page {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--fs-12);
+}
+.companion__step {
+  margin: 0;
+  line-height: 1.5;
+}
+.companion__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.companion__count {
+  font-size: var(--fs-12);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.companion__grow {
+  flex: 1;
+}
+.companion__note {
+  min-height: 1.2em;
+  margin: 0;
+  font-size: var(--fs-12);
+  color: var(--muted);
+}
+
+.companion__sees {
+  font-size: var(--fs-12);
+}
+.companion__sees summary {
+  cursor: pointer;
+}
+.companion__sees ul {
+  margin: var(--sp-1) 0;
+  padding-left: var(--sp-4);
+}
+.companion__sees p {
+  margin: var(--sp-1) 0 0;
+}
+
+.companion__log {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  max-height: 200px;
+  overflow-y: auto;
+}
+.companion__log:empty {
+  display: none;
+}
+.companion__msg {
+  margin: 0;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-2);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.companion__msg--user {
+  align-self: flex-end;
+  max-width: 90%;
+  background: var(--accent-soft);
+}
+.companion__msg--assistant {
+  align-self: flex-start;
+  max-width: 95%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.companion__error {
+  margin: 0;
+  color: var(--danger);
+}
+
+.companion__off {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+}
+.companion__off p {
+  margin: 0;
+}
+.companion__form {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--sp-2);
+}
+.companion__input {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+}
+.companion__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  font-size: var(--fs-11);
+  color: var(--muted);
+}
+
+/* "Bana göster": the element the step is about. Outline plus a short pulse;
+   under reduced motion the outline stays and the pulse goes. */
+[data-guide-hit="true"] {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 3px;
+  animation: companion-hit 1.1s var(--ease-out) 2;
+}
+@keyframes companion-hit {
+  from {
+    box-shadow: 0 0 0 0 var(--accent);
+  }
+  to {
+    box-shadow: 0 0 0 12px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .companion__bubble {
+    transition: none;
+  }
+  .companion__bubble:hover,
+  .companion__bubble:active {
+    transform: none;
+  }
+}
+[data-reduce-motion="true"] .companion__bubble {
+  transition: none;
+}
+[data-reduce-motion="true"] .companion__bubble:hover,
+[data-reduce-motion="true"] .companion__bubble:active {
+  transform: none;
+}

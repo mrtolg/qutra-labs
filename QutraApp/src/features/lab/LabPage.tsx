@@ -159,7 +159,7 @@ export default function LabPage() {
             title={t("lab.empty")}
             hint={t("lab.emptyHint")}
             action={
-              <button type="button" className="btn btn--primary" onClick={createEngagement}>
+              <button type="button" className="btn btn--primary" data-guide="lab-new" onClick={createEngagement}>
                 <Plus size={15} aria-hidden /> {t("lab.newEngagement")}
               </button>
             }
@@ -206,7 +206,12 @@ export default function LabPage() {
               onCreate={createEngagement}
               defaultOpen={params.get("switch") === "1"}
             />
-            <button type="button" className="btn btn--secondary lab-head__create" onClick={createEngagement}>
+            <button
+              type="button"
+              className="btn btn--secondary lab-head__create"
+              data-guide="lab-new"
+              onClick={createEngagement}
+            >
               <Plus size={14} aria-hidden /> {t("lab.newEngagement")}
             </button>
           </div>

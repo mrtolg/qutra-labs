@@ -2,6 +2,7 @@ import { useT } from "@/lib/i18n";
 import { getDb, usePreferences } from "@/lib/db/database";
 import { useUi } from "@/state/ui";
 import { loadDemoData, isSeeded } from "@/domain/seed";
+import { CompanionSettings } from "@/features/companion/CompanionSettings";
 
 export function GeneralSection() {
   const { t } = useT();
@@ -33,6 +34,7 @@ export function GeneralSection() {
           onChange={(e) => db.prefs.set({ addressAs: e.target.value })}
         />
       </div>
+      <CompanionSettings />
       <div className="setting-row">
         <div>
           <div className="setting-label" id="setting-start-on-login">

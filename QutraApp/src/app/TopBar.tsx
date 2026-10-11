@@ -64,6 +64,7 @@ export function TopBar() {
             <button
               key={a.to}
               type="button"
+              data-guide={`area-${a.area}`}
               aria-current={a.area === current ? "page" : undefined}
               aria-keyshortcuts={ariaKeyshortcuts(bindings[a.shortcut])}
               title={bindings[a.shortcut] ? titled(t(a.labelKey), a.shortcut) : undefined}
@@ -79,6 +80,7 @@ export function TopBar() {
         <button
           type="button"
           className="topbar-search"
+          data-guide="search"
           onClick={() => setPaletteOpen(true)}
           aria-keyshortcuts={ariaKeyshortcuts(bindings.palette)}
         >
@@ -92,6 +94,7 @@ export function TopBar() {
           type="button"
           className="topbar-icon"
           onClick={() => openSettings()}
+          data-guide="settings"
           aria-label={t("nav.settings")}
           aria-keyshortcuts={ariaKeyshortcuts(bindings.settings)}
           title={titled(t("nav.settings"), "settings")}
@@ -102,6 +105,7 @@ export function TopBar() {
           type="button"
           className="topbar-icon"
           onClick={toggleContextPanel}
+          data-guide="context"
           aria-label={t("ctx.toggle")}
           aria-pressed={contextOpen}
           aria-keyshortcuts={ariaKeyshortcuts(bindings.contextPanel)}

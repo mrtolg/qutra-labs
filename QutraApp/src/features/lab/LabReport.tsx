@@ -57,6 +57,7 @@ export function LabReport({ engagement }: LabViewProps) {
           <button
             type="button"
             className="btn btn--primary btn--sm"
+            data-guide="lab-report"
             onClick={() => exportEngagement(engagement, options)}
           >
             <FileDown size={14} aria-hidden /> {t("lab.report.exportMarkdown")}

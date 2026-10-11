@@ -213,6 +213,7 @@ function TargetsAndFiles({
                     ref={addFilesRef}
                     type="button"
                     className="btn btn--primary"
+                    data-guide="lab-add-files"
                     aria-disabled={picking || undefined}
                     onClick={() => void addFiles()}
                   >
@@ -228,6 +229,7 @@ function TargetsAndFiles({
                   <input
                     id={id}
                     className="input"
+                    data-guide="lab-add-target"
                     value={draftTarget}
                     placeholder={t("lab.targetPlaceholder")}
                     onChange={(e) => setDraftTarget(e.target.value)}

@@ -54,6 +54,7 @@ export function ScopeStrip({
     <button
       type="button"
       className={`lab-strip ${cls}`}
+      data-guide="lab-scope"
       onClick={onOpen}
       data-testid="lab-scope-strip"
     >

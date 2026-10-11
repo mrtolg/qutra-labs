@@ -42,7 +42,13 @@ export function AskJarvis({
     navigate("/jarvis");
   };
   return (
-    <button ref={buttonRef} type="button" className="btn btn--secondary" onClick={() => void ask()}>
+    <button
+      ref={buttonRef}
+      type="button"
+      className="btn btn--secondary"
+      data-guide="lab-ask"
+      onClick={() => void ask()}
+    >
       <MessageSquare size={14} aria-hidden /> {t("lab.askJarvis")}
     </button>
   );
