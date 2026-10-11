@@ -7,6 +7,7 @@ pub mod chat;
 pub mod errors;
 pub mod exclusions;
 pub mod http;
+pub mod key_list;
 pub mod keys;
 pub mod mask;
 pub mod models;

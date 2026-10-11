@@ -920,6 +920,26 @@ fn ai_key_delete(target: ai::Target) -> Result<(), String> {
     ai::keys::delete_key(&ai::keys::KeyringStore, target)
 }
 
+/* The list of keys (up to ten): add one and Rust recognises the service from
+its prefix. Like the commands above, none of these returns a key. */
+#[tauri::command]
+fn ai_keys_list() -> Result<Vec<ai::key_list::KeyEntry>, String> {
+    ai::key_list::list_keys(&ai::keys::KeyringStore)
+}
+
+#[tauri::command]
+fn ai_keys_add(key: String) -> Result<ai::key_list::KeyEntry, String> {
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |elapsed| elapsed.as_millis() as u64);
+    ai::key_list::add_key(&ai::keys::KeyringStore, &key, now)
+}
+
+#[tauri::command]
+fn ai_keys_remove(id: u8) -> Result<(), String> {
+    ai::key_list::remove_key(&ai::keys::KeyringStore, id)
+}
+
 /// The connection test: list the connection's models with its saved key.
 #[tauri::command]
 async fn ai_list_models(
@@ -1577,6 +1597,9 @@ pub fn run() {
             ai_key_set,
             ai_key_has,
             ai_key_delete,
+            ai_keys_list,
+            ai_keys_add,
+            ai_keys_remove,
             ai_list_models,
             ai_chat_start,
             ai_chat_cancel,

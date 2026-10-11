@@ -143,7 +143,7 @@ pub(crate) fn credential(
 
 /// A key is printable ASCII without spaces. Only a local server may go
 /// without one (spec §7.3).
-fn validate_key(key: &str, base_url: &str) -> Result<(), String> {
+pub(super) fn validate_key(key: &str, base_url: &str) -> Result<(), String> {
     if key.is_empty() && is_loopback_url(base_url) {
         return Ok(());
     }
@@ -197,7 +197,7 @@ fn is_loopback_host(host: &str) -> bool {
             .is_ok_and(|ip| ip.is_loopback())
 }
 
-fn last_four(key: &str) -> Option<String> {
+pub(super) fn last_four(key: &str) -> Option<String> {
     let chars: Vec<char> = key.chars().collect();
     (chars.len() >= MIN_KEY_CHARS).then(|| chars[chars.len() - 4..].iter().collect())
 }
