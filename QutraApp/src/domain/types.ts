@@ -575,6 +575,10 @@ export const PreferencesSchema = z.object({
   jarvisAboutYou: z.string().max(1500).catch("").default(""),
   jarvisInstructions: z.string().max(1500).catch("").default(""),
   jarvisResponseStyle: z.enum(["balanced", "concise", "detailed"]).catch("balanced").default("balanced"),
+  /* How the assistant addresses the user in its greeting ("Mert Bey",
+     "efendim"). Free text, kept as typed (a space inside it is the user's);
+     whoever reads it trims it. Empty means a greeting without a name. */
+  addressAs: z.string().max(40).catch("").default(""),
 });
 export type Preferences = z.infer<typeof PreferencesSchema>;
 

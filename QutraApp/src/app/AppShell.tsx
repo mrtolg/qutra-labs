@@ -5,6 +5,7 @@ import { CommandPalette } from "./CommandPalette";
 import { SettingsDialog } from "@/features/settings/SettingsDialog";
 import { Workbench } from "./workbench/Workbench";
 import { Toasts } from "@/components/ui/Toasts";
+import { AssistantGreeting } from "./AssistantGreeting";
 import { FileDrops } from "@/features/lab/FileDrops";
 import { useT } from "@/lib/i18n";
 import { useSurfaceCovered } from "./context/panelState";
@@ -68,6 +69,7 @@ export function AppShell() {
           palette has handed focus back, so both share one origin. */}
       <SettingsDialog />
       <Toasts />
+      <AssistantGreeting />
       {/* Files dropped on the window go to the open investigation. */}
       <FileDrops />
     </div>
