@@ -7,6 +7,8 @@ use std::time::Duration;
 use serde::{Deserialize, Serialize};
 use tokio::sync::Notify;
 
+use super::web::WebSource;
+
 /// One message of the conversation, as the page sends it. Only `user` and
 /// `assistant` reach a service; anything else is dropped (no app context
 /// goes to the cloud except through the consent card and masking).
@@ -75,6 +77,10 @@ pub struct TurnResult {
     /// The model that declined, when another one answered.
     pub fallback_from: Option<String>,
     pub usage: Option<Usage>,
+    /// The pages a web-enabled answer drew on or was shown: cited ones
+    /// first. Empty when the internet was off or nothing was found.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub sources: Vec<WebSource>,
 }
 
 /// Stops a turn from another task.

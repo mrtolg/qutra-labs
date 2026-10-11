@@ -15,5 +15,6 @@ pub mod pricing;
 pub mod providers;
 pub mod sse;
 pub mod turn;
+pub mod web;
 
 pub use providers::Target;
