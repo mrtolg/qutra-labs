@@ -13,6 +13,7 @@ import {
   type ModelsReport,
   type TaskEvent,
 } from "@/lib/localEngine/client";
+import { resetAutoEngineForTesting, useAutoEngine } from "@/lib/localEngine/autoEngine";
 import { LocalEnginePanel } from "./LocalEnginePanel";
 
 const GB = 1024 ** 3;
@@ -24,6 +25,7 @@ function seedDb(prefs: Record<string, unknown> = {}) {
 }
 
 afterEach(() => {
+  resetAutoEngineForTesting();
   setDbForTesting(null);
   vi.clearAllMocks();
 });
@@ -108,6 +110,38 @@ describe("LocalEnginePanel", () => {
     expect(screen.getByTestId("le-station-engine")).toHaveAttribute("data-state", "attention");
     fireEvent.click(screen.getByTestId("local-engine-install"));
     expect(mock.install).toHaveBeenCalledTimes(1);
+  });
+
+  it("offers no button between the steps it takes by itself after a model is chosen", async () => {
+    seedDb({ ollamaModel: "qwen2.5:7b" });
+    const { client } = fakeClient(report(), [qwen]);
+    act(() => useAutoEngine.setState({ phase: "preparing", model: "qwen2.5:7b", error: null }));
+    render(<LocalEnginePanel client={client} />);
+
+    expect(await screen.findByTestId("local-engine-step")).toHaveTextContent(
+      "Getting the local assistant ready…",
+    );
+    expect(screen.queryByTestId("local-engine-start")).not.toBeInTheDocument();
+  });
+
+  it("says why the engine could not be made ready, and clears it when a step is taken by hand", async () => {
+    seedDb({ ollamaModel: "qwen2.5:7b" });
+    const { client, mock } = fakeClient(report(), [qwen]);
+    act(() =>
+      useAutoEngine.setState({
+        phase: "failed",
+        model: "qwen2.5:7b",
+        error: { code: "load_failed", reason: "out_of_memory" },
+      }),
+    );
+    render(<LocalEnginePanel client={client} />);
+
+    expect(await screen.findByTestId("local-engine-error")).toBeInTheDocument();
+    fireEvent.click(await screen.findByTestId("local-engine-start"));
+
+    await waitFor(() => expect(mock.start).toHaveBeenCalledWith("qwen2.5:7b"));
+    expect(useAutoEngine.getState().phase).toBe("idle");
+    await waitFor(() => expect(screen.queryByTestId("local-engine-error")).not.toBeInTheDocument());
   });
 
   it("follows a download with a progress bar that can be cancelled", async () => {

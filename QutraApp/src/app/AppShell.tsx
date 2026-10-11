@@ -1,4 +1,4 @@
-import { useEffect, type MouseEvent } from "react";
+import { lazy, Suspense, useEffect, type MouseEvent } from "react";
 import { TopBar } from "./TopBar";
 import { SubNav } from "./SubNav";
 import { CommandPalette } from "./CommandPalette";
@@ -6,10 +6,13 @@ import { SettingsDialog } from "@/features/settings/SettingsDialog";
 import { Workbench } from "./workbench/Workbench";
 import { Toasts } from "@/components/ui/Toasts";
 import { FileDrops } from "@/features/lab/FileDrops";
-import { useT } from "@/lib/i18n";
+import { useT, withDeferredCopy } from "@/lib/i18n";
 import { useSurfaceCovered } from "./context/panelState";
 import { useAppliedAppearance } from "./useAppliedAppearance";
 import { useShortcuts } from "./useShortcuts";
+
+// The assistant's own start-up (engine and greeting) waits for the first paint.
+const AssistantStartup = lazy(withDeferredCopy(() => import("./AssistantStartup")));
 
 export function SkipToMainLink() {
   const { t } = useT();
@@ -68,6 +71,9 @@ export function AppShell() {
           palette has handed focus back, so both share one origin. */}
       <SettingsDialog />
       <Toasts />
+      <Suspense fallback={null}>
+        <AssistantStartup />
+      </Suspense>
       {/* Files dropped on the window go to the open investigation. */}
       <FileDrops />
     </div>

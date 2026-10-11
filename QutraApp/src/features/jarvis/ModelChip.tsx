@@ -4,6 +4,8 @@ import type { ModelChoice } from "@/domain/conversations";
 import { getDb, usePreferences } from "@/lib/db/database";
 import { createConversation, setConversationModel } from "@/lib/db/conversations";
 import { useT } from "@/lib/i18n";
+import { ensureLocalEngine } from "@/lib/localEngine/autoEngine";
+import { friendlyModelName } from "@/lib/modelNames";
 import { connectionName } from "./CloudParts";
 import {
   choiceOf,
@@ -23,7 +25,9 @@ export function modelLabel(t: Translate, model: Pick<ResolvedModel, "provider" |
   const target = targetOf(model);
   if (!target) return model.model || t("jarvis.model.none");
   const name = connectionName(t, target);
-  return model.model ? `${name} · ${model.model}` : name;
+  if (!model.model) return name;
+  // A readable name stands on its own; an id this build cannot read keeps its connection.
+  return friendlyModelName(model.model) ?? `${name} · ${model.model}`;
 }
 
 /** Why a cloud connection cannot be chosen yet, or null when it can. */
@@ -80,6 +84,8 @@ export function ModelChip({
   }, [open]);
 
   const choose = (choice: ModelChoice | null) => {
+    // A local model, even for this conversation only, gets the engine ready now.
+    if (choice?.provider === "local") void ensureLocalEngine(choice.model, { explicit: true });
     const db = getDb();
     const write = conversationId
       ? setConversationModel(db, conversationId, choice)
@@ -113,7 +119,11 @@ export function ModelChip({
     const blocked = Boolean(note) && !checked;
     const choice = choiceOf(candidate);
     return (
-      <label key={key} className={blocked ? "jvm-opt is-blocked" : "jvm-opt"}>
+      <label
+        key={key}
+        className={blocked ? "jvm-opt is-blocked" : "jvm-opt"}
+        title={candidate.model || undefined}
+      >
         <input
           type="radio"
           name={name}
@@ -145,7 +155,9 @@ export function ModelChip({
       >
         {isLocal ? <Cpu size={13} aria-hidden /> : <Cloud size={13} aria-hidden />}
         <span className="sr-only">{t("jarvis.model.label")}: </span>
-        <span className="jvm-chip__name">{modelLabel(t, resolved)}</span>
+        <span className="jvm-chip__name" title={resolved.model || undefined}>
+          {modelLabel(t, resolved)}
+        </span>
         {resolved.own && <span className="jvm-chip__own">{t("jarvis.model.own")}</span>}
         <ChevronDown size={13} className="jvm-chip__chev" aria-hidden />
       </button>

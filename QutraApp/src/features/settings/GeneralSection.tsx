@@ -1,5 +1,5 @@
 import { useT } from "@/lib/i18n";
-import { getDb } from "@/lib/db/database";
+import { getDb, usePreferences } from "@/lib/db/database";
 import { useUi } from "@/state/ui";
 import { loadDemoData, isSeeded } from "@/domain/seed";
 
@@ -8,9 +8,31 @@ export function GeneralSection() {
   const toast = useUi((s) => s.toast);
   const db = getDb();
   const seeded = isSeeded(db);
+  const prefs = usePreferences();
 
   return (
     <section className="settings-section">
+      <div className="setting-row">
+        <div>
+          <label className="setting-label" htmlFor="setting-address-as">
+            {t("settings.address.label")}
+          </label>
+          <div className="setting-hint" id="setting-address-as-hint">
+            {t("settings.address.hint")}
+          </div>
+        </div>
+        <input
+          id="setting-address-as"
+          className="input"
+          type="text"
+          value={prefs.addressAs}
+          maxLength={40}
+          placeholder={t("settings.address.placeholder")}
+          aria-describedby="setting-address-as-hint"
+          autoComplete="off"
+          onChange={(e) => db.prefs.set({ addressAs: e.target.value })}
+        />
+      </div>
       <div className="setting-row">
         <div>
           <div className="setting-label" id="setting-start-on-login">

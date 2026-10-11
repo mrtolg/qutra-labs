@@ -152,7 +152,7 @@ describe("Jarvis through Claude", () => {
     render(<LocalAssistantChat />);
     expect(await screen.findByText("Sends the conversation only · Claude (Anthropic)")).toBeInTheDocument();
     expect(screen.getByTestId("assistant-live-endpoint")).toHaveTextContent(
-      "Claude (Anthropic) · claude-opus-5-5",
+      "Claude Opus 5.5",
     );
 
     await ask(started, "Selam");

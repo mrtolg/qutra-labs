@@ -1,0 +1,46 @@
+/* The assistant's small cards in the bottom-right corner, beside the toast
+   column: its greeting and the progress of making its engine ready. */
+.acard-stack {
+  position: fixed;
+  bottom: var(--sp-4);
+  right: calc(var(--sp-4) * 2 + 320px);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  width: 320px;
+  max-width: calc(100vw - var(--sp-4) * 2);
+  pointer-events: none;
+}
+@media (max-width: 900px) {
+  .acard-stack {
+    right: var(--sp-4);
+    bottom: 5.5rem;
+  }
+}
+.acard {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2);
+  box-shadow: var(--shadow-2);
+  font-size: var(--fs-13);
+}
+.acard--greeting {
+  border-color: var(--info);
+}
+.acard__text {
+  flex: 1;
+  min-width: 0;
+}
+.acard--engine {
+  flex-direction: column;
+  align-items: stretch;
+}
+.acard--engine .le-progress {
+  margin-top: var(--sp-1);
+}
