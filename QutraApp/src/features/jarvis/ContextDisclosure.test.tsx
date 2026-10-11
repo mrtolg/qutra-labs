@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Database, setDbForTesting } from "@/lib/db/database";
 import { MemoryStorageAdapter } from "@/lib/db/storage";
 import { ContextDisclosure } from "./ContextDisclosure";
@@ -12,13 +13,19 @@ beforeEach(() => {
 afterEach(() => setDbForTesting(null));
 
 describe("ContextDisclosure", () => {
-  it("shows no chip when context is on but nothing would be attached", () => {
+  it("is only an icon when context is on but nothing would be attached, and the switch stays reachable", async () => {
     db.prefs.set({ assistantContextEnabled: true });
     render(<ContextDisclosure context={{ summary: [], truncated: false }} projectId="" />);
-    expect(screen.queryByTestId("qutra-context")).not.toBeInTheDocument();
+    const chip = screen.getByTestId("qutra-context");
+    expect(chip).not.toHaveTextContent("Context attached");
+    expect(chip).not.toHaveTextContent("0 items");
+    expect(chip.querySelector("summary")).toHaveAttribute("aria-label", "Context");
+
+    await userEvent.click(chip.querySelector("summary")!);
+    expect(screen.getByTestId("qutra-context-toggle")).toBeChecked();
   });
 
-  it("names the rows when there are some", () => {
+  it("names the count when there are rows", () => {
     db.prefs.set({ assistantContextEnabled: true });
     render(
       <ContextDisclosure
@@ -26,12 +33,12 @@ describe("ContextDisclosure", () => {
         projectId=""
       />,
     );
-    expect(screen.getByTestId("qutra-context")).toHaveTextContent("1");
+    expect(screen.getByTestId("qutra-context")).toHaveTextContent("Context attached (1 item");
   });
 
-  it("stays when switched off, so it can be switched back on", () => {
+  it("says Context off when switched off", () => {
     db.prefs.set({ assistantContextEnabled: false });
     render(<ContextDisclosure context={{ summary: [], truncated: false }} projectId="" />);
-    expect(screen.getByTestId("qutra-context")).toBeInTheDocument();
+    expect(screen.getByTestId("qutra-context")).toHaveTextContent("Context off");
   });
 });

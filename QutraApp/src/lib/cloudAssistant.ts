@@ -79,8 +79,8 @@ function cloudEntries(messages: readonly AssistantMessage[]): CloudEntry[] {
     }
     // A question about an investigation carries its summary first, and
     // the first one Jarvis's memory and instructions before that.
-    if (m.role === "user" && (m.context || m.personal)) {
-      const content = [m.personal, m.context, m.content].filter(Boolean).join("\n\n");
+    if (m.role === "user" && (m.context || m.personal || m.skill)) {
+      const content = [m.personal, m.skill, m.context, m.content].filter(Boolean).join("\n\n");
       out.push({ out: { role: "user", content }, from: m });
       continue;
     }

@@ -1,9 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Layers } from "lucide-react";
 import type { ContextSummaryLine } from "@/domain/assistantContext";
 import { getDb, useCollection, usePreferences } from "@/lib/db/database";
 import { useT } from "@/lib/i18n";
 import { useUi } from "@/state/ui";
+import { useDetailsDismiss } from "./useDetailsDismiss";
 
 /**
  * Honest disclosure of the context that rides along with the next turn: the
@@ -24,39 +25,30 @@ export function ContextDisclosure({
   const setActiveWorkspace = useUi((s) => s.setActiveWorkspace);
   const ref = useRef<HTMLDetailsElement>(null);
 
-  // Closes like a menu: a click elsewhere or Escape.
-  useEffect(() => {
-    const onDown = (e: MouseEvent) => {
-      const el = ref.current;
-      if (el?.open && !el.contains(e.target as Node)) el.open = false;
-    };
-    const onKey = (e: KeyboardEvent) => {
-      const el = ref.current;
-      if (e.key === "Escape" && el?.open) {
-        el.open = false;
-        el.querySelector("summary")?.focus();
-      }
-    };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, []);
+  useDetailsDismiss(ref);
 
-  // With context on and nothing to attach there is nothing to disclose, and no
-  // project exists to choose either: the chip stays away until it says
-  // something. Switched off, it stays so the choice can be undone.
-  if (prefs.assistantContextEnabled && context.summary.length === 0) return null;
+  const count = context.summary.length;
+  const label = !prefs.assistantContextEnabled
+    ? t("qutra.contextOff")
+    : count > 0
+      ? t("qutra.contextAttached", { count })
+      : t("ctx.title");
+  // With nothing attached the chip is just the icon, not a count of nothing.
+  const showText = !prefs.assistantContextEnabled || count > 0;
 
   return (
-    <details ref={ref} className="asst-context" data-testid="qutra-context">
-      <summary className="asst-chip asst-chip--btn">
+    <details
+      ref={ref}
+      className={showText ? "asst-context" : "asst-context asst-context--icon"}
+      data-testid="qutra-context"
+    >
+      <summary
+        className="asst-chip asst-chip--btn"
+        aria-label={label}
+        title={label}
+      >
         <Layers size={12} aria-hidden />
-        {prefs.assistantContextEnabled
-          ? t("qutra.contextAttached", { count: context.summary.length })
-          : t("qutra.contextOff")}
+        {showText && label}
       </summary>
 
       <div className="asst-context__pop">

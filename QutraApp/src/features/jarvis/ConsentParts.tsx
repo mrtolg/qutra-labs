@@ -95,13 +95,25 @@ export function ConsentCard({
 /** Under a question that went with an investigation's summary, or with
     Jarvis's memory and instructions: that it did, and the message as it
     went out, masked. */
-export function SentContext({ text, personalOnly = false }: { text: string; personalOnly?: boolean }) {
+export function SentContext({
+  text,
+  kind = "summary",
+}: {
+  text: string;
+  /** What rode with the question: an investigation's summary, a skill's
+      instructions, or only Jarvis's memory and instructions. */
+  kind?: "summary" | "skill" | "personal";
+}) {
   const { t, locale } = useT();
   const size = formatBytes(bytes(text), locale);
   return (
     <details className="asst-context-sent" data-testid="assistant-context-sent">
       <summary>
-        {personalOnly ? t("jarvis.personal.sent", { size }) : t("jarvis.consent.sent", { size })}
+        {kind === "personal"
+          ? t("jarvis.personal.sent", { size })
+          : kind === "skill"
+            ? t("skills.sent", { size })
+            : t("jarvis.consent.sent", { size })}
       </summary>
       <pre>{text}</pre>
     </details>

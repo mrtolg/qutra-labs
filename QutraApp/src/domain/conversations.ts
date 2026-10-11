@@ -44,6 +44,9 @@ export const SavedMessageSchema = z.object({
       question of a conversation that goes to the cloud; masked with it and
       counted in its sent line. Goes before the summary and the question. */
   personal: z.string().optional(),
+  /** The instructions of the skill picked for this question; they go with
+      it, after Jarvis's memory and before the question. */
+  skill: z.string().optional(),
   /** A cloud answer's facts: where it went, who answered, what it cost. */
   cloud: z
     .object({

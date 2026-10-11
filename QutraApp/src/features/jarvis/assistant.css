@@ -1063,3 +1063,67 @@
   gap: 4px;
   white-space: nowrap;
 }
+
+/* ---------- Skills picker ---------- */
+.asst-skills__pop {
+  gap: 8px;
+}
+.asst-skills__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: min(340px, 50vh);
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.asst-skill {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.asst-skill:hover,
+.asst-skill:focus-visible {
+  background: color-mix(in oklch, var(--surface-raised) 70%, var(--primary-soft));
+}
+.asst-skill.is-selected {
+  background: var(--primary-soft);
+}
+.asst-skill__name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.asst-skill__desc {
+  color: var(--muted);
+  font-size: 12px;
+}
+.asst-chip__x {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-right: -4px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.asst-chip__x:hover {
+  background: color-mix(in oklch, currentColor 16%, transparent);
+}
+.asst-context--icon > summary {
+  padding: 0 7px;
+}

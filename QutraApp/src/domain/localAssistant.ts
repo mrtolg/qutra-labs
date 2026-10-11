@@ -203,6 +203,8 @@ export interface AssistantMessage {
   context?: string;
   /** On the first cloud question: Jarvis's memory and instructions. */
   personal?: string;
+  /** On a question asked with a skill: its instructions. */
+  skill?: string;
 }
 
 /** One NDJSON line from `/api/chat`. */

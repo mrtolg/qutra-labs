@@ -15,7 +15,7 @@ import type { Database } from "./database";
 
 export type NewMessage = Pick<
   SavedMessage,
-  "role" | "content" | "answeredBy" | "blocks" | "cloud" | "context" | "personal"
+  "role" | "content" | "answeredBy" | "blocks" | "cloud" | "context" | "personal" | "skill"
 >;
 
 export type AppendResult =
@@ -92,6 +92,7 @@ export async function appendTurn(
         ...(m.cloud ? { cloud: m.cloud } : {}),
         ...(m.context ? { context: m.context } : {}),
         ...(m.personal ? { personal: m.personal } : {}),
+        ...(m.skill ? { skill: m.skill } : {}),
       }));
       const all = boundMessages([...existing.messages, ...added]);
       return {

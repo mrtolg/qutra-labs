@@ -82,6 +82,8 @@ import { resolveModel, targetOf } from "./jarvisModel";
 import { useJarvisUi } from "./jarvisUi";
 import { ModelChip } from "./ModelChip";
 import { personalBlock } from "./personal";
+import { SkillPicker } from "./SkillPicker";
+import { skillById, skillInstruction, type SkillId } from "./skills";
 import "./assistant.css";
 
 /** A resolved tool call, rendered as a static line once its `tool_result`
@@ -264,6 +266,8 @@ export function LocalAssistantChat() {
   const [error, setError] = useState("");
   /** One-shot text for the polite status region (see the live-region note). */
   const [announcement, setAnnouncement] = useState("");
+  /** The skill picked for the next question; it goes with that one only. */
+  const [skillId, setSkillId] = useState<SkillId | null>(null);
   const [pendingApproval, setPendingApproval] = useState<PendingApproval | null>(
     null,
   );
@@ -622,11 +626,14 @@ export function LocalAssistantChat() {
       turnTarget && personal && !messages.some((m) => m.role === "user" && m.personal)
         ? personal
         : undefined;
+    const pickedSkill = skillById(skillId);
+    const skillText = pickedSkill ? skillInstruction(pickedSkill) : undefined;
     const asked: AssistantMessage = {
       role: "user",
       content: text,
       ...(summary ? { context: summary } : {}),
       ...(carried ? { personal: carried } : {}),
+      ...(skillText ? { skill: skillText } : {}),
     };
     const next: AssistantMessage[] = [...messages, asked];
     setMessages(next);
@@ -637,6 +644,8 @@ export function LocalAssistantChat() {
     if (override === undefined || allowed) {
       setDraft((current) => (current.trim() === text ? "" : current));
     }
+    // A skill serves the question it was picked for, not the ones after it.
+    setSkillId(null);
     setError("");
     setPartial("");
     setPendingApproval(null);
@@ -680,6 +689,7 @@ export function LocalAssistantChat() {
           content: text,
           ...(summary ? { context: summary } : {}),
           ...(carried ? { personal: carried } : {}),
+          ...(skillText ? { skill: skillText } : {}),
         },
       ]);
 
@@ -822,6 +832,7 @@ export function LocalAssistantChat() {
       // system message every turn, ahead of the project context.
       const system = [
         personal,
+        skillText ?? "",
         context.text ? contextSystemMessage(context.text, prefs.assistantAgentToolsEnabled) : "",
       ]
         .filter(Boolean)
@@ -1282,12 +1293,12 @@ export function LocalAssistantChat() {
             m.role === "user" ? (
               <Fragment key={i}>
                 <UserTurn text={m.content} />
-                {(m.context || m.personal) && m.cloudSent && (
+                {(m.context || m.personal || m.skill) && m.cloudSent && (
                   <SentContext
-                    personalOnly={!m.context}
+                    kind={m.context ? "summary" : m.skill ? "skill" : "personal"}
                     text={
                       m.cloudContent ??
-                      [m.personal, m.context, m.content].filter(Boolean).join("\n\n")
+                      [m.personal, m.skill, m.context, m.content].filter(Boolean).join("\n\n")
                     }
                   />
                 )}
@@ -1406,12 +1417,15 @@ export function LocalAssistantChat() {
         sendDisabled={!draft.trim() || erase === "pending" || turnElsewhere || cloudBlocked}
         inputRef={inputRef}
         chips={
-          cloud ? null : (
-            <>
-              <AssistantModeChips onAskPrivateLab={setAskPrivateLab} />
-              <ContextDisclosure context={context} projectId={projectId} />
-            </>
-          )
+          <>
+            <SkillPicker value={skillId} onChange={setSkillId} />
+            {!cloud && (
+              <>
+                <AssistantModeChips onAskPrivateLab={setAskPrivateLab} />
+                <ContextDisclosure context={context} projectId={projectId} />
+              </>
+            )}
+          </>
         }
         badge={
           cloud ? (
