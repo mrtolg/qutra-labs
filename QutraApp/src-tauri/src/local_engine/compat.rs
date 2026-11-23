@@ -79,8 +79,13 @@ pub fn fix_kvs(kvs: &mut [Kv]) -> Vec<&'static str> {
     KV_RULES
         .iter()
         .filter(|rule| {
-            kvs.iter_mut()
-                .fold(false, |changed, kv| (rule.apply)(kv) || changed)
+            // Every entry must see the rule, so this must not stop at the
+            // first change the way `any` would.
+            let mut changed = false;
+            for kv in kvs.iter_mut() {
+                changed |= (rule.apply)(kv);
+            }
+            changed
         })
         .map(|rule| rule.id)
         .collect()
