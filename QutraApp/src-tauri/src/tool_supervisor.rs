@@ -5,10 +5,10 @@ use crate::analysis::{
 use crate::durable_file::write_new_file;
 use crate::engagement_folders::validate_engagement_id;
 use crate::launch_receipts::{Refusal, Resolution};
+use crate::tool_detect::{DetectRoots, DetectedTool};
 use crate::tool_output::OutputDecoder;
 #[cfg(test)]
 use crate::tool_registry::RegisterToolRequest;
-use crate::tool_detect::{DetectRoots, DetectedTool};
 use crate::tool_registry::{
     now_ms, ListedToolInstallation, LocatedCandidate, RegisterLocatedToolRequest,
     ToolInstallationRecord, ToolRegistry,

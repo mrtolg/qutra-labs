@@ -58,8 +58,7 @@ pub struct DetectTool {
 fn table() -> &'static [DetectTool] {
     static TABLE: OnceLock<Vec<DetectTool>> = OnceLock::new();
     TABLE.get_or_init(|| {
-        let file: DetectFile =
-            serde_json::from_str(DETECT_JSON).expect("toolDetect.json is valid");
+        let file: DetectFile = serde_json::from_str(DETECT_JSON).expect("toolDetect.json is valid");
         assert_eq!(file.version, 1, "toolDetect.json version");
         file.tools
     })
@@ -114,11 +113,15 @@ impl DetectRoots {
         let drive = var("SystemDrive")
             .map(|v| v.to_string_lossy().to_string())
             .unwrap_or_else(|| "C:".to_string());
-        roots.tool_roots.push(PathBuf::from(format!("{drive}\\Tools")));
+        roots
+            .tool_roots
+            .push(PathBuf::from(format!("{drive}\\Tools")));
         if let Some(profile) = var("USERPROFILE").map(PathBuf::from) {
-            roots
-                .scoop_roots
-                .push(var("SCOOP").map(PathBuf::from).unwrap_or_else(|| profile.join("scoop")));
+            roots.scoop_roots.push(
+                var("SCOOP")
+                    .map(PathBuf::from)
+                    .unwrap_or_else(|| profile.join("scoop")),
+            );
             roots.bin_dirs.push(profile.join(".local").join("bin"));
         }
         if let Some(path) = var("PATH") {
@@ -239,15 +242,21 @@ fn detect_with(
     skip: &HashSet<String>,
 ) -> Vec<FoundExecutable> {
     // Listed once, not once per program.
-    let packages: Vec<(String, PathBuf)> =
-        roots.package_roots.iter().flat_map(|r| child_dirs(r)).collect();
+    let packages: Vec<(String, PathBuf)> = roots
+        .package_roots
+        .iter()
+        .flat_map(|r| child_dirs(r))
+        .collect();
     let scoop_apps: Vec<(String, PathBuf)> = roots
         .scoop_roots
         .iter()
         .flat_map(|r| child_dirs(&r.join("apps")))
         .collect();
-    let tool_children: Vec<(String, PathBuf)> =
-        roots.tool_roots.iter().flat_map(|r| child_dirs(r)).collect();
+    let tool_children: Vec<(String, PathBuf)> = roots
+        .tool_roots
+        .iter()
+        .flat_map(|r| child_dirs(r))
+        .collect();
 
     let mut found = Vec::new();
     let mut seen_catalog: HashSet<&str> = HashSet::new();
@@ -256,7 +265,14 @@ fn detect_with(
             continue;
         }
         let needles = lower(&tool.folders);
-        let hit = locate_one(tool, &needles, roots, &packages, &scoop_apps, &tool_children);
+        let hit = locate_one(
+            tool,
+            &needles,
+            roots,
+            &packages,
+            &scoop_apps,
+            &tool_children,
+        );
         if let Some((path, source)) = hit {
             found.push(FoundExecutable {
                 catalog_id: tool.catalog_id.clone(),
@@ -481,7 +497,10 @@ mod tests {
             &packages,
             "horsicq.DIE-engine_Microsoft.Winget.Source_8wekyb3d8bbwe/die/die.exe",
         );
-        fake_exe(&packages, "jqlang.jq_Microsoft.Winget.Source_8wekyb3d8bbwe/jq.exe");
+        fake_exe(
+            &packages,
+            "jqlang.jq_Microsoft.Winget.Source_8wekyb3d8bbwe/jq.exe",
+        );
         let links = root.join("Links");
         fake_exe(&links, "gitleaks.exe");
         let scoop = root.join("scoop");
@@ -531,9 +550,18 @@ mod tests {
         // A folder that does not start with the program's name is not searched.
         fake_exe(&tools, "stuff/capa/capa.exe");
         let packages = temp.path().join("Packages");
-        fake_exe(&packages, "ISC.Bind_Microsoft.Winget.Source_8wekyb3d8bbwe/BIND9.17.12.x64/dig.exe");
-        fake_exe(&packages, "OWASP.Amass_Microsoft.Winget.Source_8wekyb3d8bbwe/amass_windows_amd64/amass.exe");
-        fake_exe(&packages, "OISF.Suricata_Microsoft.Winget.Source_8wekyb3d8bbwe/suricata.exe");
+        fake_exe(
+            &packages,
+            "ISC.Bind_Microsoft.Winget.Source_8wekyb3d8bbwe/BIND9.17.12.x64/dig.exe",
+        );
+        fake_exe(
+            &packages,
+            "OWASP.Amass_Microsoft.Winget.Source_8wekyb3d8bbwe/amass_windows_amd64/amass.exe",
+        );
+        fake_exe(
+            &packages,
+            "OISF.Suricata_Microsoft.Winget.Source_8wekyb3d8bbwe/suricata.exe",
+        );
         fake_exe(&packages, "PortSwigger.BurpSuite.Community_Microsoft.Winget.Source_8wekyb3d8bbwe/BurpSuiteCommunity.exe");
         let roots = DetectRoots {
             tool_roots: vec![tools.clone()],
@@ -545,7 +573,10 @@ mod tests {
 
         assert_eq!(
             only(&found, "hashcat").unwrap().path,
-            tools.join("hashcat").join("hashcat-7.1.2").join("hashcat.exe")
+            tools
+                .join("hashcat")
+                .join("hashcat-7.1.2")
+                .join("hashcat.exe")
         );
         assert!(only(&found, "john").is_some());
         assert!(only(&found, "capa").is_none());
@@ -574,7 +605,10 @@ mod tests {
             path_dirs: vec![on_path],
             ..Default::default()
         };
-        assert_eq!(only(&detect(&roots, &no_skip()), "nmap").unwrap().path, installed);
+        assert_eq!(
+            only(&detect(&roots, &no_skip()), "nmap").unwrap().path,
+            installed
+        );
     }
 
     #[test]
@@ -617,14 +651,20 @@ mod tests {
         let temp = tempfile::tempdir().unwrap();
         let dir = temp.path().join("bin");
         let jq = fake_exe(&dir, "jq.exe");
-        let before = (fs::read(&jq).unwrap(), fs::metadata(&jq).unwrap().modified().unwrap());
+        let before = (
+            fs::read(&jq).unwrap(),
+            fs::metadata(&jq).unwrap().modified().unwrap(),
+        );
         let roots = DetectRoots {
             path_dirs: vec![dir.clone()],
             ..Default::default()
         };
         detect(&roots, &no_skip());
         assert_eq!(
-            (fs::read(&jq).unwrap(), fs::metadata(&jq).unwrap().modified().unwrap()),
+            (
+                fs::read(&jq).unwrap(),
+                fs::metadata(&jq).unwrap().modified().unwrap()
+            ),
             before
         );
         assert_eq!(fs::read_dir(&dir).unwrap().count(), 1);
@@ -695,7 +735,11 @@ mod tests {
         let bin = temp.path().join("bin");
         fs::create_dir_all(&bin).unwrap();
         for name in ["jq", "nmap", "trivy", "syft", "grype", "capa"] {
-            fs::copy(std::env::current_exe().unwrap(), bin.join(format!("{name}.exe"))).unwrap();
+            fs::copy(
+                std::env::current_exe().unwrap(),
+                bin.join(format!("{name}.exe")),
+            )
+            .unwrap();
         }
         let picked = temp.path().join("picked.exe");
         fs::copy(std::env::current_exe().unwrap(), &picked).unwrap();
@@ -736,14 +780,16 @@ mod tests {
         fs::remove_file(&gone).unwrap();
 
         let listed = registry.list_with_presence().unwrap();
-        let missing: Vec<bool> = listed
-            .iter()
-            .map(|item| item.file_missing)
-            .collect();
+        let missing: Vec<bool> = listed.iter().map(|item| item.file_missing).collect();
         assert_eq!(missing.iter().filter(|m| **m).count(), 1);
         let gone_item = listed
             .iter()
-            .find(|item| item.record.canonical_path.to_lowercase().ends_with("gone.exe"))
+            .find(|item| {
+                item.record
+                    .canonical_path
+                    .to_lowercase()
+                    .ends_with("gone.exe")
+            })
             .unwrap();
         assert!(gone_item.file_missing);
         // The flag is read at list time and never written to the registry.

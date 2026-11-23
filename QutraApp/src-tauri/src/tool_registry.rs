@@ -274,7 +274,12 @@ impl ToolRegistry {
         } else {
             MAX_PENDING_CANDIDATES
         };
-        while pending.iter().filter(|item| item.detected == detected).count() >= cap {
+        while pending
+            .iter()
+            .filter(|item| item.detected == detected)
+            .count()
+            >= cap
+        {
             let oldest = pending
                 .iter()
                 .position(|item| item.detected == detected)

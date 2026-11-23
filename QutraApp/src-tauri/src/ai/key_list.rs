@@ -296,7 +296,11 @@ mod tests {
     fn a_bad_key_with_a_known_prefix_is_refused() {
         let store = MemoryStore::default();
         for bad in ["sk-ant-", "sk-ant-has a space", "sk-ant-tab\tinside"] {
-            assert_eq!(add_key(&store, bad, 1), Err("invalid_key".into()), "{bad:?}");
+            assert_eq!(
+                add_key(&store, bad, 1),
+                Err("invalid_key".into()),
+                "{bad:?}"
+            );
         }
         assert!(list_keys(&store).unwrap().is_empty());
     }
@@ -321,7 +325,10 @@ mod tests {
                 (KeyProvider::Anthropic, Some("AAAA")),
             ]
         );
-        assert_eq!(chat_key(&store, Target::Anthropic).as_deref(), Some(ANTHROPIC_2));
+        assert_eq!(
+            chat_key(&store, Target::Anthropic).as_deref(),
+            Some(ANTHROPIC_2)
+        );
         assert_eq!(
             chat_key(
                 &store,
@@ -345,7 +352,10 @@ mod tests {
         let listed = list_keys(&store).unwrap();
         assert_eq!(listed.len(), 2);
         assert_eq!(listed[0].id, first.id);
-        assert_eq!(chat_key(&store, Target::Anthropic).as_deref(), Some(ANTHROPIC));
+        assert_eq!(
+            chat_key(&store, Target::Anthropic).as_deref(),
+            Some(ANTHROPIC)
+        );
     }
 
     #[test]
@@ -353,7 +363,10 @@ mod tests {
         let store = MemoryStore::default();
         add_key(&store, ANTHROPIC, 5).unwrap();
         add_key(&store, ANTHROPIC_2, 5).unwrap();
-        assert_eq!(chat_key(&store, Target::Anthropic).as_deref(), Some(ANTHROPIC_2));
+        assert_eq!(
+            chat_key(&store, Target::Anthropic).as_deref(),
+            Some(ANTHROPIC_2)
+        );
     }
 
     #[test]
@@ -363,7 +376,10 @@ mod tests {
         let newer = add_key(&store, ANTHROPIC_2, 20).unwrap();
 
         remove_key(&store, newer.id).unwrap();
-        assert_eq!(chat_key(&store, Target::Anthropic).as_deref(), Some(ANTHROPIC));
+        assert_eq!(
+            chat_key(&store, Target::Anthropic).as_deref(),
+            Some(ANTHROPIC)
+        );
 
         remove_key(&store, older.id).unwrap();
         assert_eq!(chat_key(&store, Target::Anthropic), None);
@@ -376,7 +392,12 @@ mod tests {
     fn at_most_ten_keys() {
         let store = MemoryStore::default();
         for n in 0..MAX_KEYS {
-            add_key(&store, &format!("sk-ant-api03-key-number-{n:04}"), 100 + n as u64).unwrap();
+            add_key(
+                &store,
+                &format!("sk-ant-api03-key-number-{n:04}"),
+                100 + n as u64,
+            )
+            .unwrap();
         }
         assert_eq!(list_keys(&store).unwrap().len(), MAX_KEYS);
         assert_eq!(
@@ -402,9 +423,15 @@ mod tests {
 
         // A newer key wins over it, and removing that brings it back.
         let newer = add_key(&store, ANTHROPIC_2, 50).unwrap();
-        assert_eq!(chat_key(&store, Target::Anthropic).as_deref(), Some(ANTHROPIC_2));
+        assert_eq!(
+            chat_key(&store, Target::Anthropic).as_deref(),
+            Some(ANTHROPIC_2)
+        );
         remove_key(&store, newer.id).unwrap();
-        assert_eq!(chat_key(&store, Target::Anthropic).as_deref(), Some(ANTHROPIC));
+        assert_eq!(
+            chat_key(&store, Target::Anthropic).as_deref(),
+            Some(ANTHROPIC)
+        );
     }
 
     #[test]
@@ -454,9 +481,15 @@ mod tests {
         let store = MemoryStore::default();
         add_key(&store, ANTHROPIC, 10).unwrap();
         let brave = add_key(&store, BRAVE, 20).unwrap();
-        assert_eq!(chat_key(&store, Target::Anthropic).as_deref(), Some(ANTHROPIC));
+        assert_eq!(
+            chat_key(&store, Target::Anthropic).as_deref(),
+            Some(ANTHROPIC)
+        );
         remove_key(&store, brave.id).unwrap();
-        assert_eq!(chat_key(&store, Target::Anthropic).as_deref(), Some(ANTHROPIC));
+        assert_eq!(
+            chat_key(&store, Target::Anthropic).as_deref(),
+            Some(ANTHROPIC)
+        );
         assert_eq!(chat_key(&store, Target::Brave), None);
     }
 
