@@ -7,7 +7,7 @@ tool runs, the evidence, the findings and the report.
 Built with Tauri 2, a Rust backend and a React 19 / TypeScript interface.
 Status: in development (0.1.0).
 
-[![Qutra Labs in 20 seconds: scope first, findings with evidence, an assistant that asks before it acts](media/qutra-labs-launch.gif)](media/qutra-labs-launch.mp4)
+[![Qutra Labs in 24 seconds: out-of-scope targets are blocked, findings need evidence, the assistant asks before it acts](media/qutra-labs-launch.gif)](media/qutra-labs-launch.mp4)
 
 ![Investigation overview: scope, next steps and findings by severity](QutraApp/e2e/screenshots/dark-lab-overview.png)
 
